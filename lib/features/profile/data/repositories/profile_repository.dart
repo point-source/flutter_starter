@@ -51,11 +51,7 @@ class ProfileRepository implements IProfileRepository {
   }) async {
     try {
       final dto = await _service.updateProfile(
-        UpdateProfileRequest(
-          name: name,
-          bio: bio,
-          phoneNumber: phoneNumber,
-        ),
+        UpdateProfileRequest(name: name, bio: bio, phoneNumber: phoneNumber),
       );
       return Success(dto.toDomain());
     } on DioException catch (e, st) {

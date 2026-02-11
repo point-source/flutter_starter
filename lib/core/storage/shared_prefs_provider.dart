@@ -8,6 +8,7 @@
 /// reference without awaiting inside widget code.
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,7 +20,7 @@ part 'shared_prefs_provider.g.dart';
 /// root [ProviderScope] with a pre-initialised [SharedPreferences] instance
 /// that was resolved during application bootstrap.
 @Riverpod(keepAlive: true)
-SharedPreferences sharedPrefs(SharedPrefsRef ref) {
+SharedPreferences sharedPrefs(Ref ref) {
   throw UnimplementedError(
     'sharedPrefsProvider must be overridden in ProviderScope '
     'with a pre-initialised SharedPreferences instance.',

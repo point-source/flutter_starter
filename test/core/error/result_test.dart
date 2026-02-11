@@ -5,10 +5,9 @@
 /// accessors, and value equality.
 library;
 
-import 'package:flutter_test/flutter_test.dart' hide Timeout;
-
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_test/flutter_test.dart' hide Timeout;
 
 void main() {
   /// Tests for [Success].
@@ -77,9 +76,7 @@ void main() {
     test('flatMap() can produce an Err', () {
       const result = Success(5);
 
-      final chained = result.flatMap<int>(
-        (data) => const Err(NotFound()),
-      );
+      final chained = result.flatMap<int>((data) => const Err(NotFound()));
 
       expect(chained.isFailure, isTrue);
     });

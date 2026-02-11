@@ -27,14 +27,23 @@ class ProfileDtoMapper extends ClassMapperBase<ProfileDto> {
   static String _$name(ProfileDto v) => v.name;
   static const Field<ProfileDto, String> _f$name = Field('name', _$name);
   static String? _$avatarUrl(ProfileDto v) => v.avatarUrl;
-  static const Field<ProfileDto, String> _f$avatarUrl =
-      Field('avatarUrl', _$avatarUrl, opt: true);
+  static const Field<ProfileDto, String> _f$avatarUrl = Field(
+    'avatarUrl',
+    _$avatarUrl,
+    opt: true,
+  );
   static String? _$bio(ProfileDto v) => v.bio;
-  static const Field<ProfileDto, String> _f$bio =
-      Field('bio', _$bio, opt: true);
+  static const Field<ProfileDto, String> _f$bio = Field(
+    'bio',
+    _$bio,
+    opt: true,
+  );
   static String? _$phoneNumber(ProfileDto v) => v.phoneNumber;
-  static const Field<ProfileDto, String> _f$phoneNumber =
-      Field('phoneNumber', _$phoneNumber, opt: true);
+  static const Field<ProfileDto, String> _f$phoneNumber = Field(
+    'phoneNumber',
+    _$phoneNumber,
+    opt: true,
+  );
 
   @override
   final MappableFields<ProfileDto> fields = const {
@@ -48,12 +57,13 @@ class ProfileDtoMapper extends ClassMapperBase<ProfileDto> {
 
   static ProfileDto _instantiate(DecodingData data) {
     return ProfileDto(
-        id: data.dec(_f$id),
-        email: data.dec(_f$email),
-        name: data.dec(_f$name),
-        avatarUrl: data.dec(_f$avatarUrl),
-        bio: data.dec(_f$bio),
-        phoneNumber: data.dec(_f$phoneNumber));
+      id: data.dec(_f$id),
+      email: data.dec(_f$email),
+      name: data.dec(_f$name),
+      avatarUrl: data.dec(_f$avatarUrl),
+      bio: data.dec(_f$bio),
+      phoneNumber: data.dec(_f$phoneNumber),
+    );
   }
 
   @override
@@ -70,28 +80,36 @@ class ProfileDtoMapper extends ClassMapperBase<ProfileDto> {
 
 mixin ProfileDtoMappable {
   String toJson() {
-    return ProfileDtoMapper.ensureInitialized()
-        .encodeJson<ProfileDto>(this as ProfileDto);
+    return ProfileDtoMapper.ensureInitialized().encodeJson<ProfileDto>(
+      this as ProfileDto,
+    );
   }
 
   Map<String, dynamic> toMap() {
-    return ProfileDtoMapper.ensureInitialized()
-        .encodeMap<ProfileDto>(this as ProfileDto);
+    return ProfileDtoMapper.ensureInitialized().encodeMap<ProfileDto>(
+      this as ProfileDto,
+    );
   }
 
   ProfileDtoCopyWith<ProfileDto, ProfileDto, ProfileDto> get copyWith =>
       _ProfileDtoCopyWithImpl<ProfileDto, ProfileDto>(
-          this as ProfileDto, $identity, $identity);
+        this as ProfileDto,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return ProfileDtoMapper.ensureInitialized()
-        .stringifyValue(this as ProfileDto);
+    return ProfileDtoMapper.ensureInitialized().stringifyValue(
+      this as ProfileDto,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return ProfileDtoMapper.ensureInitialized()
-        .equalsValue(this as ProfileDto, other);
+    return ProfileDtoMapper.ensureInitialized().equalsValue(
+      this as ProfileDto,
+      other,
+    );
   }
 
   @override
@@ -108,13 +126,14 @@ extension ProfileDtoValueCopy<$R, $Out>
 
 abstract class ProfileDtoCopyWith<$R, $In extends ProfileDto, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
-  $R call(
-      {String? id,
-      String? email,
-      String? name,
-      String? avatarUrl,
-      String? bio,
-      String? phoneNumber});
+  $R call({
+    String? id,
+    String? email,
+    String? name,
+    String? avatarUrl,
+    String? bio,
+    String? phoneNumber,
+  });
   ProfileDtoCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -127,32 +146,35 @@ class _ProfileDtoCopyWithImpl<$R, $Out>
   late final ClassMapperBase<ProfileDto> $mapper =
       ProfileDtoMapper.ensureInitialized();
   @override
-  $R call(
-          {String? id,
-          String? email,
-          String? name,
-          Object? avatarUrl = $none,
-          Object? bio = $none,
-          Object? phoneNumber = $none}) =>
-      $apply(FieldCopyWithData({
-        if (id != null) #id: id,
-        if (email != null) #email: email,
-        if (name != null) #name: name,
-        if (avatarUrl != $none) #avatarUrl: avatarUrl,
-        if (bio != $none) #bio: bio,
-        if (phoneNumber != $none) #phoneNumber: phoneNumber
-      }));
+  $R call({
+    String? id,
+    String? email,
+    String? name,
+    Object? avatarUrl = $none,
+    Object? bio = $none,
+    Object? phoneNumber = $none,
+  }) => $apply(
+    FieldCopyWithData({
+      if (id != null) #id: id,
+      if (email != null) #email: email,
+      if (name != null) #name: name,
+      if (avatarUrl != $none) #avatarUrl: avatarUrl,
+      if (bio != $none) #bio: bio,
+      if (phoneNumber != $none) #phoneNumber: phoneNumber,
+    }),
+  );
   @override
   ProfileDto $make(CopyWithData data) => ProfileDto(
-      id: data.get(#id, or: $value.id),
-      email: data.get(#email, or: $value.email),
-      name: data.get(#name, or: $value.name),
-      avatarUrl: data.get(#avatarUrl, or: $value.avatarUrl),
-      bio: data.get(#bio, or: $value.bio),
-      phoneNumber: data.get(#phoneNumber, or: $value.phoneNumber));
+    id: data.get(#id, or: $value.id),
+    email: data.get(#email, or: $value.email),
+    name: data.get(#name, or: $value.name),
+    avatarUrl: data.get(#avatarUrl, or: $value.avatarUrl),
+    bio: data.get(#bio, or: $value.bio),
+    phoneNumber: data.get(#phoneNumber, or: $value.phoneNumber),
+  );
 
   @override
   ProfileDtoCopyWith<$R2, ProfileDto, $Out2> $chain<$R2, $Out2>(
-          Then<$Out2, $R2> t) =>
-      _ProfileDtoCopyWithImpl<$R2, $Out2>($value, $cast, t);
+    Then<$Out2, $R2> t,
+  ) => _ProfileDtoCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }

@@ -5,6 +5,7 @@
 /// flags by their [FeatureFlag] enum value.
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/feature_flags/feature_flag.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -69,7 +70,7 @@ class FeatureFlagNotifier extends _$FeatureFlagNotifier {
 /// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
 /// ```
 @riverpod
-bool featureFlag(FeatureFlagRef ref, FeatureFlag flag) {
+bool featureFlag(Ref ref, FeatureFlag flag) {
   final flags = ref.watch(featureFlagNotifierProvider);
   return flags[flag] ?? false;
 }

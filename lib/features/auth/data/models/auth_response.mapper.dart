@@ -22,11 +22,15 @@ class AuthResponseMapper extends ClassMapperBase<AuthResponse> {
   final String id = 'AuthResponse';
 
   static String _$accessToken(AuthResponse v) => v.accessToken;
-  static const Field<AuthResponse, String> _f$accessToken =
-      Field('accessToken', _$accessToken);
+  static const Field<AuthResponse, String> _f$accessToken = Field(
+    'accessToken',
+    _$accessToken,
+  );
   static String _$refreshToken(AuthResponse v) => v.refreshToken;
-  static const Field<AuthResponse, String> _f$refreshToken =
-      Field('refreshToken', _$refreshToken);
+  static const Field<AuthResponse, String> _f$refreshToken = Field(
+    'refreshToken',
+    _$refreshToken,
+  );
   static UserDto _$user(AuthResponse v) => v.user;
   static const Field<AuthResponse, UserDto> _f$user = Field('user', _$user);
 
@@ -39,9 +43,10 @@ class AuthResponseMapper extends ClassMapperBase<AuthResponse> {
 
   static AuthResponse _instantiate(DecodingData data) {
     return AuthResponse(
-        accessToken: data.dec(_f$accessToken),
-        refreshToken: data.dec(_f$refreshToken),
-        user: data.dec(_f$user));
+      accessToken: data.dec(_f$accessToken),
+      refreshToken: data.dec(_f$refreshToken),
+      user: data.dec(_f$user),
+    );
   }
 
   @override
@@ -58,34 +63,43 @@ class AuthResponseMapper extends ClassMapperBase<AuthResponse> {
 
 mixin AuthResponseMappable {
   String toJson() {
-    return AuthResponseMapper.ensureInitialized()
-        .encodeJson<AuthResponse>(this as AuthResponse);
+    return AuthResponseMapper.ensureInitialized().encodeJson<AuthResponse>(
+      this as AuthResponse,
+    );
   }
 
   Map<String, dynamic> toMap() {
-    return AuthResponseMapper.ensureInitialized()
-        .encodeMap<AuthResponse>(this as AuthResponse);
+    return AuthResponseMapper.ensureInitialized().encodeMap<AuthResponse>(
+      this as AuthResponse,
+    );
   }
 
   AuthResponseCopyWith<AuthResponse, AuthResponse, AuthResponse> get copyWith =>
       _AuthResponseCopyWithImpl<AuthResponse, AuthResponse>(
-          this as AuthResponse, $identity, $identity);
+        this as AuthResponse,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return AuthResponseMapper.ensureInitialized()
-        .stringifyValue(this as AuthResponse);
+    return AuthResponseMapper.ensureInitialized().stringifyValue(
+      this as AuthResponse,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return AuthResponseMapper.ensureInitialized()
-        .equalsValue(this as AuthResponse, other);
+    return AuthResponseMapper.ensureInitialized().equalsValue(
+      this as AuthResponse,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return AuthResponseMapper.ensureInitialized()
-        .hashValue(this as AuthResponse);
+    return AuthResponseMapper.ensureInitialized().hashValue(
+      this as AuthResponse,
+    );
   }
 }
 
@@ -114,20 +128,22 @@ class _AuthResponseCopyWithImpl<$R, $Out>
   UserDtoCopyWith<$R, UserDto, UserDto> get user =>
       $value.user.copyWith.$chain((v) => call(user: v));
   @override
-  $R call({String? accessToken, String? refreshToken, UserDto? user}) =>
-      $apply(FieldCopyWithData({
-        if (accessToken != null) #accessToken: accessToken,
-        if (refreshToken != null) #refreshToken: refreshToken,
-        if (user != null) #user: user
-      }));
+  $R call({String? accessToken, String? refreshToken, UserDto? user}) => $apply(
+    FieldCopyWithData({
+      if (accessToken != null) #accessToken: accessToken,
+      if (refreshToken != null) #refreshToken: refreshToken,
+      if (user != null) #user: user,
+    }),
+  );
   @override
   AuthResponse $make(CopyWithData data) => AuthResponse(
-      accessToken: data.get(#accessToken, or: $value.accessToken),
-      refreshToken: data.get(#refreshToken, or: $value.refreshToken),
-      user: data.get(#user, or: $value.user));
+    accessToken: data.get(#accessToken, or: $value.accessToken),
+    refreshToken: data.get(#refreshToken, or: $value.refreshToken),
+    user: data.get(#user, or: $value.user),
+  );
 
   @override
   AuthResponseCopyWith<$R2, AuthResponse, $Out2> $chain<$R2, $Out2>(
-          Then<$Out2, $R2> t) =>
-      _AuthResponseCopyWithImpl<$R2, $Out2>($value, $cast, t);
+    Then<$Out2, $R2> t,
+  ) => _AuthResponseCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }

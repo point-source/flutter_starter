@@ -6,13 +6,12 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-
 import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/features/auth/domain/entities/user.dart';
 import 'package:flutter_starter/features/auth/domain/failures/auth_failure.dart';
 import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/mocks.dart';
@@ -27,18 +26,16 @@ void main() {
 
   /// Helper to create a container with the auth repository overridden.
   ProviderContainer createAuthContainer() => createContainer(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(mockAuthRepository),
-        ],
-      );
+    overrides: [authRepositoryProvider.overrideWithValue(mockAuthRepository)],
+  );
 
   /// Tests for the initial [build] method.
   group('build', () {
     /// Resolves to unauthenticated when the repository has no current user.
     test('returns unauthenticated when no user exists', () async {
-      when(() => mockAuthRepository.getCurrentUser()).thenAnswer(
-        (_) async => const Success<User?>(null),
-      );
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
 
       final container = createAuthContainer();
 
@@ -54,9 +51,9 @@ void main() {
     test('returns authenticated when user exists', () async {
       final testUser = FakeData.user();
 
-      when(() => mockAuthRepository.getCurrentUser()).thenAnswer(
-        (_) async => Success<User?>(testUser),
-      );
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => Success<User?>(testUser));
 
       final container = createAuthContainer();
 
@@ -69,9 +66,9 @@ void main() {
 
     /// Resolves to unauthenticated when getCurrentUser returns a failure.
     test('returns unauthenticated on failure', () async {
-      when(() => mockAuthRepository.getCurrentUser()).thenAnswer(
-        (_) async => const Err<User?>(AuthServerError()),
-      );
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Err<User?>(AuthServerError()));
 
       final container = createAuthContainer();
 
@@ -88,14 +85,12 @@ void main() {
       final testUser = FakeData.user();
 
       // Stub build() to start unauthenticated.
-      when(() => mockAuthRepository.getCurrentUser()).thenAnswer(
-        (_) async => const Success<User?>(null),
-      );
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
       when(
         () => mockAuthRepository.login(any(), any()),
-      ).thenAnswer(
-        (_) async => Success(testUser),
-      );
+      ).thenAnswer((_) async => Success(testUser));
 
       final container = createAuthContainer();
 
@@ -115,14 +110,12 @@ void main() {
     /// Transitions to error state when login fails.
     test('transitions to error on failure', () async {
       // Stub build() to start unauthenticated.
-      when(() => mockAuthRepository.getCurrentUser()).thenAnswer(
-        (_) async => const Success<User?>(null),
-      );
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
       when(
         () => mockAuthRepository.login(any(), any()),
-      ).thenAnswer(
-        (_) async => const Err(InvalidCredentials()),
-      );
+      ).thenAnswer((_) async => const Err(InvalidCredentials()));
 
       final container = createAuthContainer();
 
@@ -146,18 +139,17 @@ void main() {
       final testUser = FakeData.user();
 
       // Start authenticated.
-      when(() => mockAuthRepository.getCurrentUser()).thenAnswer(
-        (_) async => Success<User?>(testUser),
-      );
-      when(() => mockAuthRepository.logout()).thenAnswer(
-        (_) async => const Success<void>(null),
-      );
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => Success<User?>(testUser));
+      when(
+        () => mockAuthRepository.logout(),
+      ).thenAnswer((_) async => const Success<void>(null));
 
       final container = createAuthContainer();
 
       // Wait for build() -- should be authenticated.
-      final initialState =
-          await container.read(authViewModelProvider.future);
+      final initialState = await container.read(authViewModelProvider.future);
       expect(initialState.isAuthenticated, isTrue);
 
       // Perform logout.

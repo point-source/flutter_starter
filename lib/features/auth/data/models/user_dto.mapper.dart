@@ -27,8 +27,11 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
   static String _$name(UserDto v) => v.name;
   static const Field<UserDto, String> _f$name = Field('name', _$name);
   static String? _$avatarUrl(UserDto v) => v.avatarUrl;
-  static const Field<UserDto, String> _f$avatarUrl =
-      Field('avatarUrl', _$avatarUrl, opt: true);
+  static const Field<UserDto, String> _f$avatarUrl = Field(
+    'avatarUrl',
+    _$avatarUrl,
+    opt: true,
+  );
 
   @override
   final MappableFields<UserDto> fields = const {
@@ -40,10 +43,11 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
 
   static UserDto _instantiate(DecodingData data) {
     return UserDto(
-        id: data.dec(_f$id),
-        email: data.dec(_f$email),
-        name: data.dec(_f$name),
-        avatarUrl: data.dec(_f$avatarUrl));
+      id: data.dec(_f$id),
+      email: data.dec(_f$email),
+      name: data.dec(_f$name),
+      avatarUrl: data.dec(_f$avatarUrl),
+    );
   }
 
   @override
@@ -60,18 +64,23 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
 
 mixin UserDtoMappable {
   String toJson() {
-    return UserDtoMapper.ensureInitialized()
-        .encodeJson<UserDto>(this as UserDto);
+    return UserDtoMapper.ensureInitialized().encodeJson<UserDto>(
+      this as UserDto,
+    );
   }
 
   Map<String, dynamic> toMap() {
-    return UserDtoMapper.ensureInitialized()
-        .encodeMap<UserDto>(this as UserDto);
+    return UserDtoMapper.ensureInitialized().encodeMap<UserDto>(
+      this as UserDto,
+    );
   }
 
   UserDtoCopyWith<UserDto, UserDto, UserDto> get copyWith =>
       _UserDtoCopyWithImpl<UserDto, UserDto>(
-          this as UserDto, $identity, $identity);
+        this as UserDto,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
     return UserDtoMapper.ensureInitialized().stringifyValue(this as UserDto);
@@ -79,8 +88,10 @@ mixin UserDtoMappable {
 
   @override
   bool operator ==(Object other) {
-    return UserDtoMapper.ensureInitialized()
-        .equalsValue(this as UserDto, other);
+    return UserDtoMapper.ensureInitialized().equalsValue(
+      this as UserDto,
+      other,
+    );
   }
 
   @override
@@ -109,23 +120,26 @@ class _UserDtoCopyWithImpl<$R, $Out>
   late final ClassMapperBase<UserDto> $mapper =
       UserDtoMapper.ensureInitialized();
   @override
-  $R call(
-          {String? id,
-          String? email,
-          String? name,
-          Object? avatarUrl = $none}) =>
-      $apply(FieldCopyWithData({
-        if (id != null) #id: id,
-        if (email != null) #email: email,
-        if (name != null) #name: name,
-        if (avatarUrl != $none) #avatarUrl: avatarUrl
-      }));
+  $R call({
+    String? id,
+    String? email,
+    String? name,
+    Object? avatarUrl = $none,
+  }) => $apply(
+    FieldCopyWithData({
+      if (id != null) #id: id,
+      if (email != null) #email: email,
+      if (name != null) #name: name,
+      if (avatarUrl != $none) #avatarUrl: avatarUrl,
+    }),
+  );
   @override
   UserDto $make(CopyWithData data) => UserDto(
-      id: data.get(#id, or: $value.id),
-      email: data.get(#email, or: $value.email),
-      name: data.get(#name, or: $value.name),
-      avatarUrl: data.get(#avatarUrl, or: $value.avatarUrl));
+    id: data.get(#id, or: $value.id),
+    email: data.get(#email, or: $value.email),
+    name: data.get(#name, or: $value.name),
+    avatarUrl: data.get(#avatarUrl, or: $value.avatarUrl),
+  );
 
   @override
   UserDtoCopyWith<$R2, UserDto, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>

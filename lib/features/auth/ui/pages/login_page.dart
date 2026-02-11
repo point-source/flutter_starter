@@ -40,10 +40,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _onLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(authViewModelProvider.notifier).login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
+    await ref
+        .read(authViewModelProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
   }
 
   @override
@@ -52,8 +51,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen(authViewModelProvider, (previous, next) {
       // Navigate on successful authentication
-      if (next case AsyncData(value: final state)
-          when state.isAuthenticated) {
+      if (next case AsyncData(value: final state) when state.isAuthenticated) {
         context.router.replaceAll([const ShellRoute()]);
         return;
       }
@@ -62,9 +60,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (next case AsyncError(:final error)) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(error.toString())),
-          );
+          ..showSnackBar(SnackBar(content: Text(error.toString())));
       }
     });
 
@@ -135,9 +131,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Log In'),
                   ),

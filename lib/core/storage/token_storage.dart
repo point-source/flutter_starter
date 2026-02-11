@@ -9,10 +9,10 @@
 /// the concrete implementation.
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:flutter_starter/core/storage/secure_storage_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'token_storage.g.dart';
 
@@ -77,14 +77,10 @@ class SecureTokenStorage implements ITokenStorage {
   }
 
   @override
-  Future<String?> getAccessToken() {
-    return _storage.read(key: _accessTokenKey);
-  }
+  Future<String?> getAccessToken() => _storage.read(key: _accessTokenKey);
 
   @override
-  Future<String?> getRefreshToken() {
-    return _storage.read(key: _refreshTokenKey);
-  }
+  Future<String?> getRefreshToken() => _storage.read(key: _refreshTokenKey);
 
   @override
   Future<void> clearTokens() async {
@@ -101,7 +97,7 @@ class SecureTokenStorage implements ITokenStorage {
 /// returns a [SecureTokenStorage] wrapping it.  Override this provider in
 /// tests to supply a fake or in-memory token store.
 @riverpod
-ITokenStorage tokenStorage(TokenStorageRef ref) {
+ITokenStorage tokenStorage(Ref ref) {
   final secureStorage = ref.watch(secureStorageProvider);
   return SecureTokenStorage(secureStorage);
 }

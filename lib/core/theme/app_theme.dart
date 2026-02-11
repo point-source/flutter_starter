@@ -31,11 +31,8 @@ abstract final class AppTheme {
       tertiary: ColorPalette.tertiary,
       error: ColorPalette.error,
     ),
-    useMaterial3: true,
     useMaterial3ErrorColors: true,
-    extensions: const <ThemeExtension<dynamic>>[
-      SemanticColors.light,
-    ],
+    extensions: const <ThemeExtension<dynamic>>[SemanticColors.light],
   );
 
   /// Dark theme configuration.
@@ -46,10 +43,7 @@ abstract final class AppTheme {
       tertiary: ColorPalette.tertiary,
       error: ColorPalette.error,
     ),
-    useMaterial3: true,
     useMaterial3ErrorColors: true,
-    extensions: const <ThemeExtension<dynamic>>[
-      SemanticColors.dark,
-    ],
+    extensions: const <ThemeExtension<dynamic>>[SemanticColors.dark],
   );
 }

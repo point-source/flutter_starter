@@ -59,11 +59,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(profileViewModelProvider.notifier).updateProfile(
+    await ref
+        .read(profileViewModelProvider.notifier)
+        .updateProfile(
           name: _nameController.text,
           bio: _bioController.text.isEmpty ? null : _bioController.text,
-          phoneNumber:
-              _phoneController.text.isEmpty ? null : _phoneController.text,
+          phoneNumber: _phoneController.text.isEmpty
+              ? null
+              : _phoneController.text,
         );
 
     if (mounted) {
@@ -125,102 +128,92 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildProfileView(BuildContext context, Profile profile) {
-    return ListView(
+  Widget _buildProfileView(BuildContext context, Profile profile) => ListView(
+    padding: const EdgeInsets.all(24),
+    children: [
+      CircleAvatar(
+        radius: 48,
+        backgroundImage: profile.avatarUrl != null
+            ? NetworkImage(profile.avatarUrl!)
+            : null,
+        child: profile.avatarUrl == null
+            ? Text(
+                profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '?',
+                style: Theme.of(context).textTheme.headlineLarge,
+              )
+            : null,
+      ),
+      const SizedBox(height: 24),
+      Text(
+        profile.name,
+        style: Theme.of(context).textTheme.headlineSmall,
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 8),
+      Text(
+        profile.email,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      if (profile.bio != null && profile.bio!.isNotEmpty) ...[
+        const SizedBox(height: 24),
+        Text(profile.bio!, textAlign: TextAlign.center),
+      ],
+      if (profile.phoneNumber != null && profile.phoneNumber!.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.phone, size: 16),
+            const SizedBox(width: 8),
+            Text(profile.phoneNumber!),
+          ],
+        ),
+      ],
+    ],
+  );
+
+  Widget _buildEditForm(BuildContext context) => Form(
+    key: _formKey,
+    child: ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        CircleAvatar(
-          radius: 48,
-          backgroundImage: profile.avatarUrl != null
-              ? NetworkImage(profile.avatarUrl!)
-              : null,
-          child: profile.avatarUrl == null
-              ? Text(
-                  profile.name.isNotEmpty
-                      ? profile.name[0].toUpperCase()
-                      : '?',
-                  style: Theme.of(context).textTheme.headlineLarge,
-                )
-              : null,
+        TextFormField(
+          controller: _nameController,
+          decoration: const InputDecoration(
+            labelText: 'Name',
+            border: OutlineInputBorder(),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Name is required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _bioController,
+          decoration: const InputDecoration(
+            labelText: 'Bio',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _phoneController,
+          decoration: const InputDecoration(
+            labelText: 'Phone',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: 24),
-        Text(
-          profile.name,
-          style: Theme.of(context).textTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          profile.email,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-          textAlign: TextAlign.center,
-        ),
-        if (profile.bio != null && profile.bio!.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Text(profile.bio!, textAlign: TextAlign.center),
-        ],
-        if (profile.phoneNumber != null &&
-            profile.phoneNumber!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.phone, size: 16),
-              const SizedBox(width: 8),
-              Text(profile.phoneNumber!),
-            ],
-          ),
-        ],
+        FilledButton(onPressed: _saveProfile, child: Text(t.core.action.save)),
       ],
-    );
-  }
-
-  Widget _buildEditForm(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Name is required';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _bioController,
-            decoration: const InputDecoration(
-              labelText: 'Bio',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _phoneController,
-            decoration: const InputDecoration(
-              labelText: 'Phone',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.phone,
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _saveProfile,
-            child: Text(t.core.action.save),
-          ),
-        ],
-      ),
-    );
-  }
+    ),
+  );
 }

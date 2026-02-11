@@ -21,17 +21,16 @@ import 'package:flutter_starter/gen/strings.g.dart';
 /// final message = mapFailureToMessage(context, failure);
 /// AppSnackbar.showError(context, message);
 /// ```
-String mapFailureToMessage(BuildContext context, Failure failure) {
-  return switch (failure) {
-    NoConnection() => t.core.error.noConnection,
-    Timeout() => t.core.error.timeout,
-    BadResponse() => t.core.error.serverError,
-    Unauthorized() => t.core.error.serverError,
-    Forbidden() => t.core.error.serverError,
-    NotFound() => t.core.error.serverError,
-    CacheReadFailure() => t.core.error.unexpected,
-    CacheWriteFailure() => t.core.error.unexpected,
-    UnexpectedFailure() => t.core.error.unexpected,
-    _ => t.core.error.unexpected,
-  };
-}
+String mapFailureToMessage(BuildContext context, Failure failure) =>
+    switch (failure) {
+      NoConnection() => t.core.error.noConnection,
+      Timeout() => t.core.error.timeout,
+      BadResponse() => t.core.error.serverError,
+      Unauthorized() => t.core.error.serverError,
+      Forbidden() => t.core.error.serverError,
+      NotFound() => t.core.error.serverError,
+      CacheReadFailure() => t.core.error.unexpected,
+      CacheWriteFailure() => t.core.error.unexpected,
+      UnexpectedFailure() => t.core.error.unexpected,
+      _ => t.core.error.unexpected,
+    };

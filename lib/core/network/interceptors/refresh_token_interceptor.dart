@@ -30,9 +30,9 @@ class RefreshTokenInterceptor extends QueuedInterceptor {
     required Dio dio,
     required void Function() onAuthExpired,
     this.refreshPath = '/auth/refresh',
-  })  : _tokenStorage = tokenStorage,
-        _dio = dio,
-        _onAuthExpired = onAuthExpired;
+  }) : _tokenStorage = tokenStorage,
+       _dio = dio,
+       _onAuthExpired = onAuthExpired;
 
   final ITokenStorage _tokenStorage;
   final Dio _dio;

@@ -23,8 +23,10 @@ class LoginRequestMapper extends ClassMapperBase<LoginRequest> {
   static String _$email(LoginRequest v) => v.email;
   static const Field<LoginRequest, String> _f$email = Field('email', _$email);
   static String _$password(LoginRequest v) => v.password;
-  static const Field<LoginRequest, String> _f$password =
-      Field('password', _$password);
+  static const Field<LoginRequest, String> _f$password = Field(
+    'password',
+    _$password,
+  );
 
   @override
   final MappableFields<LoginRequest> fields = const {
@@ -34,7 +36,9 @@ class LoginRequestMapper extends ClassMapperBase<LoginRequest> {
 
   static LoginRequest _instantiate(DecodingData data) {
     return LoginRequest(
-        email: data.dec(_f$email), password: data.dec(_f$password));
+      email: data.dec(_f$email),
+      password: data.dec(_f$password),
+    );
   }
 
   @override
@@ -51,34 +55,43 @@ class LoginRequestMapper extends ClassMapperBase<LoginRequest> {
 
 mixin LoginRequestMappable {
   String toJson() {
-    return LoginRequestMapper.ensureInitialized()
-        .encodeJson<LoginRequest>(this as LoginRequest);
+    return LoginRequestMapper.ensureInitialized().encodeJson<LoginRequest>(
+      this as LoginRequest,
+    );
   }
 
   Map<String, dynamic> toMap() {
-    return LoginRequestMapper.ensureInitialized()
-        .encodeMap<LoginRequest>(this as LoginRequest);
+    return LoginRequestMapper.ensureInitialized().encodeMap<LoginRequest>(
+      this as LoginRequest,
+    );
   }
 
   LoginRequestCopyWith<LoginRequest, LoginRequest, LoginRequest> get copyWith =>
       _LoginRequestCopyWithImpl<LoginRequest, LoginRequest>(
-          this as LoginRequest, $identity, $identity);
+        this as LoginRequest,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return LoginRequestMapper.ensureInitialized()
-        .stringifyValue(this as LoginRequest);
+    return LoginRequestMapper.ensureInitialized().stringifyValue(
+      this as LoginRequest,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return LoginRequestMapper.ensureInitialized()
-        .equalsValue(this as LoginRequest, other);
+    return LoginRequestMapper.ensureInitialized().equalsValue(
+      this as LoginRequest,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return LoginRequestMapper.ensureInitialized()
-        .hashValue(this as LoginRequest);
+    return LoginRequestMapper.ensureInitialized().hashValue(
+      this as LoginRequest,
+    );
   }
 }
 
@@ -103,17 +116,20 @@ class _LoginRequestCopyWithImpl<$R, $Out>
   late final ClassMapperBase<LoginRequest> $mapper =
       LoginRequestMapper.ensureInitialized();
   @override
-  $R call({String? email, String? password}) => $apply(FieldCopyWithData({
-        if (email != null) #email: email,
-        if (password != null) #password: password
-      }));
+  $R call({String? email, String? password}) => $apply(
+    FieldCopyWithData({
+      if (email != null) #email: email,
+      if (password != null) #password: password,
+    }),
+  );
   @override
   LoginRequest $make(CopyWithData data) => LoginRequest(
-      email: data.get(#email, or: $value.email),
-      password: data.get(#password, or: $value.password));
+    email: data.get(#email, or: $value.email),
+    password: data.get(#password, or: $value.password),
+  );
 
   @override
   LoginRequestCopyWith<$R2, LoginRequest, $Out2> $chain<$R2, $Out2>(
-          Then<$Out2, $R2> t) =>
-      _LoginRequestCopyWithImpl<$R2, $Out2>($value, $cast, t);
+    Then<$Out2, $R2> t,
+  ) => _LoginRequestCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }

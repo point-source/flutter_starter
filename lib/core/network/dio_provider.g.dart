@@ -6,7 +6,7 @@ part of 'dio_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dioHash() => r'cf87595dc06e969eda706def5e03ee4fcdf8ea33';
+String _$dioHash() => r'58e6d9f28b07869536e00c0256fd328683819427';
 
 /// Provides the main [Dio] instance with all interceptors configured.
 ///

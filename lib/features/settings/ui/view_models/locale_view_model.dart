@@ -5,9 +5,8 @@
 library;
 
 import 'package:flutter/widgets.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'locale_view_model.g.dart';
 

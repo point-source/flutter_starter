@@ -5,10 +5,9 @@
 library;
 
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
-
 import 'package:flutter_starter/features/profile/data/models/profile_dto.dart';
 import 'package:flutter_starter/features/profile/data/models/update_profile_request.dart';
+import 'package:retrofit/retrofit.dart';
 
 part 'profile_service.g.dart';
 

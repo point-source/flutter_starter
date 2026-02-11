@@ -8,10 +8,7 @@
 library;
 
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:flutter_starter/core/presentation/widgets/adaptive_scaffold.dart';
 import 'package:flutter_starter/core/routing/guards/auth_guard.dart';
 import 'package:flutter_starter/features/auth/ui/pages/login_page.dart';
@@ -19,6 +16,7 @@ import 'package:flutter_starter/features/auth/ui/pages/register_page.dart';
 import 'package:flutter_starter/features/dashboard/ui/pages/dashboard_page.dart';
 import 'package:flutter_starter/features/profile/ui/pages/profile_page.dart';
 import 'package:flutter_starter/features/settings/ui/pages/settings_page.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
 part 'app_router.gr.dart';
@@ -36,7 +34,7 @@ part 'app_router.gr.dart';
 ///   - `/dashboard`
 ///   - `/profile`
 ///   - `/settings`
-@AutoRouterConfig(replaceInRouteName: 'Page|Screen,Route')
+@AutoRouterConfig()
 class AppRouter extends RootStackRouter {
   /// Create an [AppRouter] with the given Riverpod [ref].
   ///
@@ -48,19 +46,19 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(page: LoginRoute.page, path: '/login'),
-        AutoRoute(page: RegisterRoute.page, path: '/register'),
-        AutoRoute(
-          page: ShellRoute.page,
-          path: '/',
-          guards: [AuthGuard(_ref)],
-          children: [
-            AutoRoute(page: DashboardRoute.page, path: 'dashboard'),
-            AutoRoute(page: ProfileRoute.page, path: 'profile'),
-            AutoRoute(page: SettingsRoute.page, path: 'settings'),
-          ],
-        ),
-      ];
+    AutoRoute(page: LoginRoute.page, path: '/login'),
+    AutoRoute(page: RegisterRoute.page, path: '/register'),
+    AutoRoute(
+      page: ShellRoute.page,
+      path: '/',
+      guards: [AuthGuard(_ref)],
+      children: [
+        AutoRoute(page: DashboardRoute.page, path: 'dashboard'),
+        AutoRoute(page: ProfileRoute.page, path: 'profile'),
+        AutoRoute(page: SettingsRoute.page, path: 'settings'),
+      ],
+    ),
+  ];
 
   @override
   RouteType get defaultRouteType => const RouteType.material();

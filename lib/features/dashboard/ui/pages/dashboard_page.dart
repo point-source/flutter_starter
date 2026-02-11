@@ -24,9 +24,7 @@ class DashboardPage extends ConsumerWidget {
     final name = ref.watch(dashboardViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.dashboard.title),
-      ),
+      appBar: AppBar(title: Text(t.dashboard.title)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

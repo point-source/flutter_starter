@@ -80,7 +80,7 @@ class AuthRepository implements IAuthRepository {
       await _authService.logout();
       await _tokenStorage.clearTokens();
       return const Success(null);
-    } on DioException catch (_, __) {
+    } on DioException catch (_) {
       // Always clear tokens locally even if the server call fails
       await _tokenStorage.clearTokens();
       return const Success(null);

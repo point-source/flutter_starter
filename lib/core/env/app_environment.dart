@@ -25,8 +25,7 @@ enum AppEnvironment {
   production;
 
   /// The raw ENVIRONMENT value from compile-time constants.
-  static const String _rawEnvironment =
-      String.fromEnvironment('ENVIRONMENT');
+  static const String _rawEnvironment = String.fromEnvironment('ENVIRONMENT');
 
   /// Whether to throw when ENVIRONMENT is invalid. Enable in CI.
   static const bool _strictMode = bool.fromEnvironment('STRICT_ENV');

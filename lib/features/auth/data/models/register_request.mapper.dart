@@ -21,11 +21,15 @@ class RegisterRequestMapper extends ClassMapperBase<RegisterRequest> {
   final String id = 'RegisterRequest';
 
   static String _$email(RegisterRequest v) => v.email;
-  static const Field<RegisterRequest, String> _f$email =
-      Field('email', _$email);
+  static const Field<RegisterRequest, String> _f$email = Field(
+    'email',
+    _$email,
+  );
   static String _$password(RegisterRequest v) => v.password;
-  static const Field<RegisterRequest, String> _f$password =
-      Field('password', _$password);
+  static const Field<RegisterRequest, String> _f$password = Field(
+    'password',
+    _$password,
+  );
   static String _$name(RegisterRequest v) => v.name;
   static const Field<RegisterRequest, String> _f$name = Field('name', _$name);
 
@@ -38,9 +42,10 @@ class RegisterRequestMapper extends ClassMapperBase<RegisterRequest> {
 
   static RegisterRequest _instantiate(DecodingData data) {
     return RegisterRequest(
-        email: data.dec(_f$email),
-        password: data.dec(_f$password),
-        name: data.dec(_f$name));
+      email: data.dec(_f$email),
+      password: data.dec(_f$password),
+      name: data.dec(_f$name),
+    );
   }
 
   @override
@@ -62,30 +67,38 @@ mixin RegisterRequestMappable {
   }
 
   Map<String, dynamic> toMap() {
-    return RegisterRequestMapper.ensureInitialized()
-        .encodeMap<RegisterRequest>(this as RegisterRequest);
+    return RegisterRequestMapper.ensureInitialized().encodeMap<RegisterRequest>(
+      this as RegisterRequest,
+    );
   }
 
   RegisterRequestCopyWith<RegisterRequest, RegisterRequest, RegisterRequest>
-      get copyWith =>
-          _RegisterRequestCopyWithImpl<RegisterRequest, RegisterRequest>(
-              this as RegisterRequest, $identity, $identity);
+  get copyWith =>
+      _RegisterRequestCopyWithImpl<RegisterRequest, RegisterRequest>(
+        this as RegisterRequest,
+        $identity,
+        $identity,
+      );
   @override
   String toString() {
-    return RegisterRequestMapper.ensureInitialized()
-        .stringifyValue(this as RegisterRequest);
+    return RegisterRequestMapper.ensureInitialized().stringifyValue(
+      this as RegisterRequest,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return RegisterRequestMapper.ensureInitialized()
-        .equalsValue(this as RegisterRequest, other);
+    return RegisterRequestMapper.ensureInitialized().equalsValue(
+      this as RegisterRequest,
+      other,
+    );
   }
 
   @override
   int get hashCode {
-    return RegisterRequestMapper.ensureInitialized()
-        .hashValue(this as RegisterRequest);
+    return RegisterRequestMapper.ensureInitialized().hashValue(
+      this as RegisterRequest,
+    );
   }
 }
 
@@ -99,7 +112,8 @@ abstract class RegisterRequestCopyWith<$R, $In extends RegisterRequest, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
   $R call({String? email, String? password, String? name});
   RegisterRequestCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
-      Then<$Out2, $R2> t);
+    Then<$Out2, $R2> t,
+  );
 }
 
 class _RegisterRequestCopyWithImpl<$R, $Out>
@@ -111,20 +125,22 @@ class _RegisterRequestCopyWithImpl<$R, $Out>
   late final ClassMapperBase<RegisterRequest> $mapper =
       RegisterRequestMapper.ensureInitialized();
   @override
-  $R call({String? email, String? password, String? name}) =>
-      $apply(FieldCopyWithData({
-        if (email != null) #email: email,
-        if (password != null) #password: password,
-        if (name != null) #name: name
-      }));
+  $R call({String? email, String? password, String? name}) => $apply(
+    FieldCopyWithData({
+      if (email != null) #email: email,
+      if (password != null) #password: password,
+      if (name != null) #name: name,
+    }),
+  );
   @override
   RegisterRequest $make(CopyWithData data) => RegisterRequest(
-      email: data.get(#email, or: $value.email),
-      password: data.get(#password, or: $value.password),
-      name: data.get(#name, or: $value.name));
+    email: data.get(#email, or: $value.email),
+    password: data.get(#password, or: $value.password),
+    name: data.get(#name, or: $value.name),
+  );
 
   @override
   RegisterRequestCopyWith<$R2, RegisterRequest, $Out2> $chain<$R2, $Out2>(
-          Then<$Out2, $R2> t) =>
-      _RegisterRequestCopyWithImpl<$R2, $Out2>($value, $cast, t);
+    Then<$Out2, $R2> t,
+  ) => _RegisterRequestCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }

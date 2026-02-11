@@ -22,6 +22,8 @@
 /// - [Err] for failure outcomes
 library;
 
+import 'package:flutter/foundation.dart' show immutable;
+
 import 'package:flutter_starter/core/error/failures.dart';
 
 /// A type that represents either a successful value of type [T] or a [Failure].
@@ -79,6 +81,7 @@ sealed class Result<T> {
 }
 
 /// A successful [Result] containing a [data] value of type [T].
+@immutable
 final class Success<T> extends Result<T> {
   /// Creates a successful result with the given [data].
   const Success(this.data);
@@ -90,8 +93,7 @@ final class Success<T> extends Result<T> {
   R when<R>({
     required R Function(T data) success,
     required R Function(Failure failure) failure,
-  }) =>
-      success(data);
+  }) => success(data);
 
   @override
   Result<R> map<R>(R Function(T data) transform) => Success(transform(data));
@@ -123,6 +125,7 @@ final class Success<T> extends Result<T> {
 }
 
 /// A failed [Result] containing a [Failure].
+@immutable
 final class Err<T> extends Result<T> {
   /// Creates a failed result with the given [failure].
   const Err(this.failure);
@@ -134,8 +137,7 @@ final class Err<T> extends Result<T> {
   R when<R>({
     required R Function(T data) success,
     required R Function(Failure failure) failure,
-  }) =>
-      failure(this.failure);
+  }) => failure(this.failure);
 
   @override
   Result<R> map<R>(R Function(T data) transform) => Err(failure);

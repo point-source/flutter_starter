@@ -7,7 +7,7 @@ part of 'connectivity_banner.dart';
 // **************************************************************************
 
 String _$connectivityStatusHash() =>
-    r'980882b6b98a02e431d5f3de24ba9eaffab9e800';
+    r'25b777118c00eda07ff9b630e052e7d15a0cc15c';
 
 /// Stream the current connectivity status from [Connectivity].
 ///

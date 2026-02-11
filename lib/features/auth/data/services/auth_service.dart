@@ -6,12 +6,11 @@
 library;
 
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
-
 import 'package:flutter_starter/features/auth/data/models/auth_response.dart';
 import 'package:flutter_starter/features/auth/data/models/login_request.dart';
 import 'package:flutter_starter/features/auth/data/models/register_request.dart';
 import 'package:flutter_starter/features/auth/data/models/user_dto.dart';
+import 'package:retrofit/retrofit.dart';
 
 part 'auth_service.g.dart';
 

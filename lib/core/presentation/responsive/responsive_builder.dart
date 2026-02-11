@@ -54,20 +54,18 @@ class ResponsiveBuilder extends StatelessWidget {
   final Widget Function(BuildContext context)? large;
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final breakpoint = AppBreakpoint.fromWidth(constraints.maxWidth);
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final breakpoint = AppBreakpoint.fromWidth(constraints.maxWidth);
 
-        return switch (breakpoint) {
-          AppBreakpoint.compact => compact(context),
-          AppBreakpoint.medium => (medium ?? compact)(context),
-          AppBreakpoint.expanded =>
-            (expanded ?? medium ?? compact)(context),
-          AppBreakpoint.large =>
-            (large ?? expanded ?? medium ?? compact)(context),
-        };
-      },
-    );
-  }
+      return switch (breakpoint) {
+        AppBreakpoint.compact => compact(context),
+        AppBreakpoint.medium => (medium ?? compact)(context),
+        AppBreakpoint.expanded => (expanded ?? medium ?? compact)(context),
+        AppBreakpoint.large => (large ?? expanded ?? medium ?? compact)(
+          context,
+        ),
+      };
+    },
+  );
 }

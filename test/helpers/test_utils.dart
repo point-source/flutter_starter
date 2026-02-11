@@ -11,9 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Create a [ProviderContainer] with optional [overrides] for testing.
 ///
 /// The container is automatically disposed when the test completes.
-ProviderContainer createContainer({
-  List<Override> overrides = const [],
-}) {
+ProviderContainer createContainer({List<Override> overrides = const []}) {
   final container = ProviderContainer(overrides: overrides);
   addTearDown(container.dispose);
   return container;

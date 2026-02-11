@@ -24,7 +24,14 @@ sealed class AppException implements Exception {
   final int? statusCode;
 
   @override
-  String toString() => '$runtimeType: $message';
+  String toString() =>
+      '${switch (this) {
+        ServerException() => 'ServerException',
+        NetworkException() => 'NetworkException',
+        TimeoutException() => 'TimeoutException',
+        ParseException() => 'ParseException',
+        CacheException() => 'CacheException',
+      }}: $message';
 }
 
 /// Exception thrown when the server returns an error response.
@@ -36,22 +43,22 @@ final class ServerException extends AppException {
 /// Exception thrown when there is no network connectivity.
 final class NetworkException extends AppException {
   /// Creates a [NetworkException].
-  const NetworkException([String message = 'No internet connection'])
-      : super(message);
+  const NetworkException([super.message = 'No internet connection']);
 }
 
 /// Exception thrown when a request times out.
 final class TimeoutException extends AppException {
   /// Creates a [TimeoutException].
-  const TimeoutException([String message = 'Request timed out'])
-      : super(message);
+  const TimeoutException([super.message = 'Request timed out']);
 }
 
 /// Exception thrown when response parsing fails.
 final class ParseException extends AppException {
   /// Creates a [ParseException] with the original [error].
-  const ParseException(this.error, [String message = 'Failed to parse response'])
-      : super(message);
+  const ParseException(
+    this.error, [
+    String message = 'Failed to parse response',
+  ]) : super(message);
 
   /// The original parsing error.
   final Object error;
@@ -60,6 +67,5 @@ final class ParseException extends AppException {
 /// Exception thrown when a local cache operation fails.
 final class CacheException extends AppException {
   /// Creates a [CacheException].
-  const CacheException([String message = 'Cache operation failed'])
-      : super(message);
+  const CacheException([super.message = 'Cache operation failed']);
 }

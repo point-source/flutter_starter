@@ -12,11 +12,7 @@ part 'update_profile_request.mapper.dart';
 @MappableClass()
 class UpdateProfileRequest with UpdateProfileRequestMappable {
   /// Create an [UpdateProfileRequest] with the fields to update.
-  const UpdateProfileRequest({
-    this.name,
-    this.bio,
-    this.phoneNumber,
-  });
+  const UpdateProfileRequest({this.name, this.bio, this.phoneNumber});
 
   /// Updated display name, or `null` to keep unchanged.
   final String? name;

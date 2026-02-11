@@ -15,10 +15,7 @@ part 'login_request.mapper.dart';
 @MappableClass()
 class LoginRequest with LoginRequestMappable {
   /// Create a [LoginRequest] with the given credentials.
-  const LoginRequest({
-    required this.email,
-    required this.password,
-  });
+  const LoginRequest({required this.email, required this.password});
 
   /// The user's email address.
   final String email;

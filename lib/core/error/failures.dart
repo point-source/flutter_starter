@@ -47,14 +47,14 @@ sealed class NetworkFailure extends Failure {
 final class NoConnection extends NetworkFailure {
   /// Creates a [NoConnection] failure.
   const NoConnection([StackTrace? stackTrace])
-      : super('No internet connection', stackTrace);
+    : super('No internet connection', stackTrace);
 }
 
 /// The request timed out before receiving a response.
 final class Timeout extends NetworkFailure {
   /// Creates a [Timeout] failure.
   const Timeout([StackTrace? stackTrace])
-      : super('Request timed out', stackTrace);
+    : super('Request timed out', stackTrace);
 }
 
 /// Failures related to server responses.
@@ -67,7 +67,7 @@ sealed class ServerFailure extends Failure {
 final class BadResponse extends ServerFailure {
   /// Creates a [BadResponse] failure with the HTTP [statusCode].
   const BadResponse(this.statusCode, [String? message, StackTrace? stackTrace])
-      : super(message ?? 'Server error ($statusCode)', stackTrace);
+    : super(message ?? 'Server error ($statusCode)', stackTrace);
 
   /// The HTTP status code returned by the server.
   final int statusCode;
@@ -77,7 +77,7 @@ final class BadResponse extends ServerFailure {
 final class Unauthorized extends ServerFailure {
   /// Creates an [Unauthorized] failure.
   const Unauthorized([StackTrace? stackTrace])
-      : super('Unauthorized', stackTrace);
+    : super('Unauthorized', stackTrace);
 }
 
 /// The authenticated user does not have permission for this operation.
@@ -102,14 +102,14 @@ sealed class CacheFailure extends Failure {
 final class CacheReadFailure extends CacheFailure {
   /// Creates a [CacheReadFailure].
   const CacheReadFailure([StackTrace? stackTrace])
-      : super('Failed to read from cache', stackTrace);
+    : super('Failed to read from cache', stackTrace);
 }
 
 /// Failed to write data to local storage.
 final class CacheWriteFailure extends CacheFailure {
   /// Creates a [CacheWriteFailure].
   const CacheWriteFailure([StackTrace? stackTrace])
-      : super('Failed to write to cache', stackTrace);
+    : super('Failed to write to cache', stackTrace);
 }
 
 /// An unexpected failure that doesn't fit other categories.
@@ -118,7 +118,7 @@ final class CacheWriteFailure extends CacheFailure {
 final class UnexpectedFailure extends Failure {
   /// Creates an [UnexpectedFailure] with the original [error].
   const UnexpectedFailure(this.error, [StackTrace? stackTrace])
-      : super('An unexpected error occurred', stackTrace);
+    : super('An unexpected error occurred', stackTrace);
 
   /// The original error or exception that caused this failure.
   final Object error;

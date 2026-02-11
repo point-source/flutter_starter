@@ -6,7 +6,7 @@ part of 'secure_storage_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$secureStorageHash() => r'1803ee54eebc4038de1cd19ff9f0850676721a7f';
+String _$secureStorageHash() => r'0cd1b80f91784467390034386f925a0be155bfbd';
 
 /// Create a [FlutterSecureStorage] instance for dependency injection.
 ///

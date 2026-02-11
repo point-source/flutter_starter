@@ -27,9 +27,7 @@ class LoggingInterceptor extends Interceptor {
     _logger.debug(
       '→ ${options.method} ${options.uri}',
       tag: 'HTTP',
-      data: {
-        'headers': _redactHeaders(options.headers),
-      },
+      data: {'headers': _redactHeaders(options.headers)},
     );
     handler.next(options);
   }

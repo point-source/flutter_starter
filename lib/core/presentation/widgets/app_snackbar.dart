@@ -81,10 +81,7 @@ abstract final class AppSnackbar {
               Icon(icon, color: foregroundColor),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(color: foregroundColor),
-                ),
+                child: Text(message, style: TextStyle(color: foregroundColor)),
               ),
             ],
           ),

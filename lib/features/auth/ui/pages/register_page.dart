@@ -42,7 +42,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _onRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(authViewModelProvider.notifier).register(
+    await ref
+        .read(authViewModelProvider.notifier)
+        .register(
           email: _emailController.text.trim(),
           password: _passwordController.text,
           name: _nameController.text.trim(),
@@ -55,8 +57,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     ref.listen(authViewModelProvider, (previous, next) {
       // Navigate on successful authentication
-      if (next case AsyncData(value: final state)
-          when state.isAuthenticated) {
+      if (next case AsyncData(value: final state) when state.isAuthenticated) {
         context.router.replaceAll([const ShellRoute()]);
         return;
       }
@@ -65,9 +66,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       if (next case AsyncError(:final error)) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(error.toString())),
-          );
+          ..showSnackBar(SnackBar(content: Text(error.toString())));
       }
     });
 
@@ -157,9 +156,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Register'),
                   ),

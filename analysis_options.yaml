@@ -12,6 +12,7 @@ analyzer:
     - "**/*.gr.dart"
     - "**/*.mapper.dart"
     - "lib/gen/**"
+    - "bricks/**"
 
 linter:
   rules:

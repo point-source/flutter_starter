@@ -47,10 +47,7 @@ Future<void> bootstrap() async {
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (AppEnvironment.current.sentryEnabled) {
-      Sentry.captureException(
-        details.exception,
-        stackTrace: details.stack,
-      );
+      Sentry.captureException(details.exception, stackTrace: details.stack);
     }
   };
 
@@ -63,9 +60,7 @@ Future<void> bootstrap() async {
 
   // Build the app with provider overrides
   final app = ProviderScope(
-    overrides: [
-      sharedPrefsProvider.overrideWithValue(sharedPreferences),
-    ],
+    overrides: [sharedPrefsProvider.overrideWithValue(sharedPreferences)],
     child: const App(),
   );
 
@@ -73,15 +68,12 @@ Future<void> bootstrap() async {
   if (AppEnvironment.current.sentryEnabled) {
     final dsn = AppEnvironment.current.sentryDsn;
     if (dsn != null) {
-      await SentryFlutter.init(
-        (options) {
-          options
-            ..dsn = dsn
-            ..tracesSampleRate = AppEnvironment.current.sentrySampleRate
-            ..environment = AppEnvironment.current.name;
-        },
-        appRunner: () => runApp(app),
-      );
+      await SentryFlutter.init((options) {
+        options
+          ..dsn = dsn
+          ..tracesSampleRate = AppEnvironment.current.sentrySampleRate
+          ..environment = AppEnvironment.current.name;
+      }, appRunner: () => runApp(app));
       return;
     }
   }

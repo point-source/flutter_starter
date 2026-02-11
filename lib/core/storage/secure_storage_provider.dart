@@ -7,6 +7,7 @@
 /// configuration point and straightforward test overrides.
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -17,6 +18,4 @@ part 'secure_storage_provider.g.dart';
 /// Returns a const instance with default platform options.  Override this
 /// provider in tests to supply a mock or in-memory implementation.
 @Riverpod(keepAlive: true)
-FlutterSecureStorage secureStorage(SecureStorageRef ref) {
-  return const FlutterSecureStorage();
-}
+FlutterSecureStorage secureStorage(Ref ref) => const FlutterSecureStorage();

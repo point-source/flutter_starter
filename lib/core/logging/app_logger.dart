@@ -18,31 +18,19 @@ abstract class IAppLogger {
   ///
   /// Use for granular tracing that should never appear in production
   /// transports.
-  void debug(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  });
+  void debug(String message, {Map<String, dynamic>? data, String? tag});
 
   /// Log an informational message about normal application behaviour.
   ///
   /// Use for milestones such as successful initialisation, navigation
   /// events, or feature-flag evaluations.
-  void info(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  });
+  void info(String message, {Map<String, dynamic>? data, String? tag});
 
   /// Log a warning about a recoverable but unexpected condition.
   ///
   /// Use when the application can continue but the situation warrants
   /// attention (e.g. deprecated API usage, missing optional config).
-  void warning(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  });
+  void warning(String message, {Map<String, dynamic>? data, String? tag});
 
   /// Log an error that affected a single operation but did not crash the app.
   ///
@@ -81,29 +69,17 @@ class ConsoleLogger implements IAppLogger {
   const ConsoleLogger();
 
   @override
-  void debug(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  }) {
+  void debug(String message, {Map<String, dynamic>? data, String? tag}) {
     _log('[DEBUG]', message, tag: tag, data: data);
   }
 
   @override
-  void info(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  }) {
+  void info(String message, {Map<String, dynamic>? data, String? tag}) {
     _log('[INFO]', message, tag: tag, data: data);
   }
 
   @override
-  void warning(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  }) {
+  void warning(String message, {Map<String, dynamic>? data, String? tag}) {
     _log('[WARN]', message, tag: tag, data: data);
   }
 

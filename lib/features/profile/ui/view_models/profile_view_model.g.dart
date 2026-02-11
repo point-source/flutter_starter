@@ -6,7 +6,7 @@ part of 'profile_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileServiceHash() => r'1dd4b6c613de60a26b406091ce2caa3d3d0c11b4';
+String _$profileServiceHash() => r'c71fe9ef088915b971249e44de2ffe32d9804191';
 
 /// Create a [ProfileService] backed by the application's [Dio] instance.
 ///
@@ -25,7 +25,7 @@ final profileServiceProvider = AutoDisposeProvider<ProfileService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ProfileServiceRef = AutoDisposeProviderRef<ProfileService>;
-String _$profileRepositoryHash() => r'426b92e3cf0b4c03bc4f4298295eeccf6f2bc34e';
+String _$profileRepositoryHash() => r'4a25173557b96caebbf7096f4f0eb6c79c375892';
 
 /// Create an [IProfileRepository] wired to the profile service.
 ///

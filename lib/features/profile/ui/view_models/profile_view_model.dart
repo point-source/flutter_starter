@@ -5,13 +5,12 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/features/profile/data/repositories/profile_repository.dart';
 import 'package:flutter_starter/features/profile/data/services/profile_service.dart';
 import 'package:flutter_starter/features/profile/domain/entities/profile.dart';
 import 'package:flutter_starter/features/profile/domain/repositories/i_profile_repository.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profile_view_model.g.dart';
 
@@ -21,15 +20,12 @@ part 'profile_view_model.g.dart';
 
 /// Create a [ProfileService] backed by the application's [Dio] instance.
 @riverpod
-ProfileService profileService(Ref ref) {
-  return ProfileService(ref.read(dioProvider));
-}
+ProfileService profileService(Ref ref) => ProfileService(ref.read(dioProvider));
 
 /// Create an [IProfileRepository] wired to the profile service.
 @riverpod
-IProfileRepository profileRepository(Ref ref) {
-  return ProfileRepository(ref.read(profileServiceProvider));
-}
+IProfileRepository profileRepository(Ref ref) =>
+    ProfileRepository(ref.read(profileServiceProvider));
 
 // ---------------------------------------------------------------------------
 // Profile view model
@@ -48,6 +44,7 @@ class ProfileViewModel extends _$ProfileViewModel {
 
     return result.when(
       success: (profile) => profile,
+      // ignore: only_throw_errors
       failure: (failure) => throw failure,
     );
   }

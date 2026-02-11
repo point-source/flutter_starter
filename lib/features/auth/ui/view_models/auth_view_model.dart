@@ -11,14 +11,13 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/core/storage/token_storage.dart';
 import 'package:flutter_starter/features/auth/data/repositories/auth_repository.dart';
 import 'package:flutter_starter/features/auth/data/services/auth_service.dart';
 import 'package:flutter_starter/features/auth/domain/entities/user.dart';
 import 'package:flutter_starter/features/auth/domain/repositories/i_auth_repository.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_view_model.g.dart';
 
@@ -31,11 +30,10 @@ part 'auth_view_model.g.dart';
 /// Use the named factories to create the appropriate variant and read
 /// [isAuthenticated] / [user] to inspect the state without pattern matching.
 class AuthState {
-  const AuthState._({this.user, required this.isAuthenticated});
+  const AuthState._({required this.isAuthenticated, this.user});
 
   /// No authentication check has been performed yet.
-  factory AuthState.initial() =>
-      const AuthState._(isAuthenticated: false);
+  factory AuthState.initial() => const AuthState._(isAuthenticated: false);
 
   /// The user is authenticated and their profile is available.
   factory AuthState.authenticated(User user) =>
@@ -58,18 +56,14 @@ class AuthState {
 
 /// Create an [AuthService] backed by the application's [Dio] instance.
 @riverpod
-AuthService authService(Ref ref) {
-  return AuthService(ref.read(dioProvider));
-}
+AuthService authService(Ref ref) => AuthService(ref.read(dioProvider));
 
 /// Create an [IAuthRepository] wired to the auth service and token storage.
 @riverpod
-IAuthRepository authRepository(Ref ref) {
-  return AuthRepository(
-    ref.read(authServiceProvider),
-    ref.read(tokenStorageProvider),
-  );
-}
+IAuthRepository authRepository(Ref ref) => AuthRepository(
+  ref.read(authServiceProvider),
+  ref.read(tokenStorageProvider),
+);
 
 // ---------------------------------------------------------------------------
 // Auth view model

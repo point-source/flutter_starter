@@ -11,6 +11,7 @@
 library;
 
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/core/network/interceptors/auth_interceptor.dart';
@@ -33,7 +34,7 @@ typedef AuthExpiredCallback = void Function();
 /// This is the Dio instance that all retrofit services should use.
 /// It includes auth, refresh, logging, and error interceptors.
 @Riverpod(keepAlive: true)
-Dio dio(DioRef ref) {
+Dio dio(Ref ref) {
   final tokenStorage = ref.read(tokenStorageProvider);
   final logger = ref.read(loggerProvider);
 

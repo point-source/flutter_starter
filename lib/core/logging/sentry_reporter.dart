@@ -27,11 +27,7 @@ class SentryReporter implements IAppLogger {
   // ---------------------------------------------------------------------------
 
   @override
-  void debug(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  }) {
+  void debug(String message, {Map<String, dynamic>? data, String? tag}) {
     Sentry.addBreadcrumb(
       Breadcrumb(
         message: message,
@@ -43,11 +39,7 @@ class SentryReporter implements IAppLogger {
   }
 
   @override
-  void info(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  }) {
+  void info(String message, {Map<String, dynamic>? data, String? tag}) {
     Sentry.addBreadcrumb(
       Breadcrumb(
         message: message,
@@ -63,11 +55,7 @@ class SentryReporter implements IAppLogger {
   // ---------------------------------------------------------------------------
 
   @override
-  void warning(
-    String message, {
-    Map<String, dynamic>? data,
-    String? tag,
-  }) {
+  void warning(String message, {Map<String, dynamic>? data, String? tag}) {
     Sentry.addBreadcrumb(
       Breadcrumb(
         message: message,

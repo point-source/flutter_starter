@@ -61,16 +61,14 @@ class ErrorInterceptor extends Interceptor {
     // Try to extract error message from response body
     String message;
     if (data is Map<String, dynamic>) {
-      message = (data['message'] as String?) ??
+      message =
+          (data['message'] as String?) ??
           (data['error'] as String?) ??
           'Server error';
     } else {
       message = 'Server error';
     }
 
-    return ServerException(
-      message,
-      statusCode: statusCode,
-    );
+    return ServerException(message, statusCode: statusCode);
   }
 }

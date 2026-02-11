@@ -6,7 +6,7 @@ part of 'logger_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$loggerHash() => r'6d3754f8937a06f875ba3143a0a676cdd8543f99';
+String _$loggerHash() => r'409586a8e73b951593f86e49a8fcfc6ee455c912';
 
 /// Create an [IAppLogger] appropriate for the current [AppEnvironment].
 ///

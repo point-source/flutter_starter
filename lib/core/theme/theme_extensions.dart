@@ -76,15 +76,14 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     Color? onWarning,
     Color? info,
     Color? onInfo,
-  }) =>
-      SemanticColors(
-        success: success ?? this.success,
-        onSuccess: onSuccess ?? this.onSuccess,
-        warning: warning ?? this.warning,
-        onWarning: onWarning ?? this.onWarning,
-        info: info ?? this.info,
-        onInfo: onInfo ?? this.onInfo,
-      );
+  }) => SemanticColors(
+    success: success ?? this.success,
+    onSuccess: onSuccess ?? this.onSuccess,
+    warning: warning ?? this.warning,
+    onWarning: onWarning ?? this.onWarning,
+    info: info ?? this.info,
+    onInfo: onInfo ?? this.onInfo,
+  );
 
   @override
   SemanticColors lerp(covariant SemanticColors? other, double t) {

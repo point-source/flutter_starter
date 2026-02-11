@@ -6,7 +6,7 @@ part of 'auth_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authServiceHash() => r'57de318ebffba2feb85303ddafea76edd8d942f3';
+String _$authServiceHash() => r'e908b5fe8a16cd1a87875742b53dd198f462feb8';
 
 /// Create an [AuthService] backed by the application's [Dio] instance.
 ///
@@ -25,7 +25,7 @@ final authServiceProvider = AutoDisposeProvider<AuthService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthServiceRef = AutoDisposeProviderRef<AuthService>;
-String _$authRepositoryHash() => r'0b901a2cd8326cb470fcd82cfdd10b5416bd5838';
+String _$authRepositoryHash() => r'6b86db1c3482b8fefeb2063c787fb3eb6ff8c306';
 
 /// Create an [IAuthRepository] wired to the auth service and token storage.
 ///

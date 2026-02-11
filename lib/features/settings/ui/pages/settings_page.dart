@@ -7,7 +7,6 @@ library;
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
 import 'package:flutter_starter/features/settings/ui/view_models/locale_view_model.dart';
 import 'package:flutter_starter/features/settings/ui/view_models/theme_view_model.dart';
@@ -25,9 +24,7 @@ class SettingsPage extends ConsumerWidget {
     final currentLocale = ref.watch(localeViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.settings.title),
-      ),
+      appBar: AppBar(title: Text(t.settings.title)),
       body: ListView(
         children: [
           // ── Theme ────────────────────────────────────────────
@@ -38,35 +35,29 @@ class SettingsPage extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          RadioListTile<ThemeMode>(
-            title: Text(t.settings.themeSystem),
-            value: ThemeMode.system,
+          RadioGroup<ThemeMode>(
             groupValue: currentTheme,
             onChanged: (mode) {
               if (mode != null) {
                 ref.read(themeViewModelProvider.notifier).setThemeMode(mode);
               }
             },
-          ),
-          RadioListTile<ThemeMode>(
-            title: Text(t.settings.themeLight),
-            value: ThemeMode.light,
-            groupValue: currentTheme,
-            onChanged: (mode) {
-              if (mode != null) {
-                ref.read(themeViewModelProvider.notifier).setThemeMode(mode);
-              }
-            },
-          ),
-          RadioListTile<ThemeMode>(
-            title: Text(t.settings.themeDark),
-            value: ThemeMode.dark,
-            groupValue: currentTheme,
-            onChanged: (mode) {
-              if (mode != null) {
-                ref.read(themeViewModelProvider.notifier).setThemeMode(mode);
-              }
-            },
+            child: Column(
+              children: [
+                RadioListTile<ThemeMode>(
+                  title: Text(t.settings.themeSystem),
+                  value: ThemeMode.system,
+                ),
+                RadioListTile<ThemeMode>(
+                  title: Text(t.settings.themeLight),
+                  value: ThemeMode.light,
+                ),
+                RadioListTile<ThemeMode>(
+                  title: Text(t.settings.themeDark),
+                  value: ThemeMode.dark,
+                ),
+              ],
+            ),
           ),
 
           const Divider(),
@@ -79,29 +70,27 @@ class SettingsPage extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          RadioListTile<Locale?>(
-            title: const Text('System'),
-            value: null,
-            groupValue: currentLocale,
-            onChanged: (locale) {
+          RadioGroup<String>(
+            groupValue: currentLocale?.languageCode ?? '',
+            onChanged: (code) {
+              final locale = (code == null || code.isEmpty)
+                  ? null
+                  : Locale(code);
               ref.read(localeViewModelProvider.notifier).setLocale(locale);
             },
-          ),
-          RadioListTile<Locale?>(
-            title: const Text('English'),
-            value: const Locale('en'),
-            groupValue: currentLocale,
-            onChanged: (locale) {
-              ref.read(localeViewModelProvider.notifier).setLocale(locale);
-            },
-          ),
-          RadioListTile<Locale?>(
-            title: const Text('Español'),
-            value: const Locale('es'),
-            groupValue: currentLocale,
-            onChanged: (locale) {
-              ref.read(localeViewModelProvider.notifier).setLocale(locale);
-            },
+            child: Column(
+              children: [
+                RadioListTile<String>(title: const Text('System'), value: ''),
+                RadioListTile<String>(
+                  title: const Text('English'),
+                  value: 'en',
+                ),
+                RadioListTile<String>(
+                  title: const Text('Español'),
+                  value: 'es',
+                ),
+              ],
+            ),
           ),
 
           const Divider(),

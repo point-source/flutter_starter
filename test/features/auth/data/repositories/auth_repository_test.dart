@@ -7,18 +7,16 @@
 library;
 
 import 'package:dio/dio.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-
 import 'package:flutter_starter/core/error/app_exception.dart';
 import 'package:flutter_starter/core/error/failures.dart';
-import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/features/auth/data/models/auth_response.dart';
 import 'package:flutter_starter/features/auth/data/models/login_request.dart';
 import 'package:flutter_starter/features/auth/data/models/register_request.dart';
 import 'package:flutter_starter/features/auth/data/models/user_dto.dart';
 import 'package:flutter_starter/features/auth/data/repositories/auth_repository.dart';
 import 'package:flutter_starter/features/auth/domain/failures/auth_failure.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 
@@ -46,9 +44,7 @@ void main() {
     repository = AuthRepository(mockAuthService, mockTokenStorage);
 
     // Register fallback values for mocktail argument matchers.
-    registerFallbackValue(
-      const LoginRequest(email: '', password: ''),
-    );
+    registerFallbackValue(const LoginRequest(email: '', password: ''));
     registerFallbackValue(
       const RegisterRequest(email: '', password: '', name: ''),
     );
@@ -59,9 +55,9 @@ void main() {
     /// Returns a [Success] containing the mapped [User] on a successful
     /// API response.
     test('returns Success with user on success', () async {
-      when(() => mockAuthService.login(any())).thenAnswer(
-        (_) async => testAuthResponse,
-      );
+      when(
+        () => mockAuthService.login(any()),
+      ).thenAnswer((_) async => testAuthResponse);
       when(
         () => mockTokenStorage.saveTokens(
           accessToken: any(named: 'accessToken'),
@@ -69,10 +65,7 @@ void main() {
         ),
       ).thenAnswer((_) async {});
 
-      final result = await repository.login(
-        'test@example.com',
-        'password123',
-      );
+      final result = await repository.login('test@example.com', 'password123');
 
       expect(result.isSuccess, isTrue);
       final user = result.getOrNull();
@@ -84,9 +77,9 @@ void main() {
 
     /// Saves both access and refresh tokens after a successful login.
     test('saves tokens on success', () async {
-      when(() => mockAuthService.login(any())).thenAnswer(
-        (_) async => testAuthResponse,
-      );
+      when(
+        () => mockAuthService.login(any()),
+      ).thenAnswer((_) async => testAuthResponse);
       when(
         () => mockTokenStorage.saveTokens(
           accessToken: any(named: 'accessToken'),
@@ -128,8 +121,7 @@ void main() {
 
     /// Returns an [Err] with [AuthServerError] for non-401/409 server
     /// errors.
-    test('returns Err with AuthServerError on generic server error',
-        () async {
+    test('returns Err with AuthServerError on generic server error', () async {
       when(() => mockAuthService.login(any())).thenThrow(
         DioException(
           requestOptions: RequestOptions(),
@@ -137,10 +129,7 @@ void main() {
         ),
       );
 
-      final result = await repository.login(
-        'test@example.com',
-        'password123',
-      );
+      final result = await repository.login('test@example.com', 'password123');
 
       expect(result.isFailure, isTrue);
       result.when(
@@ -150,23 +139,25 @@ void main() {
     });
 
     /// Returns an [Err] with [UnexpectedFailure] for non-Dio exceptions.
-    test('returns Err with UnexpectedFailure on unexpected exception',
-        () async {
-      when(() => mockAuthService.login(any())).thenThrow(
-        Exception('something broke'),
-      );
+    test(
+      'returns Err with UnexpectedFailure on unexpected exception',
+      () async {
+        when(
+          () => mockAuthService.login(any()),
+        ).thenThrow(Exception('something broke'));
 
-      final result = await repository.login(
-        'test@example.com',
-        'password123',
-      );
+        final result = await repository.login(
+          'test@example.com',
+          'password123',
+        );
 
-      expect(result.isFailure, isTrue);
-      result.when(
-        success: (_) => fail('should not succeed'),
-        failure: (f) => expect(f, isA<UnexpectedFailure>()),
-      );
-    });
+        expect(result.isFailure, isTrue);
+        result.when(
+          success: (_) => fail('should not succeed'),
+          failure: (f) => expect(f, isA<UnexpectedFailure>()),
+        );
+      },
+    );
   });
 
   /// Tests for [AuthRepository.logout].
@@ -185,9 +176,9 @@ void main() {
     /// Clears tokens even when the server request fails with a
     /// [DioException].
     test('clears tokens even on server error', () async {
-      when(() => mockAuthService.logout()).thenThrow(
-        DioException(requestOptions: RequestOptions()),
-      );
+      when(
+        () => mockAuthService.logout(),
+      ).thenThrow(DioException(requestOptions: RequestOptions()));
       when(() => mockTokenStorage.clearTokens()).thenAnswer((_) async {});
 
       final result = await repository.logout();
@@ -201,9 +192,9 @@ void main() {
     /// Clears tokens even when an unexpected exception occurs, but
     /// returns an Err in that case.
     test('clears tokens on unexpected exception and returns Err', () async {
-      when(() => mockAuthService.logout()).thenThrow(
-        Exception('network stack crashed'),
-      );
+      when(
+        () => mockAuthService.logout(),
+      ).thenThrow(Exception('network stack crashed'));
       when(() => mockTokenStorage.clearTokens()).thenAnswer((_) async {});
 
       final result = await repository.logout();
@@ -219,9 +210,9 @@ void main() {
     /// Returns Success(null) when no access token is stored, without
     /// hitting the network.
     test('returns Success(null) when no token exists', () async {
-      when(() => mockTokenStorage.getAccessToken()).thenAnswer(
-        (_) async => null,
-      );
+      when(
+        () => mockTokenStorage.getAccessToken(),
+      ).thenAnswer((_) async => null);
 
       final result = await repository.getCurrentUser();
 
@@ -233,12 +224,12 @@ void main() {
     /// Returns Success with the mapped User when a token is stored and
     /// the server responds successfully.
     test('returns Success with user when token exists', () async {
-      when(() => mockTokenStorage.getAccessToken()).thenAnswer(
-        (_) async => 'access-token-123',
-      );
-      when(() => mockAuthService.getCurrentUser()).thenAnswer(
-        (_) async => testUserDto,
-      );
+      when(
+        () => mockTokenStorage.getAccessToken(),
+      ).thenAnswer((_) async => 'access-token-123');
+      when(
+        () => mockAuthService.getCurrentUser(),
+      ).thenAnswer((_) async => testUserDto);
 
       final result = await repository.getCurrentUser();
 
@@ -252,9 +243,9 @@ void main() {
     /// Clears tokens and returns Success(null) when the server responds
     /// with 401, indicating the session is no longer valid.
     test('clears tokens and returns Success(null) on 401', () async {
-      when(() => mockTokenStorage.getAccessToken()).thenAnswer(
-        (_) async => 'expired-token',
-      );
+      when(
+        () => mockTokenStorage.getAccessToken(),
+      ).thenAnswer((_) async => 'expired-token');
       when(() => mockAuthService.getCurrentUser()).thenThrow(
         DioException(
           requestOptions: RequestOptions(),

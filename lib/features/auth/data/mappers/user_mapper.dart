@@ -13,12 +13,6 @@ import 'package:flutter_starter/features/auth/domain/entities/user.dart';
 /// before returning them to the view model layer.
 extension UserDtoMapper on UserDto {
   /// Convert this [UserDto] to a domain [User] entity.
-  User toDomain() {
-    return User(
-      id: id,
-      email: email,
-      name: name,
-      avatarUrl: avatarUrl,
-    );
-  }
+  User toDomain() =>
+      User(id: id, email: email, name: name, avatarUrl: avatarUrl);
 }

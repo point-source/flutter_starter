@@ -16,12 +16,12 @@ sealed class ProfileFailure extends Failure {
 final class ProfileNotFound extends ProfileFailure {
   /// Create a [ProfileNotFound] failure.
   const ProfileNotFound([StackTrace? stackTrace])
-      : super('Profile not found', stackTrace);
+    : super('Profile not found', stackTrace);
 }
 
 /// The profile update was rejected by the server.
 final class ProfileUpdateRejected extends ProfileFailure {
   /// Create a [ProfileUpdateRejected] failure.
   const ProfileUpdateRejected([String? message, StackTrace? stackTrace])
-      : super(message ?? 'Profile update failed', stackTrace);
+    : super(message ?? 'Profile update failed', stackTrace);
 }
