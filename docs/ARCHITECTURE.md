@@ -1,0 +1,372 @@
+# Architecture Overview
+
+This document describes the high-level architecture of the Flutter Starter template.
+For rationale behind specific decisions, see the [ADRs](adrs/). For detailed coding
+patterns, see the [architecture rules](architecture-rules/).
+
+## Architecture Pattern
+
+The application follows **MVVM (Model-View-ViewModel)** combined with **Clean Architecture**
+layering. Each feature is organized into three layers with strict dependency rules.
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │                        UI LAYER                             │
+  │                                                             │
+  │  Views (ConsumerWidget)     ViewModels (@riverpod Notifier) │
+  │  - Render UI from state     - Expose AsyncValue<State>      │
+  │  - Dispatch user actions    - Call repositories              │
+  │  - Watch providers          - Map Result -> AsyncValue       │
+  ├─────────────────────────────────────────────────────────────┤
+  │                      DOMAIN LAYER                           │
+  │                   (optional per feature)                     │
+  │                                                             │
+  │  Entities                    Repository Interfaces           │
+  │  - Core business objects     - Abstract contracts            │
+  │  Failures                    Use Cases                       │
+  │  - Feature-specific errors   - Cross-repo orchestration     │
+  ├─────────────────────────────────────────────────────────────┤
+  │                       DATA LAYER                            │
+  │                                                             │
+  │  Services (@RestApi)         Repositories (impl)            │
+  │  - HTTP endpoints            - Source of truth              │
+  │  DTOs (@MappableClass)       - Exception -> Result mapping  │
+  │  - JSON serialization        - Token management             │
+  │  Mappers                                                    │
+  │  - DTO -> Domain entity                                     │
+  └─────────────────────────────────────────────────────────────┘
+```
+
+### Dependency Rules
+
+- **UI depends on Domain** (entities, failures) and **Data** (through Riverpod providers)
+- **Domain depends on nothing** except core error types (`Result`, `Failure`)
+- **Data depends on Domain** (implements repository interfaces, maps to entities)
+- **No layer imports UI types**
+
+The domain layer is optional. Simple features (like Settings) that only persist
+local preferences may skip the domain layer entirely. Add it when the feature
+has its own entity types, repository abstraction, or failure hierarchy.
+
+## Data Flow
+
+The standard request lifecycle follows this path:
+
+```
+  User Action
+      |
+      v
+  View (ConsumerWidget)
+      |  calls method on
+      v
+  ViewModel (@riverpod AsyncNotifier)
+      |  reads provider, calls method
+      v
+  Repository (implements IXxxRepository)
+      |  calls service, catches exceptions
+      v
+  Service (@RestApi / retrofit)
+      |  sends HTTP request via Dio
+      v
+  Dio Interceptor Chain
+      |  AuthInterceptor -> RefreshTokenInterceptor
+      |  -> LoggingInterceptor -> ErrorInterceptor
+      v
+  REST API
+```
+
+### Response Flow (Success)
+
+```
+  API Response (JSON)
+      |
+      v
+  Retrofit (deserializes to DTO)
+      |
+      v
+  Repository
+      |  maps DTO -> domain entity
+      |  returns Success(entity)
+      v
+  ViewModel
+      |  result.when(success: ...) -> AsyncData(state)
+      v
+  View
+      |  ref.watch() rebuilds with new data
+      v
+  UI Updated
+```
+
+### Response Flow (Error)
+
+```
+  HTTP Error / Network Failure
+      |
+      v
+  Dio throws DioException
+      |
+      v
+  ErrorInterceptor
+      |  wraps as AppException (preserves status code)
+      |  re-throws as DioException with AppException in .error
+      v
+  Repository catch block
+      |  inspects AppException.statusCode
+      |  maps to feature-specific Failure subtype
+      |  returns Err(failure)
+      v
+  ViewModel
+      |  result.when(failure: ...) -> AsyncError(failure, stackTrace)
+      v
+  View
+      |  ref.watch() rebuilds with error state
+      v
+  Error UI Shown
+```
+
+## Error Handling Architecture
+
+Error handling uses a layered conversion strategy that transforms raw errors into
+typed, pattern-matchable values.
+
+### The Error Type Hierarchy
+
+```
+  DioException (from Dio)
+      |
+      | ErrorInterceptor converts to:
+      v
+  AppException (sealed class)
+      |-- ServerException       statusCode, message
+      |-- NetworkException      no connectivity
+      |-- TimeoutException      request timed out
+      |-- ParseException        response parsing failed
+      |-- CacheException        local storage failed
+      |
+      | Repository catches and maps to:
+      v
+  Failure (abstract base class)
+      |
+      |-- NetworkFailure (sealed)
+      |     |-- NoConnection
+      |     |-- Timeout
+      |
+      |-- ServerFailure (sealed)
+      |     |-- BadResponse(statusCode)
+      |     |-- Unauthorized
+      |     |-- Forbidden
+      |     |-- NotFound
+      |
+      |-- CacheFailure (sealed)
+      |     |-- CacheReadFailure
+      |     |-- CacheWriteFailure
+      |
+      |-- UnexpectedFailure
+      |
+      |-- <Feature>Failure (sealed, per feature)
+            |-- e.g. InvalidCredentials
+            |-- e.g. EmailAlreadyInUse
+            |-- e.g. SessionExpired
+```
+
+### The Result Type
+
+All repository methods return `Future<Result<T>>` instead of throwing exceptions.
+
+```dart
+sealed class Result<T>
+    |-- Success<T>(T data)
+    |-- Err<T>(Failure failure)
+```
+
+Key operations on `Result`:
+- `when(success:, failure:)` -- exhaustive pattern match
+- `map(transform)` -- transform success value, pass through failure
+- `flatMap(transform)` -- chain operations that themselves return Result
+- `getOrElse(orElse)` -- unwrap with fallback
+- `getOrNull()` -- unwrap or null
+
+## Riverpod Provider Architecture
+
+Riverpod serves as both state management and dependency injection. Providers
+are organized by responsibility.
+
+### Provider Hierarchy for a Feature
+
+```
+  dioProvider (@Riverpod keepAlive)
+      |
+      v
+  authServiceProvider (@riverpod)
+      |  creates AuthService(dio)
+      v
+  authRepositoryProvider (@riverpod)
+      |  creates AuthRepository(authService, tokenStorage)
+      v
+  authViewModelProvider (@Riverpod keepAlive)
+      |  AsyncNotifier reading authRepository
+      v
+  authStateProvider (@riverpod)
+      |  derived bool from authViewModel
+      v
+  AuthGuard / Views
+```
+
+### Provider Patterns
+
+| Pattern | Annotation | Use Case |
+|---|---|---|
+| App-lifetime singleton | `@Riverpod(keepAlive: true)` | Dio, AppRouter, AuthViewModel |
+| Auto-dispose provider | `@riverpod` | Services, repositories, derived state |
+| AsyncNotifier | `@riverpod class Xxx extends _$Xxx` | ViewModels with async state |
+| Simple provider | `@riverpod Type name(Ref ref)` | Infrastructure wiring |
+
+## Routing and Navigation
+
+Navigation is handled by `auto_route` with type-safe route generation.
+
+### Route Tree
+
+```
+  /login              (unauthenticated)
+  /register           (unauthenticated)
+  /                   (shell -- AuthGuard protected)
+    /dashboard
+    /profile
+    /settings
+```
+
+### AuthGuard
+
+The `AuthGuard` reads `authStateProvider` (a derived boolean) synchronously.
+If the user is not authenticated, navigation is redirected to `LoginRoute`.
+
+The `AppRouter` is created inside a `@Riverpod(keepAlive: true)` provider so
+that `Ref` can be passed to the `AuthGuard` constructor, bridging auto_route's
+guard system with Riverpod's provider tree.
+
+### Adaptive Navigation
+
+The shell route renders an `AdaptiveScaffold` that changes navigation chrome
+based on screen width:
+
+| Breakpoint | Width | Navigation |
+|---|---|---|
+| Compact | < 600dp | Bottom navigation bar |
+| Medium | 600--840dp | Navigation rail |
+| Expanded | 840--1200dp | Navigation rail with labels |
+| Large | 1200dp+ | Persistent navigation drawer |
+
+## Environment Configuration
+
+The application uses a single `main.dart` entry point. Environment selection is
+handled entirely through compile-time constants loaded from JSON config files.
+
+```
+config/
+  development.json     # Local development defaults
+  staging.json         # Pre-production testing
+  production.json      # Live deployment
+```
+
+### Usage
+
+```bash
+flutter run --dart-define-from-file=config/development.json
+flutter build apk --release --dart-define-from-file=config/production.json
+```
+
+### AppEnvironment Enum
+
+`AppEnvironment` reads compile-time constants (`ENVIRONMENT`, `API_URL`,
+`SENTRY_DSN`) and exposes environment-aware configuration:
+
+- `apiBaseUrl` -- per-environment API endpoint
+- `sentryEnabled` -- true for staging/production
+- `sentrySampleRate` -- 1.0 staging, 0.1 production
+- `sslPinningEnabled` -- disabled in development for proxy inspection
+
+Strict mode (`STRICT_ENV=true`) throws on invalid environment values, intended
+for CI pipelines.
+
+## Bootstrap Sequence
+
+`main()` delegates to `bootstrap()`, which performs initialization in order:
+
+1. `WidgetsFlutterBinding.ensureInitialized()`
+2. Initialize `SharedPreferences` (async)
+3. Log environment configuration warnings
+4. Register global error handlers (`FlutterError.onError`, `PlatformDispatcher.onError`)
+5. Initialize Sentry (staging/production only, if DSN configured)
+6. Create `ProviderScope` with `SharedPreferences` override
+7. Run `App` widget
+
+## Dio Interceptor Chain
+
+HTTP requests pass through four interceptors in order:
+
+1. **AuthInterceptor** -- reads access token from `ITokenStorage`, adds
+   `Authorization: Bearer <token>` header
+2. **RefreshTokenInterceptor** (`QueuedInterceptor`) -- on 401, acquires lock,
+   calls refresh endpoint using a separate plain Dio instance (avoiding
+   interceptor recursion), retries the original request. On refresh failure,
+   clears tokens and fires `onAuthExpired` callback to invalidate auth state
+3. **LoggingInterceptor** -- logs request/response details via `IAppLogger`
+   with sensitive data redaction
+4. **ErrorInterceptor** -- converts `DioException` into `AppException` subtypes
+   preserving the HTTP status code for downstream mapping
+
+## Testing Strategy
+
+Tests mirror the `lib/` directory structure under `test/`.
+
+### Test Patterns by Layer
+
+| Layer | What to Test | Approach |
+|---|---|---|
+| Repository | Exception-to-Result mapping, token persistence | Override service provider with mock, verify Result variants |
+| ViewModel | State transitions (loading, data, error) | Use `ProviderContainer` with mock repository override |
+| Widget | UI rendering for each state | Wrap in `ProviderScope` with mock overrides, pump, verify |
+| Domain | Entity behavior, failure types | Unit tests, no mocking needed |
+
+### Test Helpers
+
+- `test/helpers/test_utils.dart` -- `createContainer()` with teardown
+- `test/helpers/mocks.dart` -- shared mock classes (MockAuthRepository, etc.)
+- `test/helpers/fakes.dart` -- fake data factories (FakeUser, FakeProfile, etc.)
+
+## Architecture Decision Records
+
+Rationale for major architectural choices is documented in ADRs:
+
+| ADR | Decision |
+|---|---|
+| [001](adrs/001-riverpod-for-state-and-di.md) | Riverpod for state management and DI |
+| [002](adrs/002-auto-route-for-navigation.md) | auto_route for navigation |
+| [003](adrs/003-dio-retrofit-for-networking.md) | Dio + Retrofit for networking |
+| [004](adrs/004-dart-mappable-for-models.md) | dart_mappable for data modeling |
+| [005](adrs/005-sealed-result-for-errors.md) | Sealed Result type for error handling |
+| [006](adrs/006-slang-for-i18n.md) | slang for internationalization |
+| [007](adrs/007-feature-first-architecture.md) | Feature-first project structure |
+| [008](adrs/008-mvvm-with-clean-architecture.md) | MVVM with Clean Architecture layers |
+| [009](adrs/009-environment-configuration.md) | Environment configuration strategy |
+| [010](adrs/010-logging-and-monitoring.md) | Logging and monitoring approach |
+
+## Architecture Rules
+
+Detailed coding patterns and rules are documented in `docs/architecture-rules/`:
+
+| Rule | Topic |
+|---|---|
+| [01](architecture-rules/01-project-structure.md) | Project structure |
+| [02](architecture-rules/02-layer-responsibilities.md) | Layer responsibilities |
+| [03](architecture-rules/03-riverpod-patterns.md) | Riverpod patterns |
+| [04](architecture-rules/04-navigation-rules.md) | Navigation rules |
+| [05](architecture-rules/05-error-handling.md) | Error handling |
+| [06](architecture-rules/06-data-modeling.md) | Data modeling |
+| [07](architecture-rules/07-testing-standards.md) | Testing standards |
+| [08](architecture-rules/08-api-integration.md) | API integration |
+| [09](architecture-rules/09-theming.md) | Theming |
+| [10](architecture-rules/10-i18n.md) | Internationalization |
+| [11](architecture-rules/11-security.md) | Security |
+| [12](architecture-rules/12-documentation.md) | Documentation standards |

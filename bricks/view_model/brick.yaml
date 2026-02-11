@@ -1,0 +1,12 @@
+name: view_model
+description: Scaffold a page with its view model.
+version: 0.1.0
+vars:
+  feature_name:
+    type: string
+    description: The feature this page belongs to
+    prompt: What feature does this page belong to?
+  page_name:
+    type: string
+    description: The page name (e.g., "detail", "list")
+    prompt: What is the page name?

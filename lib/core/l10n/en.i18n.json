@@ -1,0 +1,54 @@
+{
+  "core": {
+    "appName": "Flutter Starter",
+    "error": {
+      "unexpected": "An unexpected error occurred",
+      "noConnection": "No internet connection",
+      "timeout": "Request timed out",
+      "serverError": "Server error. Please try again later."
+    },
+    "action": {
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "ok": "OK"
+    }
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Register",
+    "logout": "Log Out",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "error": {
+      "invalidCredentials": "Invalid email or password",
+      "emailTaken": "Email is already in use"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, $name"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "error": {
+      "loadFailed": "Failed to load profile",
+      "updateFailed": "Failed to update profile"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "language": "Language"
+  }
+}

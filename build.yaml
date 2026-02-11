@@ -1,0 +1,34 @@
+targets:
+  $default:
+    builders:
+      # Riverpod code generation
+      riverpod_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/**
+
+      # auto_route code generation
+      auto_route_generator:auto_route_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/**
+
+      # retrofit code generation
+      retrofit_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/features/**/services/**
+
+      # dart_mappable code generation
+      dart_mappable_builder:
+        enabled: true
+        generate_for:
+          include:
+            - lib/**
+
+      # slang code generation
+      slang_build_runner:
+        enabled: true

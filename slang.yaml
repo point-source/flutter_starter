@@ -1,0 +1,19 @@
+## Slang i18n configuration
+## https://pub.dev/packages/slang
+
+base_locale: en
+fallback_strategy: base_locale
+
+input_directory: lib/core/l10n
+input_file_pattern: .i18n.json
+output_directory: lib/gen
+output_file_name: strings.g.dart
+string_interpolation: dart
+key_case: camel
+key_map_case: camel
+param_case: camel
+
+# Enable pluralization and context support
+pluralization:
+  auto: cardinal
+  default_parameter: count

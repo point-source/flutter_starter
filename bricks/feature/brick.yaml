@@ -1,0 +1,8 @@
+name: feature
+description: Scaffold a new feature with data, domain, and UI layers.
+version: 0.1.0
+vars:
+  feature_name:
+    type: string
+    description: The name of the feature (e.g., "order", "notification")
+    prompt: What is the feature name?

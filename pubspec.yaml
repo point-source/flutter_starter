@@ -1,0 +1,67 @@
+name: flutter_starter
+description: An enterprise-ready Flutter starter template with clean architecture.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management & DI
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  auto_route: ^9.2.2
+
+  # Networking
+  dio: ^5.7.0
+  retrofit: ">=4.4.1 <4.6.0"
+  connectivity_plus: ^6.1.4
+
+  # Data Classes & Collections
+  dart_mappable: ^4.3.0
+  fast_immutable_collections: ^10.2.4
+
+  # Local Storage
+  shared_preferences: ^2.5.3
+  flutter_secure_storage: ^9.2.4
+
+  # Theming
+  flex_color_scheme: ^8.2.0
+
+  # i18n
+  slang: ^4.5.0
+  slang_flutter: ^4.5.0
+
+  # Logging & Monitoring
+  sentry_flutter: ^8.13.0
+
+  # Icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.3
+  auto_route_generator: ^9.0.0
+  retrofit_generator: ^9.1.7
+  dart_mappable_builder: ^4.3.0
+  slang_build_runner: ^4.5.0
+
+  # Testing
+  mocktail: ^1.0.4
+
+  # Linting
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
