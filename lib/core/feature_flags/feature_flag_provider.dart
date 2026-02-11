@@ -5,7 +5,6 @@
 /// flags by their [FeatureFlag] enum value.
 library;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/feature_flags/feature_flag.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,10 +19,10 @@ part 'feature_flag_provider.g.dart';
 ///
 /// ```dart
 /// // Read a flag
-/// final enabled = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
+/// final enabled = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
 ///
 /// // Toggle a flag
-/// ref.read(featureFlagNotifierProvider.notifier).toggle(FeatureFlag.darkMode);
+/// ref.read(featureFlagProvider.notifier).toggle(FeatureFlag.darkMode);
 /// ```
 @Riverpod(keepAlive: true)
 class FeatureFlagNotifier extends _$FeatureFlagNotifier {
@@ -67,10 +66,10 @@ class FeatureFlagNotifier extends _$FeatureFlagNotifier {
 /// extracts the value for a single flag.
 ///
 /// ```dart
-/// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
+/// final isDarkMode = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
 /// ```
 @riverpod
-bool featureFlag(Ref ref, FeatureFlag flag) {
-  final flags = ref.watch(featureFlagNotifierProvider);
+bool isFeatureFlagEnabled(Ref ref, FeatureFlag flag) {
+  final flags = ref.watch(featureFlagProvider);
   return flags[flag] ?? false;
 }

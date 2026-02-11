@@ -6,27 +6,65 @@ part of 'secure_storage_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$secureStorageHash() => r'0cd1b80f91784467390034386f925a0be155bfbd';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Create a [FlutterSecureStorage] instance for dependency injection.
+///
+/// Returns a const instance with default platform options.  Override this
+/// provider in tests to supply a mock or in-memory implementation.
+
+@ProviderFor(secureStorage)
+final secureStorageProvider = SecureStorageProvider._();
 
 /// Create a [FlutterSecureStorage] instance for dependency injection.
 ///
 /// Returns a const instance with default platform options.  Override this
 /// provider in tests to supply a mock or in-memory implementation.
-///
-/// Copied from [secureStorage].
-@ProviderFor(secureStorage)
-final secureStorageProvider = Provider<FlutterSecureStorage>.internal(
-  secureStorage,
-  name: r'secureStorageProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$secureStorageHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SecureStorageRef = ProviderRef<FlutterSecureStorage>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class SecureStorageProvider
+    extends
+        $FunctionalProvider<
+          FlutterSecureStorage,
+          FlutterSecureStorage,
+          FlutterSecureStorage
+        >
+    with $Provider<FlutterSecureStorage> {
+  /// Create a [FlutterSecureStorage] instance for dependency injection.
+  ///
+  /// Returns a const instance with default platform options.  Override this
+  /// provider in tests to supply a mock or in-memory implementation.
+  SecureStorageProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'secureStorageProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$secureStorageHash();
+
+  @$internal
+  @override
+  $ProviderElement<FlutterSecureStorage> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  FlutterSecureStorage create(Ref ref) {
+    return secureStorage(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FlutterSecureStorage value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FlutterSecureStorage>(value),
+    );
+  }
+}
+
+String _$secureStorageHash() => r'0cd1b80f91784467390034386f925a0be155bfbd';

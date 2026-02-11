@@ -11,7 +11,7 @@ library;
 /// disabled unless explicitly enabled via [FeatureFlagNotifier].
 ///
 /// ```dart
-/// if (ref.watch(featureFlagProvider(FeatureFlag.darkMode))) {
+/// if (ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode))) {
 ///   // Show dark mode toggle
 /// }
 /// ```

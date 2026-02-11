@@ -13,24 +13,24 @@ dependencies:
     sdk: flutter
 
   # State Management & DI
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
 
   # Navigation
-  auto_route: ^9.2.2
+  auto_route: ^11.1.0
 
   # Networking
   dio: ^5.7.0
-  retrofit: ">=4.4.1 <4.6.0"
-  connectivity_plus: ^6.1.4
+  retrofit: ^4.9.2
+  connectivity_plus: ^7.0.0
 
   # Data Classes & Collections
   dart_mappable: ^4.3.0
-  fast_immutable_collections: ^10.2.4
+  fast_immutable_collections: ^11.1.0
 
   # Local Storage
   shared_preferences: ^2.5.3
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^10.0.0
 
   # Theming
   flex_color_scheme: ^8.2.0
@@ -40,7 +40,7 @@ dependencies:
   slang_flutter: ^4.5.0
 
   # Logging & Monitoring
-  sentry_flutter: ^8.13.0
+  sentry_flutter: ^9.12.0
 
   # Icons
   cupertino_icons: ^1.0.8
@@ -51,9 +51,9 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.4.15
-  riverpod_generator: ^2.6.3
-  auto_route_generator: ^9.0.0
-  retrofit_generator: ^9.1.7
+  riverpod_generator: ^4.0.0+1
+  auto_route_generator: ^10.4.0
+  retrofit_generator: ^10.2.1
   dart_mappable_builder: ^4.3.0
   slang_build_runner: ^4.5.0
 

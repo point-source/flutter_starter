@@ -10,7 +10,6 @@
 /// the UI can react to loading, data, and error states declaratively.
 library;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/core/storage/token_storage.dart';
 import 'package:flutter_starter/features/auth/data/repositories/auth_repository.dart';

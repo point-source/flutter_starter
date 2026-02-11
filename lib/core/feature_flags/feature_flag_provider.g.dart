@@ -6,195 +6,75 @@ part of 'feature_flag_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$featureFlagHash() => r'00ac345661430a91c15265dca2da65b36cc772d1';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// Check whether a specific [FeatureFlag] is currently enabled.
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Manage the enabled/disabled state of all [FeatureFlag]s.
 ///
-/// This is a convenience provider that watches the full flag map and
-/// extracts the value for a single flag.
+/// State is a [Map] from [FeatureFlag] to [bool]. Changes are persisted
+/// to [SharedPreferences] so they survive app restarts.
 ///
 /// ```dart
-/// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
+/// // Read a flag
+/// final enabled = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+///
+/// // Toggle a flag
+/// ref.read(featureFlagProvider.notifier).toggle(FeatureFlag.darkMode);
 /// ```
-///
-/// Copied from [featureFlag].
-@ProviderFor(featureFlag)
-const featureFlagProvider = FeatureFlagFamily();
 
-/// Check whether a specific [FeatureFlag] is currently enabled.
+@ProviderFor(FeatureFlagNotifier)
+final featureFlagProvider = FeatureFlagNotifierProvider._();
+
+/// Manage the enabled/disabled state of all [FeatureFlag]s.
 ///
-/// This is a convenience provider that watches the full flag map and
-/// extracts the value for a single flag.
+/// State is a [Map] from [FeatureFlag] to [bool]. Changes are persisted
+/// to [SharedPreferences] so they survive app restarts.
 ///
 /// ```dart
-/// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
+/// // Read a flag
+/// final enabled = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+///
+/// // Toggle a flag
+/// ref.read(featureFlagProvider.notifier).toggle(FeatureFlag.darkMode);
 /// ```
-///
-/// Copied from [featureFlag].
-class FeatureFlagFamily extends Family<bool> {
-  /// Check whether a specific [FeatureFlag] is currently enabled.
+final class FeatureFlagNotifierProvider
+    extends $NotifierProvider<FeatureFlagNotifier, Map<FeatureFlag, bool>> {
+  /// Manage the enabled/disabled state of all [FeatureFlag]s.
   ///
-  /// This is a convenience provider that watches the full flag map and
-  /// extracts the value for a single flag.
-  ///
-  /// ```dart
-  /// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
-  /// ```
-  ///
-  /// Copied from [featureFlag].
-  const FeatureFlagFamily();
-
-  /// Check whether a specific [FeatureFlag] is currently enabled.
-  ///
-  /// This is a convenience provider that watches the full flag map and
-  /// extracts the value for a single flag.
+  /// State is a [Map] from [FeatureFlag] to [bool]. Changes are persisted
+  /// to [SharedPreferences] so they survive app restarts.
   ///
   /// ```dart
-  /// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
+  /// // Read a flag
+  /// final enabled = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+  ///
+  /// // Toggle a flag
+  /// ref.read(featureFlagProvider.notifier).toggle(FeatureFlag.darkMode);
   /// ```
-  ///
-  /// Copied from [featureFlag].
-  FeatureFlagProvider call(FeatureFlag flag) {
-    return FeatureFlagProvider(flag);
-  }
-
-  @override
-  FeatureFlagProvider getProviderOverride(
-    covariant FeatureFlagProvider provider,
-  ) {
-    return call(provider.flag);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'featureFlagProvider';
-}
-
-/// Check whether a specific [FeatureFlag] is currently enabled.
-///
-/// This is a convenience provider that watches the full flag map and
-/// extracts the value for a single flag.
-///
-/// ```dart
-/// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
-/// ```
-///
-/// Copied from [featureFlag].
-class FeatureFlagProvider extends AutoDisposeProvider<bool> {
-  /// Check whether a specific [FeatureFlag] is currently enabled.
-  ///
-  /// This is a convenience provider that watches the full flag map and
-  /// extracts the value for a single flag.
-  ///
-  /// ```dart
-  /// final isDarkMode = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
-  /// ```
-  ///
-  /// Copied from [featureFlag].
-  FeatureFlagProvider(FeatureFlag flag)
-    : this._internal(
-        (ref) => featureFlag(ref as FeatureFlagRef, flag),
-        from: featureFlagProvider,
+  FeatureFlagNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
         name: r'featureFlagProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$featureFlagHash,
-        dependencies: FeatureFlagFamily._dependencies,
-        allTransitiveDependencies: FeatureFlagFamily._allTransitiveDependencies,
-        flag: flag,
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
       );
 
-  FeatureFlagProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.flag,
-  }) : super.internal();
-
-  final FeatureFlag flag;
-
   @override
-  Override overrideWith(bool Function(FeatureFlagRef provider) create) {
-    return ProviderOverride(
+  String debugGetCreateSourceHash() => _$featureFlagNotifierHash();
+
+  @$internal
+  @override
+  FeatureFlagNotifier create() => FeatureFlagNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<FeatureFlag, bool> value) {
+    return $ProviderOverride(
       origin: this,
-      override: FeatureFlagProvider._internal(
-        (ref) => create(ref as FeatureFlagRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        flag: flag,
-      ),
+      providerOverride: $SyncValueProvider<Map<FeatureFlag, bool>>(value),
     );
   }
-
-  @override
-  AutoDisposeProviderElement<bool> createElement() {
-    return _FeatureFlagProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is FeatureFlagProvider && other.flag == flag;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, flag.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin FeatureFlagRef on AutoDisposeProviderRef<bool> {
-  /// The parameter `flag` of this provider.
-  FeatureFlag get flag;
-}
-
-class _FeatureFlagProviderElement extends AutoDisposeProviderElement<bool>
-    with FeatureFlagRef {
-  _FeatureFlagProviderElement(super.provider);
-
-  @override
-  FeatureFlag get flag => (origin as FeatureFlagProvider).flag;
 }
 
 String _$featureFlagNotifierHash() =>
@@ -207,25 +87,149 @@ String _$featureFlagNotifierHash() =>
 ///
 /// ```dart
 /// // Read a flag
-/// final enabled = ref.watch(featureFlagProvider(FeatureFlag.darkMode));
+/// final enabled = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
 ///
 /// // Toggle a flag
-/// ref.read(featureFlagNotifierProvider.notifier).toggle(FeatureFlag.darkMode);
+/// ref.read(featureFlagProvider.notifier).toggle(FeatureFlag.darkMode);
 /// ```
-///
-/// Copied from [FeatureFlagNotifier].
-@ProviderFor(FeatureFlagNotifier)
-final featureFlagNotifierProvider =
-    NotifierProvider<FeatureFlagNotifier, Map<FeatureFlag, bool>>.internal(
-      FeatureFlagNotifier.new,
-      name: r'featureFlagNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$featureFlagNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$FeatureFlagNotifier = Notifier<Map<FeatureFlag, bool>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$FeatureFlagNotifier extends $Notifier<Map<FeatureFlag, bool>> {
+  Map<FeatureFlag, bool> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<Map<FeatureFlag, bool>, Map<FeatureFlag, bool>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Map<FeatureFlag, bool>, Map<FeatureFlag, bool>>,
+              Map<FeatureFlag, bool>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+/// Check whether a specific [FeatureFlag] is currently enabled.
+///
+/// This is a convenience provider that watches the full flag map and
+/// extracts the value for a single flag.
+///
+/// ```dart
+/// final isDarkMode = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+/// ```
+
+@ProviderFor(isFeatureFlagEnabled)
+final isFeatureFlagEnabledProvider = IsFeatureFlagEnabledFamily._();
+
+/// Check whether a specific [FeatureFlag] is currently enabled.
+///
+/// This is a convenience provider that watches the full flag map and
+/// extracts the value for a single flag.
+///
+/// ```dart
+/// final isDarkMode = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+/// ```
+
+final class IsFeatureFlagEnabledProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Check whether a specific [FeatureFlag] is currently enabled.
+  ///
+  /// This is a convenience provider that watches the full flag map and
+  /// extracts the value for a single flag.
+  ///
+  /// ```dart
+  /// final isDarkMode = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+  /// ```
+  IsFeatureFlagEnabledProvider._({
+    required IsFeatureFlagEnabledFamily super.from,
+    required FeatureFlag super.argument,
+  }) : super(
+         retry: null,
+         name: r'isFeatureFlagEnabledProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isFeatureFlagEnabledHash();
+
+  @override
+  String toString() {
+    return r'isFeatureFlagEnabledProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as FeatureFlag;
+    return isFeatureFlagEnabled(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsFeatureFlagEnabledProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isFeatureFlagEnabledHash() =>
+    r'08f33ec6b71b83bbebc9f1540fad0373cb0dc71c';
+
+/// Check whether a specific [FeatureFlag] is currently enabled.
+///
+/// This is a convenience provider that watches the full flag map and
+/// extracts the value for a single flag.
+///
+/// ```dart
+/// final isDarkMode = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+/// ```
+
+final class IsFeatureFlagEnabledFamily extends $Family
+    with $FunctionalFamilyOverride<bool, FeatureFlag> {
+  IsFeatureFlagEnabledFamily._()
+    : super(
+        retry: null,
+        name: r'isFeatureFlagEnabledProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Check whether a specific [FeatureFlag] is currently enabled.
+  ///
+  /// This is a convenience provider that watches the full flag map and
+  /// extracts the value for a single flag.
+  ///
+  /// ```dart
+  /// final isDarkMode = ref.watch(isFeatureFlagEnabledProvider(FeatureFlag.darkMode));
+  /// ```
+
+  IsFeatureFlagEnabledProvider call(FeatureFlag flag) =>
+      IsFeatureFlagEnabledProvider._(argument: flag, from: this);
+
+  @override
+  String toString() => r'isFeatureFlagEnabledProvider';
+}

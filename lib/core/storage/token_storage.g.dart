@@ -6,28 +6,62 @@ part of 'token_storage.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tokenStorageHash() => r'f71779655d6abbb5f145860e685b61f7d77c78bf';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Create an [ITokenStorage] backed by [FlutterSecureStorage].
+///
+/// Reads the [secureStorageProvider] to obtain the storage instance and
+/// returns a [SecureTokenStorage] wrapping it.  Override this provider in
+/// tests to supply a fake or in-memory token store.
+
+@ProviderFor(tokenStorage)
+final tokenStorageProvider = TokenStorageProvider._();
 
 /// Create an [ITokenStorage] backed by [FlutterSecureStorage].
 ///
 /// Reads the [secureStorageProvider] to obtain the storage instance and
 /// returns a [SecureTokenStorage] wrapping it.  Override this provider in
 /// tests to supply a fake or in-memory token store.
-///
-/// Copied from [tokenStorage].
-@ProviderFor(tokenStorage)
-final tokenStorageProvider = AutoDisposeProvider<ITokenStorage>.internal(
-  tokenStorage,
-  name: r'tokenStorageProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tokenStorageHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TokenStorageRef = AutoDisposeProviderRef<ITokenStorage>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TokenStorageProvider
+    extends $FunctionalProvider<ITokenStorage, ITokenStorage, ITokenStorage>
+    with $Provider<ITokenStorage> {
+  /// Create an [ITokenStorage] backed by [FlutterSecureStorage].
+  ///
+  /// Reads the [secureStorageProvider] to obtain the storage instance and
+  /// returns a [SecureTokenStorage] wrapping it.  Override this provider in
+  /// tests to supply a fake or in-memory token store.
+  TokenStorageProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tokenStorageProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tokenStorageHash();
+
+  @$internal
+  @override
+  $ProviderElement<ITokenStorage> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ITokenStorage create(Ref ref) {
+    return tokenStorage(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ITokenStorage value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ITokenStorage>(value),
+    );
+  }
+}
+
+String _$tokenStorageHash() => r'f71779655d6abbb5f145860e685b61f7d77c78bf';

@@ -6,65 +6,164 @@ part of 'profile_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileServiceHash() => r'c71fe9ef088915b971249e44de2ffe32d9804191';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Create a [ProfileService] backed by the application's [Dio] instance.
+
+@ProviderFor(profileService)
+final profileServiceProvider = ProfileServiceProvider._();
 
 /// Create a [ProfileService] backed by the application's [Dio] instance.
-///
-/// Copied from [profileService].
-@ProviderFor(profileService)
-final profileServiceProvider = AutoDisposeProvider<ProfileService>.internal(
-  profileService,
-  name: r'profileServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$profileServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ProfileServiceRef = AutoDisposeProviderRef<ProfileService>;
-String _$profileRepositoryHash() => r'4a25173557b96caebbf7096f4f0eb6c79c375892';
+final class ProfileServiceProvider
+    extends $FunctionalProvider<ProfileService, ProfileService, ProfileService>
+    with $Provider<ProfileService> {
+  /// Create a [ProfileService] backed by the application's [Dio] instance.
+  ProfileServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profileServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProfileService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProfileService create(Ref ref) {
+    return profileService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProfileService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProfileService>(value),
+    );
+  }
+}
+
+String _$profileServiceHash() => r'c71fe9ef088915b971249e44de2ffe32d9804191';
 
 /// Create an [IProfileRepository] wired to the profile service.
-///
-/// Copied from [profileRepository].
-@ProviderFor(profileRepository)
-final profileRepositoryProvider =
-    AutoDisposeProvider<IProfileRepository>.internal(
-      profileRepository,
-      name: r'profileRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$profileRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ProfileRepositoryRef = AutoDisposeProviderRef<IProfileRepository>;
+@ProviderFor(profileRepository)
+final profileRepositoryProvider = ProfileRepositoryProvider._();
+
+/// Create an [IProfileRepository] wired to the profile service.
+
+final class ProfileRepositoryProvider
+    extends
+        $FunctionalProvider<
+          IProfileRepository,
+          IProfileRepository,
+          IProfileRepository
+        >
+    with $Provider<IProfileRepository> {
+  /// Create an [IProfileRepository] wired to the profile service.
+  ProfileRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profileRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IProfileRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  IProfileRepository create(Ref ref) {
+    return profileRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IProfileRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IProfileRepository>(value),
+    );
+  }
+}
+
+String _$profileRepositoryHash() => r'4a25173557b96caebbf7096f4f0eb6c79c375892';
+
+/// Notifier that manages the profile lifecycle.
+///
+/// Loads the profile on initialization and provides an [updateProfile]
+/// method for saving edits.
+
+@ProviderFor(ProfileViewModel)
+final profileViewModelProvider = ProfileViewModelProvider._();
+
+/// Notifier that manages the profile lifecycle.
+///
+/// Loads the profile on initialization and provides an [updateProfile]
+/// method for saving edits.
+final class ProfileViewModelProvider
+    extends $AsyncNotifierProvider<ProfileViewModel, Profile> {
+  /// Notifier that manages the profile lifecycle.
+  ///
+  /// Loads the profile on initialization and provides an [updateProfile]
+  /// method for saving edits.
+  ProfileViewModelProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profileViewModelProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileViewModelHash();
+
+  @$internal
+  @override
+  ProfileViewModel create() => ProfileViewModel();
+}
+
 String _$profileViewModelHash() => r'd40eab28e32b222c1908de627504de65069ce387';
 
 /// Notifier that manages the profile lifecycle.
 ///
 /// Loads the profile on initialization and provides an [updateProfile]
 /// method for saving edits.
-///
-/// Copied from [ProfileViewModel].
-@ProviderFor(ProfileViewModel)
-final profileViewModelProvider =
-    AutoDisposeAsyncNotifierProvider<ProfileViewModel, Profile>.internal(
-      ProfileViewModel.new,
-      name: r'profileViewModelProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$profileViewModelHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$ProfileViewModel = AutoDisposeAsyncNotifier<Profile>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$ProfileViewModel extends $AsyncNotifier<Profile> {
+  FutureOr<Profile> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<Profile>, Profile>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<Profile>, Profile>,
+              AsyncValue<Profile>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

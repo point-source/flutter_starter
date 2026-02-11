@@ -7,7 +7,6 @@
 /// rather than constructing loggers directly.
 library;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/logging/app_logger.dart';
 import 'package:flutter_starter/core/logging/sentry_reporter.dart';

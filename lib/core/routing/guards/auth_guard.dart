@@ -36,7 +36,7 @@ class AuthGuard extends AutoRouteGuard {
     if (isAuthenticated) {
       resolver.next();
     } else {
-      resolver.redirect(const LoginRoute());
+      resolver.redirectUntil(const LoginRoute());
     }
   }
 }

@@ -7,7 +7,6 @@
 /// configuration point and straightforward test overrides.
 library;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

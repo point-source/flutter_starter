@@ -48,7 +48,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _populateControllers() {
-    final profile = ref.read(profileViewModelProvider).valueOrNull;
+    final profile = ref.read(profileViewModelProvider).value;
     if (profile != null) {
       _nameController.text = profile.name;
       _bioController.text = profile.bio ?? '';

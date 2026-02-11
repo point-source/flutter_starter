@@ -4,7 +4,6 @@
 /// for the [ProfileService] and [IProfileRepository].
 library;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/features/profile/data/repositories/profile_repository.dart';
 import 'package:flutter_starter/features/profile/data/services/profile_service.dart';

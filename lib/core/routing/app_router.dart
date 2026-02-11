@@ -8,7 +8,6 @@
 library;
 
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/presentation/widgets/adaptive_scaffold.dart';
 import 'package:flutter_starter/core/routing/guards/auth_guard.dart';
 import 'package:flutter_starter/features/auth/ui/pages/login_page.dart';
