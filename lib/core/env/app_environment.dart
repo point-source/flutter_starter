@@ -14,6 +14,13 @@
 /// # Production
 /// flutter build apk --release --dart-define-from-file=config/production.json
 /// ```
+library;
+
+/// Enumerate the supported application environments.
+///
+/// Use [current] to read the compile-time environment. Each variant
+/// exposes environment-specific configuration such as [apiBaseUrl],
+/// [sentryDsn], and [sentrySampleRate].
 enum AppEnvironment {
   /// Development environment — local development with debug tools.
   development,

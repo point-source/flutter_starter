@@ -132,6 +132,76 @@ void main() {
     });
   });
 
+  /// Tests for [AuthViewModel.register].
+  group('register', () {
+    /// Transitions to authenticated state on a successful registration.
+    test('transitions to authenticated on success', () async {
+      final testUser = FakeData.user();
+
+      // Stub build() to start unauthenticated.
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
+      when(
+        () => mockAuthRepository.register(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+          name: any(named: 'name'),
+        ),
+      ).thenAnswer((_) async => Success(testUser));
+
+      final container = createAuthContainer();
+
+      // Wait for build() to complete.
+      await container.read(authViewModelProvider.future);
+
+      // Perform registration.
+      final notifier = container.read(authViewModelProvider.notifier);
+      await notifier.register(
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+      );
+
+      final state = container.read(authViewModelProvider);
+      expect(state.hasValue, isTrue);
+      expect(state.requireValue.isAuthenticated, isTrue);
+      expect(state.requireValue.user!.email, 'test@example.com');
+    });
+
+    /// Transitions to error state when registration fails.
+    test('transitions to error on failure', () async {
+      // Stub build() to start unauthenticated.
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
+      when(
+        () => mockAuthRepository.register(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+          name: any(named: 'name'),
+        ),
+      ).thenAnswer((_) async => const Err(EmailAlreadyInUse()));
+
+      final container = createAuthContainer();
+
+      // Wait for build() to complete.
+      await container.read(authViewModelProvider.future);
+
+      // Perform registration.
+      final notifier = container.read(authViewModelProvider.notifier);
+      await notifier.register(
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+      );
+
+      final state = container.read(authViewModelProvider);
+      expect(state.hasError, isTrue);
+      expect(state.error, isA<EmailAlreadyInUse>());
+    });
+  });
+
   /// Tests for [AuthViewModel.logout].
   group('logout', () {
     /// Transitions to unauthenticated state after logout.

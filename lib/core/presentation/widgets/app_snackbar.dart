@@ -37,28 +37,32 @@ abstract final class AppSnackbar {
 
   /// Show a success snack bar with the given [message].
   ///
-  /// Uses [SemanticColors.success] from the theme extension.
+  /// Uses [SemanticColors.success] from the theme extension with a
+  /// fallback to the primary color if the extension is not registered.
   static void showSuccess(BuildContext context, String message) {
-    final semanticColors = Theme.of(context).extension<SemanticColors>()!;
+    final theme = Theme.of(context);
+    final semanticColors = theme.extension<SemanticColors>();
     _show(
       context,
       message: message,
-      backgroundColor: semanticColors.success,
-      foregroundColor: semanticColors.onSuccess,
+      backgroundColor: semanticColors?.success ?? theme.colorScheme.primary,
+      foregroundColor: semanticColors?.onSuccess ?? theme.colorScheme.onPrimary,
       icon: Icons.check_circle_outline,
     );
   }
 
   /// Show an informational snack bar with the given [message].
   ///
-  /// Uses [SemanticColors.info] from the theme extension.
+  /// Uses [SemanticColors.info] from the theme extension with a
+  /// fallback to the primary color if the extension is not registered.
   static void showInfo(BuildContext context, String message) {
-    final semanticColors = Theme.of(context).extension<SemanticColors>()!;
+    final theme = Theme.of(context);
+    final semanticColors = theme.extension<SemanticColors>();
     _show(
       context,
       message: message,
-      backgroundColor: semanticColors.info,
-      foregroundColor: semanticColors.onInfo,
+      backgroundColor: semanticColors?.info ?? theme.colorScheme.primary,
+      foregroundColor: semanticColors?.onInfo ?? theme.colorScheme.onPrimary,
       icon: Icons.info_outline,
     );
   }

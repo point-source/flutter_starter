@@ -22,12 +22,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'dio_provider.g.dart';
 
-/// Callback type for when the auth session expires.
-///
-/// Passed to [RefreshTokenInterceptor] to bridge the gap between
-/// Dio's interceptor chain and Riverpod's provider tree.
-typedef AuthExpiredCallback = void Function();
-
 /// Provides the main [Dio] instance with all interceptors configured.
 ///
 /// This is the Dio instance that all retrofit services should use.

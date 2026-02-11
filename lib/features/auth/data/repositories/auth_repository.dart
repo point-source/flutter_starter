@@ -78,16 +78,15 @@ class AuthRepository implements IAuthRepository {
   Future<Result<void>> logout() async {
     try {
       await _authService.logout();
-      await _tokenStorage.clearTokens();
       return const Success(null);
     } on DioException catch (_) {
-      // Always clear tokens locally even if the server call fails
-      await _tokenStorage.clearTokens();
+      // Server errors are acceptable during logout — the local session
+      // is still cleared in the finally block.
       return const Success(null);
     } on Exception catch (e, st) {
-      // Still clear tokens on unexpected errors
-      await _tokenStorage.clearTokens();
       return Err(UnexpectedFailure(e, st));
+    } finally {
+      await _tokenStorage.clearTokens();
     }
   }
 

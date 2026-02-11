@@ -29,16 +29,17 @@ part 'auth_view_model.g.dart';
 /// Use the named factories to create the appropriate variant and read
 /// [isAuthenticated] / [user] to inspect the state without pattern matching.
 class AuthState {
+  /// Create an [AuthState] with the given authentication status.
   const AuthState._({required this.isAuthenticated, this.user});
 
-  /// No authentication check has been performed yet.
+  /// Create an [AuthState] for a fresh session with no check performed.
   factory AuthState.initial() => const AuthState._(isAuthenticated: false);
 
-  /// The user is authenticated and their profile is available.
+  /// Create an [AuthState] for an authenticated session with [user].
   factory AuthState.authenticated(User user) =>
       AuthState._(user: user, isAuthenticated: true);
 
-  /// The user is not authenticated (logged out or session invalid).
+  /// Create an [AuthState] for an unauthenticated (logged-out) session.
   factory AuthState.unauthenticated() =>
       const AuthState._(isAuthenticated: false);
 
@@ -101,7 +102,7 @@ class AuthViewModel extends _$AuthViewModel {
 
     state = result.when(
       success: (user) => AsyncData(AuthState.authenticated(user)),
-      failure: (failure) => AsyncError(failure, StackTrace.current),
+      failure: (failure) => AsyncError(failure, failure.stackTrace ?? StackTrace.current),
     );
   }
 
@@ -123,7 +124,7 @@ class AuthViewModel extends _$AuthViewModel {
 
     state = result.when(
       success: (user) => AsyncData(AuthState.authenticated(user)),
-      failure: (failure) => AsyncError(failure, StackTrace.current),
+      failure: (failure) => AsyncError(failure, failure.stackTrace ?? StackTrace.current),
     );
   }
 

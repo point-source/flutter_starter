@@ -4,8 +4,8 @@ An enterprise-ready Flutter starter template with clean architecture, code gener
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.10-0175C2?logo=dart)
-![Riverpod](https://img.shields.io/badge/Riverpod-2.x-00B4D8)
-![AutoRoute](https://img.shields.io/badge/AutoRoute-9.x-6C63FF)
+![Riverpod](https://img.shields.io/badge/Riverpod-3.x-00B4D8)
+![AutoRoute](https://img.shields.io/badge/AutoRoute-11.x-6C63FF)
 ![Retrofit](https://img.shields.io/badge/Retrofit-4.x-009688)
 ![License](https://img.shields.io/badge/License-TBD-lightgrey)
 

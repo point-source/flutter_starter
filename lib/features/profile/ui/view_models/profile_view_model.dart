@@ -4,6 +4,7 @@
 /// for the [ProfileService] and [IProfileRepository].
 library;
 
+import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/features/profile/data/repositories/profile_repository.dart';
 import 'package:flutter_starter/features/profile/data/services/profile_service.dart';
@@ -43,8 +44,7 @@ class ProfileViewModel extends _$ProfileViewModel {
 
     return result.when(
       success: (profile) => profile,
-      // ignore: only_throw_errors
-      failure: (failure) => throw failure,
+      failure: (failure) => throw FailureException(failure),
     );
   }
 
@@ -66,7 +66,8 @@ class ProfileViewModel extends _$ProfileViewModel {
 
     state = result.when(
       success: AsyncData.new,
-      failure: (failure) => AsyncError(failure, StackTrace.current),
+      failure: (failure) =>
+          AsyncError(FailureException(failure), failure.stackTrace ?? StackTrace.current),
     );
   }
 }

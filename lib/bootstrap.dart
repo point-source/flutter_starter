@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/app.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
+import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,13 +48,30 @@ Future<void> bootstrap() async {
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (AppEnvironment.current.sentryEnabled) {
-      Sentry.captureException(details.exception, stackTrace: details.stack);
+      final exception = details.exception;
+      // Unwrap FailureException to report the original failure with its
+      // captured stack trace for better Sentry grouping.
+      if (exception is FailureException) {
+        Sentry.captureException(
+          exception.failure,
+          stackTrace: exception.failure.stackTrace ?? details.stack,
+        );
+      } else {
+        Sentry.captureException(exception, stackTrace: details.stack);
+      }
     }
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
     if (AppEnvironment.current.sentryEnabled) {
-      Sentry.captureException(error, stackTrace: stack);
+      if (error is FailureException) {
+        Sentry.captureException(
+          error.failure,
+          stackTrace: error.failure.stackTrace ?? stack,
+        );
+      } else {
+        Sentry.captureException(error, stackTrace: stack);
+      }
     }
     return true;
   };

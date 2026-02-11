@@ -33,6 +33,29 @@ abstract class Failure {
   String toString() => '$runtimeType: $message';
 }
 
+/// Exception wrapper for [Failure] values that need to be thrown.
+///
+/// Use this in view models where an [AsyncNotifier.build] method must throw
+/// on failure (to produce an [AsyncError]), but the repository returns a
+/// [Result] containing a [Failure] value rather than an exception.
+///
+/// ```dart
+/// return result.when(
+///   success: (data) => data,
+///   failure: (failure) => throw FailureException(failure),
+/// );
+/// ```
+class FailureException implements Exception {
+  /// Create a [FailureException] wrapping the given [failure].
+  const FailureException(this.failure);
+
+  /// The underlying [Failure] value.
+  final Failure failure;
+
+  @override
+  String toString() => 'FailureException: ${failure.message}';
+}
+
 // ---------------------------------------------------------------------------
 // Infrastructure failures — shared across all features
 // ---------------------------------------------------------------------------

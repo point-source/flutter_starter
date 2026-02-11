@@ -160,6 +160,130 @@ void main() {
     );
   });
 
+  /// Tests for [AuthRepository.register].
+  group('register', () {
+    /// Returns a [Success] containing the mapped [User] on a successful
+    /// API response.
+    test('returns Success with user on success', () async {
+      when(
+        () => mockAuthService.register(any()),
+      ).thenAnswer((_) async => testAuthResponse);
+      when(
+        () => mockTokenStorage.saveTokens(
+          accessToken: any(named: 'accessToken'),
+          refreshToken: any(named: 'refreshToken'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final result = await repository.register(
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+      );
+
+      expect(result.isSuccess, isTrue);
+      final user = result.getOrNull();
+      expect(user, isNotNull);
+      expect(user!.id, 'user-1');
+      expect(user.email, 'test@example.com');
+      expect(user.name, 'Test User');
+    });
+
+    /// Saves both access and refresh tokens after a successful registration.
+    test('saves tokens on success', () async {
+      when(
+        () => mockAuthService.register(any()),
+      ).thenAnswer((_) async => testAuthResponse);
+      when(
+        () => mockTokenStorage.saveTokens(
+          accessToken: any(named: 'accessToken'),
+          refreshToken: any(named: 'refreshToken'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await repository.register(
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+      );
+
+      verify(
+        () => mockTokenStorage.saveTokens(
+          accessToken: 'access-token-123',
+          refreshToken: 'refresh-token-456',
+        ),
+      ).called(1);
+    });
+
+    /// Returns an [Err] with [EmailAlreadyInUse] when the server
+    /// responds with a 409 status code.
+    test('returns Err with EmailAlreadyInUse on 409', () async {
+      when(() => mockAuthService.register(any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(),
+          error: const ServerException('Conflict', statusCode: 409),
+        ),
+      );
+
+      final result = await repository.register(
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+      );
+
+      expect(result.isFailure, isTrue);
+      result.when(
+        success: (_) => fail('should not succeed'),
+        failure: (f) => expect(f, isA<EmailAlreadyInUse>()),
+      );
+    });
+
+    /// Returns an [Err] with [AuthServerError] for non-401/409 server
+    /// errors.
+    test('returns Err with AuthServerError on generic server error', () async {
+      when(() => mockAuthService.register(any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(),
+          error: const ServerException('Internal error', statusCode: 500),
+        ),
+      );
+
+      final result = await repository.register(
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+      );
+
+      expect(result.isFailure, isTrue);
+      result.when(
+        success: (_) => fail('should not succeed'),
+        failure: (f) => expect(f, isA<AuthServerError>()),
+      );
+    });
+
+    /// Returns an [Err] with [UnexpectedFailure] for non-Dio exceptions.
+    test(
+      'returns Err with UnexpectedFailure on unexpected exception',
+      () async {
+        when(
+          () => mockAuthService.register(any()),
+        ).thenThrow(Exception('something broke'));
+
+        final result = await repository.register(
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'Test User',
+        );
+
+        expect(result.isFailure, isTrue);
+        result.when(
+          success: (_) => fail('should not succeed'),
+          failure: (f) => expect(f, isA<UnexpectedFailure>()),
+        );
+      },
+    );
+  });
+
   /// Tests for [AuthRepository.logout].
   group('logout', () {
     /// Clears tokens and returns Success on a clean server logout.
