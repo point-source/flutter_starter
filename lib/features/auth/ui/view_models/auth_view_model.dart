@@ -10,6 +10,7 @@
 /// the UI can react to loading, data, and error states declaratively.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/core/storage/token_storage.dart';
@@ -158,4 +159,24 @@ class AuthViewModel extends _$AuthViewModel {
 bool authState(Ref ref) {
   final viewModel = ref.watch(authViewModelProvider);
   return viewModel.whenOrNull(data: (state) => state.isAuthenticated) ?? false;
+}
+
+/// A [Listenable] that fires whenever [authStateProvider] changes.
+///
+/// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
+/// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
+/// login, logout, token expiry, or server-side session revocation.
+@Riverpod(keepAlive: true)
+AuthStateListenable authStateListenable(Ref ref) {
+  final notifier = AuthStateListenable();
+  ref
+    ..listen(authStateProvider, (_, _) => notifier.notify())
+    ..onDispose(notifier.dispose);
+  return notifier;
+}
+
+/// A [ChangeNotifier] that exposes a public [notify] method.
+class AuthStateListenable extends ChangeNotifier {
+  /// Notify listeners that the auth state has changed.
+  void notify() => notifyListeners();
 }

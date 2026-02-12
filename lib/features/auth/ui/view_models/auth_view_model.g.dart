@@ -229,3 +229,68 @@ final class AuthStateProvider extends $FunctionalProvider<bool, bool, bool>
 }
 
 String _$authStateHash() => r'eb94a852278acb1bcfccc0543c76917903435085';
+
+/// A [Listenable] that fires whenever [authStateProvider] changes.
+///
+/// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
+/// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
+/// login, logout, token expiry, or server-side session revocation.
+
+@ProviderFor(authStateListenable)
+final authStateListenableProvider = AuthStateListenableProvider._();
+
+/// A [Listenable] that fires whenever [authStateProvider] changes.
+///
+/// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
+/// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
+/// login, logout, token expiry, or server-side session revocation.
+
+final class AuthStateListenableProvider
+    extends
+        $FunctionalProvider<
+          AuthStateListenable,
+          AuthStateListenable,
+          AuthStateListenable
+        >
+    with $Provider<AuthStateListenable> {
+  /// A [Listenable] that fires whenever [authStateProvider] changes.
+  ///
+  /// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
+  /// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
+  /// login, logout, token expiry, or server-side session revocation.
+  AuthStateListenableProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'authStateListenableProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$authStateListenableHash();
+
+  @$internal
+  @override
+  $ProviderElement<AuthStateListenable> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AuthStateListenable create(Ref ref) {
+    return authStateListenable(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AuthStateListenable value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AuthStateListenable>(value),
+    );
+  }
+}
+
+String _$authStateListenableHash() =>
+    r'08e02cb99957c835bb7477788d7800e6b1650f8b';

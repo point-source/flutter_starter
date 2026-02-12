@@ -8,6 +8,7 @@
 library;
 
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_starter/core/presentation/widgets/adaptive_scaffold.dart';
 import 'package:flutter_starter/core/routing/guards/auth_guard.dart';
 import 'package:flutter_starter/features/auth/ui/pages/login_page.dart';
@@ -78,7 +79,12 @@ AppRouter appRouter(Ref ref) => .new(ref);
 /// This page hosts the [AutoTabsRouter] and delegates navigation
 /// chrome (bottom bar, rail, drawer) to [AdaptiveScaffold].
 @RoutePage()
-class ShellPage extends AutoRouter {
+class ShellPage extends StatelessWidget {
   /// Create the shell page.
   const ShellPage({super.key});
+
+  @override
+  Widget build(BuildContext context) => AutoTabsRouter(
+    builder: (context, child) => AdaptiveScaffold(child: child),
+  );
 }

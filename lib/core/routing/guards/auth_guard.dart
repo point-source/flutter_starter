@@ -8,8 +8,6 @@ library;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/routing/app_router.dart';
 import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
 
@@ -32,11 +30,6 @@ class AuthGuard extends AutoRouteGuard {
 
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) {
-    if (AppEnvironment.authBypass == 'mock') {
-      resolver.next();
-      return;
-    }
-
     final isAuthenticated = _ref.read(authStateProvider);
 
     if (isAuthenticated) {
