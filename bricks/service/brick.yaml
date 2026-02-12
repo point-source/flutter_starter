@@ -1,0 +1,12 @@
+name: service
+description: Scaffold a Retrofit API service for an existing feature.
+version: 0.1.0
+vars:
+  feature_name:
+    type: string
+    description: The feature this service belongs to
+    prompt: What feature does this service belong to?
+  service_name:
+    type: string
+    description: The service name (e.g., "payment", "notification")
+    prompt: What is the service name?

@@ -1,0 +1,12 @@
+name: model
+description: Scaffold a DTO, domain entity, and mapper for an existing feature.
+version: 0.1.0
+vars:
+  feature_name:
+    type: string
+    description: The feature this model belongs to
+    prompt: What feature does this model belong to?
+  model_name:
+    type: string
+    description: The model name (e.g., "order_item", "address")
+    prompt: What is the model name?

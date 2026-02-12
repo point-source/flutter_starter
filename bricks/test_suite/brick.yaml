@@ -1,0 +1,8 @@
+name: test_suite
+description: Scaffold repository and view model tests for a feature.
+version: 0.1.0
+vars:
+  feature_name:
+    type: string
+    description: The feature to generate tests for (e.g., "order", "notification")
+    prompt: What is the feature name?

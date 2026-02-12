@@ -8,3 +8,9 @@ bricks:
     path: bricks/repository
   view_model:
     path: bricks/view_model
+  model:
+    path: bricks/model
+  service:
+    path: bricks/service
+  test_suite:
+    path: bricks/test_suite
