@@ -19,7 +19,7 @@ part 'shared_prefs_provider.g.dart';
 /// root [ProviderScope] with a pre-initialised [SharedPreferences] instance
 /// that was resolved during application bootstrap.
 @Riverpod(keepAlive: true)
-SharedPreferences sharedPrefs(Ref ref) {
+SharedPreferences sharedPrefs(Ref _) {
   throw UnimplementedError(
     'sharedPrefsProvider must be overridden in ProviderScope '
     'with a pre-initialised SharedPreferences instance.',

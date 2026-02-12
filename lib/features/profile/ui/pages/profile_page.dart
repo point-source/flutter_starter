@@ -107,10 +107,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
+            spacing: 16,
             children: [
               Text(t.profile.error.loadFailed),
-              const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.invalidate(profileViewModelProvider),
                 child: Text(t.core.action.retry),
@@ -129,7 +129,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildProfileView(BuildContext context, Profile profile) => ListView(
-    padding: const EdgeInsets.all(24),
+    padding: const .all(24),
     children: [
       CircleAvatar(
         radius: 48,
@@ -147,7 +147,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       Text(
         profile.name,
         style: Theme.of(context).textTheme.headlineSmall,
-        textAlign: TextAlign.center,
+        textAlign: .center,
       ),
       const SizedBox(height: 8),
       Text(
@@ -155,19 +155,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        textAlign: TextAlign.center,
+        textAlign: .center,
       ),
       if (profile.bio != null && profile.bio!.isNotEmpty) ...[
         const SizedBox(height: 24),
-        Text(profile.bio!, textAlign: TextAlign.center),
+        Text(profile.bio!, textAlign: .center),
       ],
       if (profile.phoneNumber != null && profile.phoneNumber!.isNotEmpty) ...[
         const SizedBox(height: 16),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
+          spacing: 8,
           children: [
             const Icon(Icons.phone, size: 16),
-            const SizedBox(width: 8),
             Text(profile.phoneNumber!),
           ],
         ),
@@ -175,10 +175,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ],
   );
 
-  Widget _buildEditForm(BuildContext context) => Form(
+  Widget _buildEditForm(BuildContext _) => Form(
     key: _formKey,
     child: ListView(
-      padding: const EdgeInsets.all(24),
+      padding: const .all(24),
       children: [
         TextFormField(
           controller: _nameController,
@@ -209,10 +209,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             labelText: 'Phone',
             border: OutlineInputBorder(),
           ),
-          keyboardType: TextInputType.phone,
+          keyboardType: .phone,
         ),
         const SizedBox(height: 24),
-        FilledButton(onPressed: _saveProfile, child: Text(t.core.action.save)),
+        FilledButton(
+          // ignore: avoid-passing-async-when-sync-expected
+          onPressed: _saveProfile,
+          child: Text(t.core.action.save),
+        ),
       ],
     ),
   );

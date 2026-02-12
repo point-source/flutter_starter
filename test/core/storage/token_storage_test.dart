@@ -3,6 +3,8 @@
 /// Validates that the storage implementation correctly delegates read, write,
 /// and delete operations to [FlutterSecureStorage] using the expected key
 /// names.
+// ignore_for_file: no-empty-block
+
 library;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

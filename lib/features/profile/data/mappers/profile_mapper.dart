@@ -10,7 +10,7 @@ import 'package:flutter_starter/features/profile/domain/entities/profile.dart';
 /// Map [ProfileDto] to domain [Profile].
 extension ProfileDtoMapper on ProfileDto {
   /// Convert this DTO to a domain [Profile] entity.
-  Profile toDomain() => Profile(
+  Profile toDomain() => .new(
     id: id,
     email: email,
     name: name,

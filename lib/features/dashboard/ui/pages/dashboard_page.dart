@@ -27,20 +27,20 @@ class DashboardPage extends ConsumerWidget {
       appBar: AppBar(title: Text(t.dashboard.title)),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const .all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
+            spacing: 24,
             children: [
               Icon(
                 Icons.dashboard_outlined,
                 size: 64,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(height: 24),
               Text(
                 t.dashboard.welcome(name: name ?? 'User'),
                 style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
             ],
           ),

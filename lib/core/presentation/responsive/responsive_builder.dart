@@ -28,30 +28,30 @@ class ResponsiveBuilder extends StatelessWidget {
   /// Create a [ResponsiveBuilder] with the required [compact] builder
   /// and optional larger-breakpoint builders.
   const ResponsiveBuilder({
-    required this.compact,
-    this.medium,
-    this.expanded,
-    this.large,
+    required this.compactBuilder,
+    this.mediumBuilder,
+    this.expandedBuilder,
+    this.largeBuilder,
     super.key,
   });
 
   /// Builder for compact (phone) layouts. Always required.
-  final Widget Function(BuildContext context) compact;
+  final Widget Function(BuildContext context) compactBuilder;
 
   /// Builder for medium (small tablet) layouts.
   ///
-  /// Falls back to [compact] when not provided.
-  final Widget Function(BuildContext context)? medium;
+  /// Falls back to [compactBuilder] when not provided.
+  final Widget Function(BuildContext context)? mediumBuilder;
 
   /// Builder for expanded (tablet / small desktop) layouts.
   ///
-  /// Falls back to [medium] when not provided.
-  final Widget Function(BuildContext context)? expanded;
+  /// Falls back to [mediumBuilder] when not provided.
+  final Widget Function(BuildContext context)? expandedBuilder;
 
   /// Builder for large (wide desktop) layouts.
   ///
-  /// Falls back to [expanded] when not provided.
-  final Widget Function(BuildContext context)? large;
+  /// Falls back to [expandedBuilder] when not provided.
+  final Widget Function(BuildContext context)? largeBuilder;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -59,12 +59,15 @@ class ResponsiveBuilder extends StatelessWidget {
       final breakpoint = AppBreakpoint.fromWidth(constraints.maxWidth);
 
       return switch (breakpoint) {
-        AppBreakpoint.compact => compact(context),
-        AppBreakpoint.medium => (medium ?? compact)(context),
-        AppBreakpoint.expanded => (expanded ?? medium ?? compact)(context),
-        AppBreakpoint.large => (large ?? expanded ?? medium ?? compact)(
+        .compact => compactBuilder(context),
+        .medium => (mediumBuilder ?? compactBuilder)(context),
+        .expanded => (expandedBuilder ?? mediumBuilder ?? compactBuilder)(
           context,
         ),
+        .large =>
+          (largeBuilder ?? expandedBuilder ?? mediumBuilder ?? compactBuilder)(
+            context,
+          ),
       };
     },
   );

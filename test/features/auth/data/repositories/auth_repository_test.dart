@@ -4,6 +4,8 @@
 /// [ITokenStorage], maps responses to domain entities, converts HTTP
 /// errors to [AuthFailure] subtypes, and persists or clears tokens at
 /// the appropriate moments.
+// ignore_for_file: no-empty-block
+
 library;
 
 import 'package:dio/dio.dart';

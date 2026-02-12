@@ -17,4 +17,4 @@ part 'secure_storage_provider.g.dart';
 /// Returns a const instance with default platform options.  Override this
 /// provider in tests to supply a mock or in-memory implementation.
 @Riverpod(keepAlive: true)
-FlutterSecureStorage secureStorage(Ref ref) => const FlutterSecureStorage();
+FlutterSecureStorage secureStorage(Ref _) => const .new();

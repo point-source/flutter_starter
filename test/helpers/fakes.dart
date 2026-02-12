@@ -22,7 +22,7 @@ class FakeData {
     String email = 'test@example.com',
     String name = 'Test User',
     String? avatarUrl,
-  }) => User(id: id, email: email, name: name, avatarUrl: avatarUrl);
+  }) => .new(id: id, email: email, name: name, avatarUrl: avatarUrl);
 
   /// Create a fake [Profile] entity.
   static Profile profile({
@@ -32,7 +32,7 @@ class FakeData {
     String? avatarUrl,
     String? bio,
     String? phoneNumber,
-  }) => Profile(
+  }) => .new(
     id: id,
     email: email,
     name: name,

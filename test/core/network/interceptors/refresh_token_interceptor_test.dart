@@ -49,11 +49,8 @@ void main() {
             handler.reject(
               DioException(
                 requestOptions: options,
-                response: Response(
-                  requestOptions: options,
-                  statusCode: 500,
-                ),
-                type: DioExceptionType.badResponse,
+                response: Response(requestOptions: options, statusCode: 500),
+                type: .badResponse,
               ),
             );
           },
@@ -90,10 +87,7 @@ void main() {
         InterceptorsWrapper(
           onRequest: (options, handler) {
             handler.reject(
-              DioException(
-                requestOptions: options,
-                type: DioExceptionType.connectionError,
-              ),
+              DioException(requestOptions: options, type: .connectionError),
             );
           },
         ),

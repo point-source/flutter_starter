@@ -57,7 +57,9 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      container.read(localeViewModelProvider.notifier).setLocale(const Locale('fr'));
+      container
+          .read(localeViewModelProvider.notifier)
+          .setLocale(const Locale('fr'));
 
       final locale = container.read(localeViewModelProvider);
       expect(locale, isNotNull);

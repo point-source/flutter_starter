@@ -28,7 +28,7 @@ enum AppBreakpoint {
   expanded(1200),
 
   /// Large desktop or wide display (no upper bound).
-  large(double.infinity);
+  large(.infinity);
 
   const AppBreakpoint(this.maxWidth);
 

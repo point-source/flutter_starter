@@ -69,25 +69,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const .all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: .min,
+                crossAxisAlignment: .stretch,
                 children: [
                   Text(
                     'Welcome Back',
                     style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
+                    textAlign: .center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Sign in to your account',
                     style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
+                    textAlign: .center,
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
@@ -96,8 +96,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
+                    keyboardType: .emailAddress,
+                    textInputAction: .next,
                     autofillHints: const [AutofillHints.email],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -114,7 +114,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       prefixIcon: Icon(Icons.lock_outlined),
                     ),
                     obscureText: true,
-                    textInputAction: TextInputAction.done,
+                    textInputAction: .done,
                     autofillHints: const [AutofillHints.password],
                     onFieldSubmitted: (_) => _onLogin(),
                     validator: (value) {
@@ -126,6 +126,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
+                    // ignore: avoid-passing-async-when-sync-expected
                     onPressed: isLoading ? null : _onLogin,
                     child: isLoading
                         ? const SizedBox(

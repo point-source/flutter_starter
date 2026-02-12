@@ -25,7 +25,7 @@ import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dar
 /// ```
 class AuthGuard extends AutoRouteGuard {
   /// Create an [AuthGuard] backed by the given Riverpod [ref].
-  AuthGuard(this._ref);
+  const AuthGuard(this._ref);
 
   final Ref _ref;
 

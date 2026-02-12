@@ -29,7 +29,7 @@ class SettingsPage extends ConsumerWidget {
         children: [
           // ── Theme ────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const .fromLTRB(16, 16, 16, 8),
             child: Text(
               t.settings.theme,
               style: Theme.of(context).textTheme.titleMedium,
@@ -44,15 +44,15 @@ class SettingsPage extends ConsumerWidget {
             },
             child: Column(
               children: [
-                RadioListTile<ThemeMode>(
+                RadioListTile(
                   title: Text(t.settings.themeSystem),
                   value: ThemeMode.system,
                 ),
-                RadioListTile<ThemeMode>(
+                RadioListTile(
                   title: Text(t.settings.themeLight),
                   value: ThemeMode.light,
                 ),
-                RadioListTile<ThemeMode>(
+                RadioListTile(
                   title: Text(t.settings.themeDark),
                   value: ThemeMode.dark,
                 ),
@@ -64,7 +64,7 @@ class SettingsPage extends ConsumerWidget {
 
           // ── Language ─────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const .fromLTRB(16, 16, 16, 8),
             child: Text(
               t.settings.language,
               style: Theme.of(context).textTheme.titleMedium,
@@ -80,15 +80,9 @@ class SettingsPage extends ConsumerWidget {
             },
             child: Column(
               children: [
-                RadioListTile<String>(title: const Text('System'), value: ''),
-                RadioListTile<String>(
-                  title: const Text('English'),
-                  value: 'en',
-                ),
-                RadioListTile<String>(
-                  title: const Text('Español'),
-                  value: 'es',
-                ),
+                RadioListTile(title: const Text('System'), value: ''),
+                RadioListTile(title: const Text('English'), value: 'en'),
+                RadioListTile(title: const Text('Español'), value: 'es'),
               ],
             ),
           ),
@@ -97,7 +91,7 @@ class SettingsPage extends ConsumerWidget {
 
           // ── Logout ───────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const .all(16),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.logout),
               label: Text(t.auth.logout),

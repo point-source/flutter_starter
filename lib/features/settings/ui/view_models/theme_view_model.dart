@@ -24,7 +24,9 @@ class ThemeViewModel extends _$ThemeViewModel {
   ThemeMode build() {
     final prefs = ref.read(sharedPrefsProvider);
     final index = prefs.getInt(_kThemeModeKey) ?? 0;
-    return ThemeMode.values[index.clamp(0, ThemeMode.values.length - 1)];
+    final safeIndex = index.clamp(0, ThemeMode.values.length - 1);
+    // ignore: avoid-unsafe-collection-methods
+    return .values.elementAt(safeIndex);
   }
 
   /// Set the theme mode and persist it to local storage.

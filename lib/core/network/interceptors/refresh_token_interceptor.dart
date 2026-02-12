@@ -70,9 +70,9 @@ class RefreshTokenInterceptor extends QueuedInterceptor {
       // Retry the original request with the new token
       final newToken = await _tokenStorage.getAccessToken();
       final options = err.requestOptions;
-      options.headers['Authorization'] = 'Bearer $newToken';
+      options.headers['Authorization'] = 'Bearer ${newToken ?? ""}';
 
-      final response = await _dio.fetch<dynamic>(options);
+      final response = await _dio.fetch<Object?>(options);
       handler.resolve(response);
     } on DioException catch (retryError) {
       handler.next(retryError);

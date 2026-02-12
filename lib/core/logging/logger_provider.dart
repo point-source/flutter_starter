@@ -19,7 +19,7 @@ part 'logger_provider.g.dart';
 /// Returns [ConsoleLogger] in development and [SentryReporter] otherwise.
 /// Override this provider in tests to capture log output without side effects.
 @Riverpod(keepAlive: true)
-IAppLogger logger(Ref ref) {
+IAppLogger logger(Ref _) {
   if (AppEnvironment.isDevelopment) {
     return const ConsoleLogger();
   }

@@ -13,6 +13,8 @@ import 'package:flutter_starter/core/error/app_exception.dart';
 /// Placed last in the interceptor chain so it processes errors after
 /// all other interceptors (auth, refresh, logging) have had their turn.
 class ErrorInterceptor extends Interceptor {
+  /// Creates an [ErrorInterceptor] with no configuration.
+  const ErrorInterceptor();
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final exception = _mapDioException(err);
@@ -29,24 +31,24 @@ class ErrorInterceptor extends Interceptor {
 
   AppException _mapDioException(DioException err) {
     switch (err.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
+      case .connectionTimeout:
+      case .sendTimeout:
+      case .receiveTimeout:
         return const TimeoutException();
 
-      case DioExceptionType.connectionError:
+      case .connectionError:
         return const NetworkException();
 
-      case DioExceptionType.badResponse:
+      case .badResponse:
         return _mapBadResponse(err);
 
-      case DioExceptionType.cancel:
+      case .cancel:
         return const ServerException('Request was cancelled');
 
-      case DioExceptionType.badCertificate:
+      case .badCertificate:
         return const ServerException('Invalid SSL certificate');
 
-      case DioExceptionType.unknown:
+      case .unknown:
         if (err.error != null) {
           return ServerException('Unexpected error: ${err.error}');
         }

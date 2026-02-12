@@ -53,13 +53,13 @@ enum AppEnvironment {
   static String? get configurationWarning => _validate(_rawEnvironment);
 
   /// Checks if running in development.
-  static bool get isDevelopment => current == AppEnvironment.development;
+  static bool get isDevelopment => current == .development;
 
   /// Checks if running in staging.
-  static bool get isStaging => current == AppEnvironment.staging;
+  static bool get isStaging => current == .staging;
 
   /// Checks if running in production.
-  static bool get isProduction => current == AppEnvironment.production;
+  static bool get isProduction => current == .production;
 
   // ---------------------------------------------------------------------------
   // Environment-specific configuration
@@ -136,7 +136,7 @@ enum AppEnvironment {
   }
 
   static AppEnvironment _parse(String environment) {
-    if (environment.isEmpty) return AppEnvironment.development;
+    if (environment.isEmpty) return .development;
     return AppEnvironment.values.firstWhere(
       (e) => e.name == environment.toLowerCase(),
       orElse: () => AppEnvironment.development,

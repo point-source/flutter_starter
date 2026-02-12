@@ -46,7 +46,8 @@ abstract final class AppSnackbar {
       context,
       message: message,
       backgroundColor: semanticColors?.success ?? theme.colorScheme.primary,
-      foregroundColor: semanticColors?.onSuccess ?? theme.colorScheme.onPrimary,
+      foregroundColor:
+          semanticColors?.successForeground ?? theme.colorScheme.onPrimary,
       icon: Icons.check_circle_outline,
     );
   }
@@ -62,7 +63,8 @@ abstract final class AppSnackbar {
       context,
       message: message,
       backgroundColor: semanticColors?.info ?? theme.colorScheme.primary,
-      foregroundColor: semanticColors?.onInfo ?? theme.colorScheme.onPrimary,
+      foregroundColor:
+          semanticColors?.infoForeground ?? theme.colorScheme.onPrimary,
       icon: Icons.info_outline,
     );
   }
@@ -79,11 +81,11 @@ abstract final class AppSnackbar {
       ..showSnackBar(
         SnackBar(
           backgroundColor: backgroundColor,
-          behavior: SnackBarBehavior.floating,
+          behavior: .floating,
           content: Row(
+            spacing: 12,
             children: [
               Icon(icon, color: foregroundColor),
-              const SizedBox(width: 12),
               Expanded(
                 child: Text(message, style: TextStyle(color: foregroundColor)),
               ),

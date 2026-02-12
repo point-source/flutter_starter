@@ -14,6 +14,14 @@ analyzer:
     - "lib/gen/**"
     - "bricks/**"
 
+dcm:
+  extends:
+    - recommended
+  rules:
+    - prefer-match-file-name: false
+    - avoid-shadowing:
+        ignore-parameters: true
+
 linter:
   rules:
     # Error rules

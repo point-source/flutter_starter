@@ -3,6 +3,8 @@
 /// Uses a [ProviderContainer] with a mocked [IProfileRepository] to verify
 /// that the view model correctly translates repository results into
 /// [AsyncValue<Profile>] transitions.
+// ignore_for_file: no-empty-block
+
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,10 +63,7 @@ void main() {
       final container = createProfileContainer();
 
       // Listen to the provider and expect it to eventually have an error.
-      final sub = container.listen(
-        profileViewModelProvider,
-        (_, _) {},
-      );
+      final sub = container.listen(profileViewModelProvider, (_, _) {});
 
       // Wait for the provider to complete its async operation.
       await Future<void>.delayed(const Duration(milliseconds: 100));

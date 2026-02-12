@@ -60,7 +60,7 @@ class AppRouter extends RootStackRouter {
   ];
 
   @override
-  RouteType get defaultRouteType => const RouteType.material();
+  RouteType get defaultRouteType => const .material();
 
   @override
   List<AutoRouteGuard> get guards => [];
@@ -71,7 +71,7 @@ class AppRouter extends RootStackRouter {
 /// The router is created with a [Ref] so that [AuthGuard] can read
 /// authentication state from the Riverpod provider tree.
 @Riverpod(keepAlive: true)
-AppRouter appRouter(Ref ref) => AppRouter(ref);
+AppRouter appRouter(Ref ref) => .new(ref);
 
 /// Shell route that wraps authenticated tabs with [AdaptiveScaffold].
 ///

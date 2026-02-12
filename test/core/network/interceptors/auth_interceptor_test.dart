@@ -33,12 +33,7 @@ void main() {
         onRequest: (options, handler) {
           capturedOptions = options;
           // Reject to prevent actual network call
-          handler.reject(
-            DioException(
-              requestOptions: options,
-              type: DioExceptionType.cancel,
-            ),
-          );
+          handler.reject(DioException(requestOptions: options, type: .cancel));
         },
       ),
     );
@@ -63,10 +58,7 @@ void main() {
       final options = await captureRequest('/api/profile');
 
       expect(options, isNotNull);
-      expect(
-        options!.headers['Authorization'],
-        'Bearer test-token-123',
-      );
+      expect(options!.headers['Authorization'], 'Bearer test-token-123');
       verify(() => mockTokenStorage.getAccessToken()).called(1);
     });
 
@@ -90,10 +82,7 @@ void main() {
       final options = await captureRequest('/api/profile');
 
       expect(options, isNotNull);
-      expect(
-        options!.headers['Authorization'],
-        'Bearer custom-token',
-      );
+      expect(options!.headers['Authorization'], 'Bearer custom-token');
       // Should not attempt to read from token storage
       verifyNever(() => mockTokenStorage.getAccessToken());
     });

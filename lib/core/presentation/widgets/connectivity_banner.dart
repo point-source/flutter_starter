@@ -18,7 +18,7 @@ part 'connectivity_banner.g.dart';
 /// device's connectivity changes. An empty list or a list containing
 /// only [ConnectivityResult.none] indicates no internet access.
 @riverpod
-Stream<List<ConnectivityResult>> connectivityStatus(Ref ref) =>
+Stream<List<ConnectivityResult>> connectivityStatus(Ref _) =>
     Connectivity().onConnectivityChanged;
 
 /// Show a [MaterialBanner] when the device is offline.
@@ -50,7 +50,7 @@ class ConnectivityBanner extends ConsumerWidget {
         if (!isOffline) return const SizedBox.shrink();
 
         return MaterialBanner(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const .symmetric(horizontal: 16, vertical: 8),
           leading: Icon(
             Icons.wifi_off,
             color: Theme.of(context).colorScheme.error,

@@ -20,7 +20,7 @@ part 'profile_view_model.g.dart';
 
 /// Create a [ProfileService] backed by the application's [Dio] instance.
 @riverpod
-ProfileService profileService(Ref ref) => ProfileService(ref.read(dioProvider));
+ProfileService profileService(Ref ref) => .new(ref.read(dioProvider));
 
 /// Create an [IProfileRepository] wired to the profile service.
 @riverpod
@@ -67,7 +67,7 @@ class ProfileViewModel extends _$ProfileViewModel {
     state = result.when(
       success: AsyncData.new,
       failure: (failure) =>
-          AsyncError(FailureException(failure), failure.stackTrace ?? StackTrace.current),
+          AsyncError(FailureException(failure), failure.stackTrace ?? .current),
     );
   }
 }

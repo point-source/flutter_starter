@@ -47,7 +47,7 @@ void main() {
       );
 
       late AuthGuard guard;
-      final testProvider = Provider<void>((ref) {
+      final testProvider = Provider((ref) {
         guard = AuthGuard(ref);
       });
       container.read(testProvider);
@@ -65,7 +65,7 @@ void main() {
       );
 
       late AuthGuard guard;
-      final testProvider = Provider<void>((ref) {
+      final testProvider = Provider((ref) {
         guard = AuthGuard(ref);
       });
       container.read(testProvider);

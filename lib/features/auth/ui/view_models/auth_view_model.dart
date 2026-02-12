@@ -56,7 +56,7 @@ class AuthState {
 
 /// Create an [AuthService] backed by the application's [Dio] instance.
 @riverpod
-AuthService authService(Ref ref) => AuthService(ref.read(dioProvider));
+AuthService authService(Ref ref) => .new(ref.read(dioProvider));
 
 /// Create an [IAuthRepository] wired to the auth service and token storage.
 @riverpod
@@ -102,7 +102,7 @@ class AuthViewModel extends _$AuthViewModel {
 
     state = result.when(
       success: (user) => AsyncData(AuthState.authenticated(user)),
-      failure: (failure) => AsyncError(failure, failure.stackTrace ?? StackTrace.current),
+      failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
     );
   }
 
@@ -124,7 +124,7 @@ class AuthViewModel extends _$AuthViewModel {
 
     state = result.when(
       success: (user) => AsyncData(AuthState.authenticated(user)),
-      failure: (failure) => AsyncError(failure, failure.stackTrace ?? StackTrace.current),
+      failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
     );
   }
 

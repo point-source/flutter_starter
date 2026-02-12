@@ -15,7 +15,7 @@ import 'package:flutter_starter/core/logging/app_logger.dart';
 /// noise in production.
 class LoggingInterceptor extends Interceptor {
   /// Creates a [LoggingInterceptor] with the given [logger].
-  LoggingInterceptor(this._logger);
+  const LoggingInterceptor(this._logger);
 
   final IAppLogger _logger;
 
@@ -34,11 +34,11 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onResponse(
-    Response<dynamic> response,
+    Response<Object?> response,
     ResponseInterceptorHandler handler,
   ) {
     _logger.debug(
-      '← ${response.statusCode} ${response.requestOptions.method} '
+      '← ${response.statusCode ?? "?"} ${response.requestOptions.method} '
       '${response.requestOptions.uri}',
       tag: 'HTTP',
     );
@@ -49,7 +49,7 @@ class LoggingInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     _logger.warning(
       '✕ ${err.response?.statusCode ?? "?"} ${err.requestOptions.method} '
-      '${err.requestOptions.uri}: ${err.message}',
+      '${err.requestOptions.uri}: ${err.message ?? "unknown"}',
       tag: 'HTTP',
     );
     handler.next(err);

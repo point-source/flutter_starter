@@ -39,16 +39,19 @@ class AdaptiveScaffold extends ConsumerWidget {
     final activeIndex = tabsRouter.activeIndex;
 
     return ResponsiveBuilder(
-      compact: (context) => _buildCompact(context, tabsRouter, activeIndex),
-      medium: (context) => _buildMedium(context, tabsRouter, activeIndex),
-      expanded: (context) => _buildExpanded(context, tabsRouter, activeIndex),
-      large: (context) => _buildLarge(context, tabsRouter, activeIndex),
+      compactBuilder: (context) =>
+          _buildCompact(context, tabsRouter, activeIndex),
+      mediumBuilder: (context) =>
+          _buildMedium(context, tabsRouter, activeIndex),
+      expandedBuilder: (context) =>
+          _buildExpanded(context, tabsRouter, activeIndex),
+      largeBuilder: (context) => _buildLarge(context, tabsRouter, activeIndex),
     );
   }
 
   /// Build a compact layout with a [BottomNavigationBar].
   Widget _buildCompact(
-    BuildContext context,
+    BuildContext _,
     TabsRouter tabsRouter,
     int activeIndex,
   ) => Scaffold(
@@ -68,44 +71,41 @@ class AdaptiveScaffold extends ConsumerWidget {
   );
 
   /// Build a medium layout with a collapsed [NavigationRail].
-  Widget _buildMedium(
-    BuildContext context,
-    TabsRouter tabsRouter,
-    int activeIndex,
-  ) => Scaffold(
-    body: Row(
-      children: [
-        NavigationRail(
-          selectedIndex: activeIndex,
-          onDestinationSelected: tabsRouter.setActiveIndex,
-          labelType: NavigationRailLabelType.selected,
-          destinations: const [
-            NavigationRailDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: Text('Dashboard'),
+  Widget _buildMedium(BuildContext _, TabsRouter tabsRouter, int activeIndex) =>
+      Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: activeIndex,
+              onDestinationSelected: tabsRouter.setActiveIndex,
+              labelType: .selected,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard),
+                  label: Text('Dashboard'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person_outlined),
+                  selectedIcon: Icon(Icons.person),
+                  label: Text('Profile'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings),
+                  label: Text('Settings'),
+                ),
+              ],
             ),
-            NavigationRailDestination(
-              icon: Icon(Icons.person_outlined),
-              selectedIcon: Icon(Icons.person),
-              label: Text('Profile'),
-            ),
-            NavigationRailDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: Text('Settings'),
-            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: child),
           ],
         ),
-        const VerticalDivider(thickness: 1, width: 1),
-        Expanded(child: child),
-      ],
-    ),
-  );
+      );
 
   /// Build an expanded layout with an extended [NavigationRail].
   Widget _buildExpanded(
-    BuildContext context,
+    BuildContext _,
     TabsRouter tabsRouter,
     int activeIndex,
   ) => Scaffold(
@@ -140,44 +140,41 @@ class AdaptiveScaffold extends ConsumerWidget {
   );
 
   /// Build a large layout with a persistent [NavigationDrawer].
-  Widget _buildLarge(
-    BuildContext context,
-    TabsRouter tabsRouter,
-    int activeIndex,
-  ) => Scaffold(
-    body: Row(
-      children: [
-        NavigationDrawer(
-          selectedIndex: activeIndex,
-          onDestinationSelected: tabsRouter.setActiveIndex,
-          children: const [
-            Padding(
-              padding: EdgeInsets.fromLTRB(28, 16, 16, 10),
-              child: Text(
-                'Flutter Starter',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+  Widget _buildLarge(BuildContext _, TabsRouter tabsRouter, int activeIndex) =>
+      Scaffold(
+        body: Row(
+          children: [
+            NavigationDrawer(
+              selectedIndex: activeIndex,
+              onDestinationSelected: tabsRouter.setActiveIndex,
+              children: const [
+                Padding(
+                  padding: .fromLTRB(28, 16, 16, 10),
+                  child: Text(
+                    'Flutter Starter',
+                    style: TextStyle(fontSize: 18, fontWeight: .bold),
+                  ),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard),
+                  label: Text('Dashboard'),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.person_outlined),
+                  selectedIcon: Icon(Icons.person),
+                  label: Text('Profile'),
+                ),
+                NavigationDrawerDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings),
+                  label: Text('Settings'),
+                ),
+              ],
             ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: Text('Dashboard'),
-            ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.person_outlined),
-              selectedIcon: Icon(Icons.person),
-              label: Text('Profile'),
-            ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: Text('Settings'),
-            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: child),
           ],
         ),
-        const VerticalDivider(thickness: 1, width: 1),
-        Expanded(child: child),
-      ],
-    ),
-  );
+      );
 }

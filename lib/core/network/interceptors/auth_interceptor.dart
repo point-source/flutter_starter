@@ -14,7 +14,7 @@ import 'package:flutter_starter/core/storage/token_storage.dart';
 /// header or for unauthenticated endpoints like login and register.
 class AuthInterceptor extends Interceptor {
   /// Creates an [AuthInterceptor] with the given [tokenStorage].
-  AuthInterceptor(this._tokenStorage);
+  const AuthInterceptor(this._tokenStorage);
 
   final ITokenStorage _tokenStorage;
 

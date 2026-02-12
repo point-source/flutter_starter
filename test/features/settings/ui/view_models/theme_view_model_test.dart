@@ -70,7 +70,7 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      container.read(themeViewModelProvider.notifier).setThemeMode(ThemeMode.dark);
+      container.read(themeViewModelProvider.notifier).setThemeMode(.dark);
 
       final themeMode = container.read(themeViewModelProvider);
       expect(themeMode, ThemeMode.dark);

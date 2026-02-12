@@ -29,24 +29,14 @@ class SentryReporter implements IAppLogger {
   @override
   void debug(String message, {Map<String, dynamic>? data, String? tag}) {
     Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: message,
-        category: tag,
-        level: SentryLevel.debug,
-        data: data,
-      ),
+      Breadcrumb(message: message, category: tag, level: .debug, data: data),
     );
   }
 
   @override
   void info(String message, {Map<String, dynamic>? data, String? tag}) {
     Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: message,
-        category: tag,
-        level: SentryLevel.info,
-        data: data,
-      ),
+      Breadcrumb(message: message, category: tag, level: .info, data: data),
     );
   }
 
@@ -57,17 +47,12 @@ class SentryReporter implements IAppLogger {
   @override
   void warning(String message, {Map<String, dynamic>? data, String? tag}) {
     Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: message,
-        category: tag,
-        level: SentryLevel.warning,
-        data: data,
-      ),
+      Breadcrumb(message: message, category: tag, level: .warning, data: data),
     );
 
     Sentry.captureMessage(
       message,
-      level: SentryLevel.warning,
+      level: .warning,
       params: data != null ? [data.toString()] : null,
     );
   }
@@ -81,12 +66,7 @@ class SentryReporter implements IAppLogger {
     String? tag,
   }) {
     Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: message,
-        category: tag,
-        level: SentryLevel.error,
-        data: data,
-      ),
+      Breadcrumb(message: message, category: tag, level: .error, data: data),
     );
 
     Sentry.captureException(
@@ -104,12 +84,7 @@ class SentryReporter implements IAppLogger {
     String? tag,
   }) {
     Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: message,
-        category: tag,
-        level: SentryLevel.fatal,
-        data: data,
-      ),
+      Breadcrumb(message: message, category: tag, level: .fatal, data: data),
     );
 
     Sentry.captureException(

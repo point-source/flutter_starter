@@ -43,7 +43,7 @@ void main() {
     test('maps connectionTimeout to TimeoutException', () async {
       final error = DioException(
         requestOptions: RequestOptions(path: '/test'),
-        type: DioExceptionType.connectionTimeout,
+        type: .connectionTimeout,
       );
 
       try {
@@ -59,7 +59,7 @@ void main() {
     test('maps sendTimeout to TimeoutException', () async {
       final error = DioException(
         requestOptions: RequestOptions(path: '/test'),
-        type: DioExceptionType.sendTimeout,
+        type: .sendTimeout,
       );
 
       try {
@@ -75,7 +75,7 @@ void main() {
     test('maps receiveTimeout to TimeoutException', () async {
       final error = DioException(
         requestOptions: RequestOptions(path: '/test'),
-        type: DioExceptionType.receiveTimeout,
+        type: .receiveTimeout,
       );
 
       try {
@@ -94,7 +94,7 @@ void main() {
     test('maps connectionError to NetworkException', () async {
       final error = DioException(
         requestOptions: RequestOptions(path: '/test'),
-        type: DioExceptionType.connectionError,
+        type: .connectionError,
       );
 
       try {
@@ -113,7 +113,7 @@ void main() {
     test('maps cancel to ServerException', () async {
       final error = DioException(
         requestOptions: RequestOptions(path: '/test'),
-        type: DioExceptionType.cancel,
+        type: .cancel,
       );
 
       try {
@@ -129,7 +129,7 @@ void main() {
     test('maps badCertificate to ServerException', () async {
       final error = DioException(
         requestOptions: RequestOptions(path: '/test'),
-        type: DioExceptionType.badCertificate,
+        type: .badCertificate,
       );
 
       try {
@@ -153,7 +153,7 @@ void main() {
           statusCode: 404,
           data: {'message': 'Not found'},
         ),
-        type: DioExceptionType.badResponse,
+        type: .badResponse,
       );
 
       try {
@@ -174,7 +174,7 @@ void main() {
           statusCode: 400,
           data: {'error': 'Invalid request'},
         ),
-        type: DioExceptionType.badResponse,
+        type: .badResponse,
       );
 
       try {
@@ -187,25 +187,28 @@ void main() {
     });
 
     /// Falls back to default message when response body is not JSON.
-    test('maps badResponse without JSON to ServerException with default message', () async {
-      final error = DioException(
-        requestOptions: RequestOptions(path: '/test'),
-        response: Response(
+    test(
+      'maps badResponse without JSON to ServerException with default message',
+      () async {
+        final error = DioException(
           requestOptions: RequestOptions(path: '/test'),
-          statusCode: 500,
-          data: 'Internal Server Error',
-        ),
-        type: DioExceptionType.badResponse,
-      );
+          response: Response(
+            requestOptions: RequestOptions(path: '/test'),
+            statusCode: 500,
+            data: 'Internal Server Error',
+          ),
+          type: .badResponse,
+        );
 
-      try {
-        await triggerError(error);
-      } on DioException catch (e) {
-        final appError = e.error! as ServerException;
-        expect(appError.message, 'Server error');
-        expect(appError.statusCode, 500);
-      }
-    });
+        try {
+          await triggerError(error);
+        } on DioException catch (e) {
+          final appError = e.error! as ServerException;
+          expect(appError.message, 'Server error');
+          expect(appError.statusCode, 500);
+        }
+      },
+    );
   });
 
   /// Tests for unknown error mappings.
@@ -244,9 +247,7 @@ void main() {
 
     /// Maps unknown error with neither error nor message.
     test('maps unknown without error or message to ServerException', () async {
-      final error = DioException(
-        requestOptions: RequestOptions(path: '/test'),
-      );
+      final error = DioException(requestOptions: RequestOptions(path: '/test'));
 
       try {
         await triggerError(error);

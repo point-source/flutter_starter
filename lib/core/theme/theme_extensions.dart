@@ -23,66 +23,66 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
   /// Creates a [SemanticColors] theme extension.
   const SemanticColors({
     required this.success,
-    required this.onSuccess,
+    required this.successForeground,
     required this.warning,
-    required this.onWarning,
+    required this.warningForeground,
     required this.info,
-    required this.onInfo,
+    required this.infoForeground,
   });
 
   /// Light theme semantic colors.
   static const SemanticColors light = SemanticColors(
     success: ColorPalette.success,
-    onSuccess: Colors.white,
+    successForeground: Colors.white,
     warning: ColorPalette.warning,
-    onWarning: Colors.black,
+    warningForeground: Colors.black,
     info: ColorPalette.info,
-    onInfo: Colors.white,
+    infoForeground: Colors.white,
   );
 
   /// Dark theme semantic colors.
   static const SemanticColors dark = SemanticColors(
     success: Color(0xFF66BB6A),
-    onSuccess: Colors.black,
+    successForeground: Colors.black,
     warning: Color(0xFFFFEE58),
-    onWarning: Colors.black,
+    warningForeground: Colors.black,
     info: Color(0xFF4FC3F7),
-    onInfo: Colors.black,
+    infoForeground: Colors.black,
   );
 
   /// Color for success states (completed, saved, approved).
   final Color success;
 
   /// Foreground color for content displayed on [success] backgrounds.
-  final Color onSuccess;
+  final Color successForeground;
 
   /// Color for warning states (caution, pending, expiring).
   final Color warning;
 
   /// Foreground color for content displayed on [warning] backgrounds.
-  final Color onWarning;
+  final Color warningForeground;
 
   /// Color for informational states (tips, notices, updates).
   final Color info;
 
   /// Foreground color for content displayed on [info] backgrounds.
-  final Color onInfo;
+  final Color infoForeground;
 
   @override
   SemanticColors copyWith({
     Color? success,
-    Color? onSuccess,
+    Color? successForeground,
     Color? warning,
-    Color? onWarning,
+    Color? warningForeground,
     Color? info,
-    Color? onInfo,
-  }) => SemanticColors(
+    Color? infoForeground,
+  }) => .new(
     success: success ?? this.success,
-    onSuccess: onSuccess ?? this.onSuccess,
+    successForeground: successForeground ?? this.successForeground,
     warning: warning ?? this.warning,
-    onWarning: onWarning ?? this.onWarning,
+    warningForeground: warningForeground ?? this.warningForeground,
     info: info ?? this.info,
-    onInfo: onInfo ?? this.onInfo,
+    infoForeground: infoForeground ?? this.infoForeground,
   );
 
   @override
@@ -90,11 +90,19 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     if (other is! SemanticColors) return this;
     return SemanticColors(
       success: Color.lerp(success, other.success, t)!,
-      onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
+      successForeground: Color.lerp(
+        successForeground,
+        other.successForeground,
+        t,
+      )!,
       warning: Color.lerp(warning, other.warning, t)!,
-      onWarning: Color.lerp(onWarning, other.onWarning, t)!,
+      warningForeground: Color.lerp(
+        warningForeground,
+        other.warningForeground,
+        t,
+      )!,
       info: Color.lerp(info, other.info, t)!,
-      onInfo: Color.lerp(onInfo, other.onInfo, t)!,
+      infoForeground: Color.lerp(infoForeground, other.infoForeground, t)!,
     );
   }
 }

@@ -32,7 +32,7 @@ abstract final class AppTheme {
       error: ColorPalette.error,
     ),
     useMaterial3ErrorColors: true,
-    extensions: const <ThemeExtension<dynamic>>[SemanticColors.light],
+    extensions: const <ThemeExtension<SemanticColors>>[SemanticColors.light],
   );
 
   /// Dark theme configuration.
@@ -44,6 +44,6 @@ abstract final class AppTheme {
       error: ColorPalette.error,
     ),
     useMaterial3ErrorColors: true,
-    extensions: const <ThemeExtension<dynamic>>[SemanticColors.dark],
+    extensions: const <ThemeExtension<SemanticColors>>[SemanticColors.dark],
   );
 }
