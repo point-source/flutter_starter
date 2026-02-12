@@ -133,7 +133,15 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 
 1. **Create the directory scaffold.** Each feature follows the `data/`, `domain/`, `ui/` layer split. You can use the Mason bricks in `bricks/` to generate boilerplate:
    ```bash
-   mason make feature --name my_feature
+   # First time only: install registered bricks
+   mason get
+
+   # Scaffold a full feature (data + domain + ui layers)
+   mason make feature --feature_name my_feature
+
+   # Or scaffold individual parts:
+   mason make repository --feature_name my_feature --entity_name order
+   mason make view_model --feature_name my_feature --page_name detail
    ```
 
 2. **Define domain entities** in `domain/entities/` using `dart_mappable`.
