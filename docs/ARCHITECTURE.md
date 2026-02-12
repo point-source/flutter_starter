@@ -335,6 +335,152 @@ Tests mirror the `lib/` directory structure under `test/`.
 - `test/helpers/mocks.dart` -- shared mock classes (MockAuthRepository, etc.)
 - `test/helpers/fakes.dart` -- fake data factories (FakeUser, FakeProfile, etc.)
 
+## Shared Repositories (Cross-Feature Dependencies)
+
+When multiple features need to depend on the same repository, place it in one of these locations:
+
+### Option 1: Core Infrastructure (Recommended for True Cross-Cutting Concerns)
+
+If the repository provides truly foundational data (e.g., user profile, app configuration, analytics):
+
+```
+lib/core/
+  repositories/
+    user/
+      user_repository.dart         # IUserRepository interface
+      user_repository_impl.dart    # Implementation
+      user_repository_provider.dart  # @riverpod provider
+```
+
+**Use when:**
+- Multiple unrelated features need the data (e.g., Dashboard, Profile, Settings all need user data)
+- The data is foundational to the app (not business logic)
+- You want to avoid circular dependencies between features
+
+### Option 2: Primary Feature with Re-Export (Recommended for Feature-Owned Data)
+
+If one feature "owns" the domain, other features can import from it:
+
+```
+lib/features/
+  user/                    # Primary owner
+    data/
+      repositories/
+        user_repository.dart
+    domain/
+      entities/
+        user.dart
+
+  dashboard/               # Consumer feature
+    # Imports: package:flutter_starter/features/user/...
+
+  profile/                 # Consumer feature
+    # Imports: package:flutter_starter/features/user/...
+```
+
+**Use when:**
+- One feature has primary ownership of the business logic
+- Other features only read/consume the data (don't modify business rules)
+- You want to keep the domain model close to its primary use case
+
+### Option 3: Shared Feature Module (For Complex Shared Domains)
+
+For substantial shared domains (e.g., "contacts", "products", "notifications"):
+
+```
+lib/features/
+  shared/
+    user/
+      data/
+      domain/
+      providers/
+
+  auth/          # Uses shared/user
+  dashboard/     # Uses shared/user
+  profile/       # Uses shared/user
+```
+
+**Use when:**
+- The domain is complex enough to warrant its own feature module
+- Multiple features both read AND write the data
+- You want to centralize business rules for the shared domain
+
+### Anti-Pattern: Avoid Duplication
+
+❌ **Don't** duplicate repository implementations across features:
+
+```
+lib/features/
+  dashboard/
+    data/
+      repositories/
+        user_repository.dart    # ❌ Duplicated
+  profile/
+    data/
+      repositories/
+        user_repository.dart    # ❌ Duplicated
+```
+
+This creates maintenance burden and data inconsistency.
+
+### Example: User Repository in Core
+
+```dart
+// lib/core/repositories/user/user_repository.dart
+library;
+
+/// Provides access to user profile data.
+abstract interface class IUserRepository {
+  /// Fetches the current user's profile.
+  Future<Result<User>> getCurrentUser();
+
+  /// Updates the current user's profile.
+  Future<Result<void>> updateUser(User user);
+}
+
+// lib/core/repositories/user/user_repository_provider.dart
+library;
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_starter/core/repositories/user/user_repository.dart';
+import 'package:flutter_starter/core/repositories/user/user_repository_impl.dart';
+
+part 'user_repository_provider.g.dart';
+
+/// Provides the user repository instance.
+@riverpod
+IUserRepository userRepository(UserRepositoryRef ref) {
+  final service = ref.watch(userServiceProvider);
+  return UserRepositoryImpl(service);
+}
+```
+
+Then features can depend on it:
+
+```dart
+// lib/features/dashboard/ui/view_models/dashboard_view_model.dart
+library;
+
+import 'package:flutter_starter/core/repositories/user/user_repository_provider.dart';
+
+@riverpod
+class DashboardViewModel extends _$DashboardViewModel {
+  @override
+  Future<DashboardState> build() async {
+    final userRepo = ref.read(userRepositoryProvider);
+    final result = await userRepo.getCurrentUser();
+    // ... use user data
+  }
+}
+```
+
+### Guideline Summary
+
+1. **Start with Option 2** (feature-owned) if one feature has clear ownership
+2. **Move to Option 1** (core) when 3+ unrelated features need the repository
+3. **Only use Option 3** (shared feature) for complex shared business domains
+4. **Never duplicate** repository implementations
+
 ## Architecture Decision Records
 
 Rationale for major architectural choices is documented in ADRs:

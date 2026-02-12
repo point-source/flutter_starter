@@ -45,21 +45,33 @@ flutter doctor
 
 ## Getting Started
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/PointSource/flutter_starter.git
-cd flutter_starter
+### Using This Template for a New Project
 
-# 2. Install dependencies
+```bash
+# 1. Create a new repository from this template
+#    Option A: Use GitHub's "Use this template" button
+#    Option B: Clone and create new repo manually
+git clone https://github.com/PointSource/flutter_starter.git my-new-app
+cd my-new-app
+rm -rf .git
+git init
+
+# 2. Add template as remote for future updates
+git remote add template https://github.com/PointSource/flutter_starter.git
+git fetch template
+
+# 3. Install dependencies
 flutter pub get
 
-# 3. Run code generation
+# 4. Run code generation
 dart run build_runner build --delete-conflicting-outputs
 dart run slang
 
-# 4. Launch the app (development)
+# 5. Launch the app (development)
 flutter run --dart-define-from-file=config/development.json
 ```
+
+**📖 For keeping your project in sync with template updates, see [docs/TEMPLATE_SYNC.md](docs/TEMPLATE_SYNC.md)**
 
 ---
 
@@ -245,10 +257,11 @@ Generated files are committed to the repository. The CI pipeline includes a `cod
 
 ## Documentation
 
-- **Architecture Decision Records** -- `docs/adrs/`
-- **Architecture Rules** -- `docs/architecture-rules/`
-- **Architecture Overview** -- `docs/ARCHITECTURE.md` (if available)
-- **Mason Bricks** -- `bricks/` (feature, repository, view_model scaffolding)
+- **Architecture Overview** -- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **Architecture Decision Records** -- [docs/adrs/](docs/adrs/)
+- **Architecture Rules** -- [docs/architecture-rules/](docs/architecture-rules/)
+- **Template Synchronization** -- [docs/TEMPLATE_SYNC.md](docs/TEMPLATE_SYNC.md)
+- **Mason Bricks** -- [bricks/](bricks/) (feature, repository, view_model scaffolding)
 
 ---
 
