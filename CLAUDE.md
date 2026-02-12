@@ -123,12 +123,17 @@ entity types, repository abstraction, or failure hierarchy.
 ### Environment Configuration
 - Single `main.dart` entry point
 - Environment selected via `--dart-define-from-file=config/<env>.json`
-- Config files: `config/development.json`, `config/staging.json`, `config/production.json`
+- Config templates live in `config/examples/`; active configs are gitignored
+- Run `./scripts/setup.sh` to provision `config/*.json` from templates
 - `AppEnvironment` enum reads compile-time constants
+- Auth bypass: `AUTH_BYPASS=mock` (fake user, no backend) or `AUTH_BYPASS=prefill` (pre-fill login from `DEV_EMAIL`/`DEV_PASSWORD`)
 
 ## Common Commands
 
 ```bash
+# Provision config files from templates (first time only)
+./scripts/setup.sh
+
 # Install dependencies
 flutter pub get
 

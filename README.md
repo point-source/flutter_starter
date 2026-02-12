@@ -60,14 +60,17 @@ git init
 git remote add template https://github.com/PointSource/flutter_starter.git
 git fetch template
 
-# 3. Install dependencies
+# 3. Provision config files from templates
+./scripts/setup.sh
+
+# 4. Install dependencies
 flutter pub get
 
-# 4. Run code generation
+# 5. Run code generation
 dart run build_runner build --delete-conflicting-outputs
 dart run slang
 
-# 5. Launch the app (development)
+# 6. Launch the app (development)
 flutter run --dart-define-from-file=config/development.json
 ```
 
@@ -115,9 +118,15 @@ lib/
     settings/                        -- App settings (theme, locale)
   gen/                               -- Generated i18n files (slang)
 config/
-  development.json                   -- Dev environment variables
-  staging.json                       -- Staging environment variables
-  production.json                    -- Production environment variables
+  examples/                          -- Template configs (committed)
+    development.json                 -- Dev environment template
+    staging.json                     -- Staging environment template
+    production.json                  -- Production environment template
+    auth_bypass_mock.json            -- Auth bypass (mock) overlay
+    auth_bypass_prefill.json         -- Auth bypass (prefill) overlay
+  *.json                             -- Active configs (gitignored, from setup.sh)
+scripts/
+  setup.sh                           -- Provision config files from templates
 test/                                -- Unit and widget tests
 bricks/                              -- Mason bricks (feature, repository, view_model)
 docs/
@@ -179,6 +188,7 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 
 | Command | Description |
 |---------|-------------|
+| `./scripts/setup.sh` | Provision config files from templates |
 | `flutter pub get` | Install dependencies |
 | `flutter run --dart-define-from-file=config/development.json` | Run app (development) |
 | `flutter run --dart-define-from-file=config/staging.json` | Run app (staging) |
@@ -196,13 +206,13 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 
 ## Environment Configuration
 
-The app uses compile-time constants via `--dart-define-from-file`. Three environment configs are provided:
+The app uses compile-time constants via `--dart-define-from-file`. Config files are **not committed** -- only templates in `config/examples/` are tracked. Run `./scripts/setup.sh` to create your local copies.
 
-| File | Environment | API URL |
-|------|-------------|---------|
-| `config/development.json` | Development | `http://localhost:3000` |
-| `config/staging.json` | Staging | Configured per project |
-| `config/production.json` | Production | Configured per project |
+| Template | Environment | API URL |
+|----------|-------------|---------|
+| `config/examples/development.json` | Development | `http://localhost:3000` |
+| `config/examples/staging.json` | Staging | Configured per project |
+| `config/examples/production.json` | Production | Configured per project |
 
 Each config file defines:
 
@@ -211,6 +221,31 @@ Each config file defines:
 - `SENTRY_DSN` -- Sentry DSN for error reporting (empty in dev)
 
 See `lib/core/env/app_environment.dart` for how these values are consumed at runtime.
+
+### Auth Bypass (Development Only)
+
+Two overlay configs let you skip or simplify the login flow during development. Layer them on top of the base config using multiple `--dart-define-from-file` args (or use the VS Code launch configs):
+
+| Mode | Overlay File | Behavior |
+|------|-------------|----------|
+| Mock | `config/auth_bypass_mock.json` | Fake user, no backend needed |
+| Prefill | `config/auth_bypass_prefill.json` | Pre-fills login form with dev credentials |
+
+**Mock mode** -- returns a fake user immediately, bypassing the login screen entirely. Useful for UI and navigation work when no backend is available.
+
+**Prefill mode** -- uses the real auth flow but pre-fills the email and password fields from `DEV_EMAIL` and `DEV_PASSWORD` in the config. Edit `config/auth_bypass_prefill.json` with your credentials (this file is gitignored).
+
+```bash
+# Mock mode (no backend)
+flutter run \
+  --dart-define-from-file=config/development.json \
+  --dart-define-from-file=config/auth_bypass_mock.json
+
+# Prefill mode (real backend, pre-filled credentials)
+flutter run \
+  --dart-define-from-file=config/development.json \
+  --dart-define-from-file=config/auth_bypass_prefill.json
+```
 
 ---
 

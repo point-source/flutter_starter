@@ -9,6 +9,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/routing/app_router.dart';
 import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
 
@@ -29,6 +30,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    switch (AppEnvironment.authBypass) {
+      case 'prefill':
+        _emailController.text = AppEnvironment.devEmail;
+        _passwordController.text = AppEnvironment.devPassword;
+      case 'mock':
+        _emailController.text = 'dev@example.com';
+        _passwordController.text = 'password';
+      default:
+        break;
+    }
+  }
 
   @override
   void dispose() {

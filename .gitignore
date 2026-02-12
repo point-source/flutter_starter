@@ -23,6 +23,9 @@ migrate_working_dir/
 # is commented out by default.
 #.vscode/
 
+# Environment config (generated from .example templates by scripts/setup.sh)
+config/*.json
+
 # Mason brick cache
 .mason/
 mason-lock.json

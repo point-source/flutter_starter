@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted (amended)
 
 ## Context
 
@@ -21,16 +21,21 @@ Use a **single `main.dart`** with **`--dart-define-from-file`** to inject enviro
 
 Implementation:
 
-- Three JSON config files in `config/`: `development.json`, `staging.json`, `production.json`.
+- Example config files live in `config/examples/` and are committed to the repo.
+- Active config files (`config/*.json`) are gitignored. Run `./scripts/setup.sh` to provision them from the templates.
 - The `AppEnvironment` enum reads compile-time constants via `String.fromEnvironment` and `bool.fromEnvironment`.
 - Configuration values include: `ENVIRONMENT`, `API_URL`, `SENTRY_DSN`.
 - Sensible defaults apply when no config file is specified (defaults to development).
 - A `STRICT_ENV` flag enables strict validation in CI, throwing `StateError` on invalid environment values.
 - Environment-specific behavior (Sentry enablement, SSL pinning, sample rates) is computed from the `AppEnvironment` enum's instance properties.
+- Multiple `--dart-define-from-file` args can be layered, with later files overriding earlier values. This enables overlay configs for auth bypass modes.
 
 Build commands:
 
 ```bash
+# Provision config files (first time)
+./scripts/setup.sh
+
 # Development (default, config optional)
 flutter run --dart-define-from-file=config/development.json
 
@@ -41,19 +46,43 @@ flutter run --dart-define-from-file=config/staging.json
 flutter build apk --release --dart-define-from-file=config/production.json
 ```
 
+### Auth Bypass (Development)
+
+Additional compile-time constants support bypassing or simplifying the login flow:
+
+- `AUTH_BYPASS` -- `"mock"` (fake user, no network) or `"prefill"` (pre-fill login form)
+- `DEV_EMAIL` / `DEV_PASSWORD` -- credentials for prefill mode
+
+These are provided via overlay config files layered on top of the base environment config:
+
+```bash
+# Mock mode (no backend needed)
+flutter run \
+  --dart-define-from-file=config/development.json \
+  --dart-define-from-file=config/auth_bypass_mock.json
+
+# Prefill mode (real backend, pre-filled credentials)
+flutter run \
+  --dart-define-from-file=config/development.json \
+  --dart-define-from-file=config/auth_bypass_prefill.json
+```
+
+VS Code launch configurations are provided for each mode.
+
 ## Consequences
 
 ### Positive
 
 - **Single entry point**: One `main.dart` reduces duplication and the risk of diverging initialization logic.
-- **Compile-time safety**: Environment values are baked into the binary; they cannot be tampered with at runtime.
-- **Simple CI integration**: Each CI job passes a different `--dart-define-from-file` argument.
+- **Compile-time safety**: Environment values are baked into the binary; they cannot be tampered with at runtime. Auth bypass code is tree-shaken from release builds.
+- **Simple CI integration**: Each CI job provisions configs from templates and optionally overrides from secrets.
 - **No platform configuration**: Unlike flavors, no Android `build.gradle` or iOS scheme changes needed.
+- **Config-as-templates**: Only example files are committed. Sensitive values (DSNs, credentials) never enter version control.
 
 ### Negative
 
 - **No runtime switching**: Changing environments requires a rebuild. Cannot switch environments in a running app.
-- **JSON file management**: Config files contain potentially sensitive values (Sentry DSN) and should be managed carefully in version control.
+- **Setup step required**: Developers must run `./scripts/setup.sh` before their first build.
 - **Limited to string/bool/int**: `--dart-define` only supports primitive types, not complex configuration objects.
 
 ### Neutral

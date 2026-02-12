@@ -70,4 +70,4 @@ final class SharedPrefsProvider
   }
 }
 
-String _$sharedPrefsHash() => r'481da9d96e98738ab657e43e60befff2fcf71afe';
+String _$sharedPrefsHash() => r'84741d4f940d0caa36178f70647fdbceda12c253';

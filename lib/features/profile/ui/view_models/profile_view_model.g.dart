@@ -52,7 +52,7 @@ final class ProfileServiceProvider
   }
 }
 
-String _$profileServiceHash() => r'c71fe9ef088915b971249e44de2ffe32d9804191';
+String _$profileServiceHash() => r'68cfb178de166de1e206ee268959cb913f005020';
 
 /// Create an [IProfileRepository] wired to the profile service.
 
@@ -143,7 +143,7 @@ final class ProfileViewModelProvider
   ProfileViewModel create() => ProfileViewModel();
 }
 
-String _$profileViewModelHash() => r'd40eab28e32b222c1908de627504de65069ce387';
+String _$profileViewModelHash() => r'3114a48153fca119c520e3b6c02c30465962bab0';
 
 /// Notifier that manages the profile lifecycle.
 ///

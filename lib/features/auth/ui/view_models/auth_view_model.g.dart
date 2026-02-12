@@ -52,20 +52,29 @@ final class AuthServiceProvider
   }
 }
 
-String _$authServiceHash() => r'e908b5fe8a16cd1a87875742b53dd198f462feb8';
+String _$authServiceHash() => r'75151e3e3f192c812b9d9cd4c7aef6af2973808a';
 
 /// Create an [IAuthRepository] wired to the auth service and token storage.
+///
+/// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
+/// provides a fake user with no network calls.
 
 @ProviderFor(authRepository)
 final authRepositoryProvider = AuthRepositoryProvider._();
 
 /// Create an [IAuthRepository] wired to the auth service and token storage.
+///
+/// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
+/// provides a fake user with no network calls.
 
 final class AuthRepositoryProvider
     extends
         $FunctionalProvider<IAuthRepository, IAuthRepository, IAuthRepository>
     with $Provider<IAuthRepository> {
   /// Create an [IAuthRepository] wired to the auth service and token storage.
+  ///
+  /// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
+  /// provides a fake user with no network calls.
   AuthRepositoryProvider._()
     : super(
         from: null,
@@ -99,7 +108,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'6b86db1c3482b8fefeb2063c787fb3eb6ff8c306';
+String _$authRepositoryHash() => r'91bb9b1084b79484bcb5fc63a21d1b4898b5968a';
 
 /// Notifier that manages the authentication lifecycle.
 ///
@@ -141,7 +150,7 @@ final class AuthViewModelProvider
   AuthViewModel create() => AuthViewModel();
 }
 
-String _$authViewModelHash() => r'0709ad21c0556bfe5f985578e3ea361847b64764';
+String _$authViewModelHash() => r'e45a5c1508e640300572a0612309dc5fef184c20';
 
 /// Notifier that manages the authentication lifecycle.
 ///

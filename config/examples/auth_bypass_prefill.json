@@ -1,0 +1,5 @@
+{
+  "AUTH_BYPASS": "prefill",
+  "DEV_EMAIL": "your-dev-email@example.com",
+  "DEV_PASSWORD": "your-dev-password"
+}

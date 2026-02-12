@@ -74,6 +74,16 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Provision config from templates
+        run: ./scripts/setup.sh
+
+      - name: Override config from secrets
+        if: env.API_URL != ''
+        run: |
+          jq --arg url "$API_URL" '.API_URL = $url' config/development.json > tmp.$$.json && mv tmp.$$.json config/development.json
+        env:
+          API_URL: ${{ secrets.API_URL }}
+
       - name: Install dependencies
         run: flutter pub get
 

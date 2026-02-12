@@ -62,6 +62,25 @@ enum AppEnvironment {
   static bool get isProduction => current == .production;
 
   // ---------------------------------------------------------------------------
+  // Development auth bypass
+  // ---------------------------------------------------------------------------
+
+  /// The auth bypass mode from compile-time config.
+  ///
+  /// Supported values:
+  /// - `""` (empty/absent) -- normal auth flow
+  /// - `"mock"` -- skip auth entirely with a fake user (no backend needed)
+  /// - `"prefill"` -- pre-fill login form with [devEmail] / [devPassword]
+  static const String authBypass = String.fromEnvironment('AUTH_BYPASS');
+
+  /// Dev email to pre-fill on the login page when [authBypass] is `"prefill"`.
+  static const String devEmail = String.fromEnvironment('DEV_EMAIL');
+
+  /// Dev password to pre-fill on the login page when [authBypass] is
+  /// `"prefill"`.
+  static const String devPassword = String.fromEnvironment('DEV_PASSWORD');
+
+  // ---------------------------------------------------------------------------
   // Environment-specific configuration
   // ---------------------------------------------------------------------------
 

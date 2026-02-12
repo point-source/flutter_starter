@@ -56,7 +56,7 @@ final class ThemeViewModelProvider
   }
 }
 
-String _$themeViewModelHash() => r'749c09ffa5e37c5cb7e47578f821b3ed8eed2fec';
+String _$themeViewModelHash() => r'b09d3b3380f3fcbdb457b4f068c30b15aec3ef38';
 
 /// Notifier that manages the current [ThemeMode].
 ///
