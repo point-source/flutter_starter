@@ -21,7 +21,7 @@ part of 'task_tracker.dart';
 ///   id: 'upload/avatar',
 ///   category: 'uploads',
 ///   label: 'Uploading avatar',
-///   work: (token, report) async {
+///   onExecute: (token, report) async {
 ///     report(TaskProgress.determinate(0));
 ///     // ... do work ...
 ///     return 'https://cdn.example.com/avatar.png';
@@ -45,7 +45,7 @@ final taskTrackerProvider = TaskTrackerProvider._();
 ///   id: 'upload/avatar',
 ///   category: 'uploads',
 ///   label: 'Uploading avatar',
-///   work: (token, report) async {
+///   onExecute: (token, report) async {
 ///     report(TaskProgress.determinate(0));
 ///     // ... do work ...
 ///     return 'https://cdn.example.com/avatar.png';
@@ -67,7 +67,7 @@ final class TaskTrackerProvider
   ///   id: 'upload/avatar',
   ///   category: 'uploads',
   ///   label: 'Uploading avatar',
-  ///   work: (token, report) async {
+  ///   onExecute: (token, report) async {
   ///     report(TaskProgress.determinate(0));
   ///     // ... do work ...
   ///     return 'https://cdn.example.com/avatar.png';
@@ -101,7 +101,7 @@ final class TaskTrackerProvider
   }
 }
 
-String _$taskTrackerHash() => r'cbb048edc333a91761a96420d784c62d003bcaee';
+String _$taskTrackerHash() => r'8935944c20ffc7f43851c7928c3f21cedc94dd33';
 
 /// Track, throttle, cancel, and retry background tasks across all features.
 ///
@@ -116,7 +116,7 @@ String _$taskTrackerHash() => r'cbb048edc333a91761a96420d784c62d003bcaee';
 ///   id: 'upload/avatar',
 ///   category: 'uploads',
 ///   label: 'Uploading avatar',
-///   work: (token, report) async {
+///   onExecute: (token, report) async {
 ///     report(TaskProgress.determinate(0));
 ///     // ... do work ...
 ///     return 'https://cdn.example.com/avatar.png';
