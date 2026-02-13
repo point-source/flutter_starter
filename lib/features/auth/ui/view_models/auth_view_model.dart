@@ -66,14 +66,13 @@ AuthService authService(Ref ref) => .new(ref.read(dioProvider));
 /// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
 /// provides a fake user with no network calls.
 @riverpod
-IAuthRepository authRepository(Ref ref) =>
-    switch (AppEnvironment.authBypass) {
-      'mock' => const MockAuthRepository(),
-      _ => AuthRepository(
-        ref.read(authServiceProvider),
-        ref.read(tokenStorageProvider),
-      ),
-    };
+IAuthRepository authRepository(Ref ref) => switch (AppEnvironment.authBypass) {
+  'mock' => const MockAuthRepository(),
+  _ => AuthRepository(
+    ref.read(authServiceProvider),
+    ref.read(tokenStorageProvider),
+  ),
+};
 
 // ---------------------------------------------------------------------------
 // Auth view model

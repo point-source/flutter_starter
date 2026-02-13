@@ -36,11 +36,11 @@ for example in "$EXAMPLES_DIR"/*.json; do
 
   if [[ -f "$target" && "$FORCE" == false ]]; then
     echo "  skip  config/$name (already exists)"
-    ((skipped++))
+    skipped=$((skipped + 1))
   else
     cp "$example" "$target"
     echo "  create config/$name"
-    ((copied++))
+    copied=$((copied + 1))
   fi
 done
 
