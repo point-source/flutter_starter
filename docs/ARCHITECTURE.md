@@ -186,6 +186,51 @@ Key operations on `Result`:
 - `getOrElse(orElse)` -- unwrap with fallback
 - `getOrNull()` -- unwrap or null
 
+## Background Task Tracking
+
+User-initiated long-running operations (file uploads, data syncs, batch processing) are
+managed by a centralised `TaskTracker` Riverpod notifier in `core/tasks/`.
+
+### Architecture
+
+```
+Feature UI                    Feature ViewModel
+    |                              |
+    | ref.watch(selector)          | channel.run<T>(...)
+    |                              |
+    v                              v
+TaskChannel                   TaskChannel
+    |                              |
+    | filters by category          | delegates with prefixed ID
+    |                              |
+    v                              v
+TaskTracker (IMap<String, TrackedTask>)
+    |
+    | manages lifecycle, throttling, cancellation
+    |
+    v
+TaskWork<T> function
+    | receives CancellationToken + progress callback
+```
+
+### Key Concepts
+
+- **TaskTracker**: `@Riverpod(keepAlive: true)` notifier holding an
+  `IMap<String, TrackedTask>` of every active or recently-terminal task.
+- **TaskChannel**: Feature-scoped plain class that binds a category, concurrency
+  limit, and defaults. Features create one channel per category and never touch
+  the tracker directly.
+- **TaskProgress**: Sealed hierarchy supporting indeterminate (spinner), determinate
+  (0.0–1.0 fraction), and phased (labelled steps with optional fraction) progress.
+- **CancellationToken**: Pure Dart cooperative cancellation — no Dio dependency.
+  Features bridge to Dio's `CancelToken` inside the work function.
+- **Throttling**: Categories with a registered `maxConcurrent` limit queue excess
+  tasks as `pending` and auto-promote them when slots open.
+- **Retry**: Tasks marked `retryable: true` retain their work factory for re-execution.
+
+For detailed patterns, code examples, and DO/DO NOT rules, see
+[Architecture Rule 13: Background Tasks](architecture-rules/13-background-tasks.md).
+
 ## Riverpod Provider Architecture
 
 Riverpod serves as both state management and dependency injection. Providers
@@ -516,3 +561,4 @@ Detailed coding patterns and rules are documented in `docs/architecture-rules/`:
 | [10](architecture-rules/10-i18n.md) | Internationalization |
 | [11](architecture-rules/11-security.md) | Security |
 | [12](architecture-rules/12-documentation.md) | Documentation standards |
+| [13](architecture-rules/13-background-tasks.md) | Background task tracking |

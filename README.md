@@ -95,6 +95,7 @@ lib/
     presentation/                    -- Shared widgets (e.g. connectivity banner)
     routing/                         -- AutoRoute router, guards
     storage/                         -- Secure storage, shared prefs, token storage
+    tasks/                           -- Background task tracking, progress, cancellation
     theme/                           -- App theme, color palette, extensions
     utils/                           -- General-purpose helpers
   features/

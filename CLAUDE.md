@@ -19,6 +19,7 @@ type-safe routing, code-generated providers, and explicit error handling.
 | Data Models | `dart_mappable` + `dart_mappable_builder` | Immutable models, JSON, copyWith |
 | Collections | `fast_immutable_collections` | IList, IMap, ISet for domain models |
 | Error Handling | Custom sealed `Result<T>` | No fpdart -- failures are values |
+| Background Tasks | Custom `TaskTracker` + `TaskChannel` | Progress, cancellation, throttling, retry |
 | Storage | `shared_preferences` + `flutter_secure_storage` | Settings + encrypted tokens |
 | Theming | `flex_color_scheme` | Material 3 light/dark |
 | i18n | `slang` + `slang_flutter` | Type-safe, namespaced keys |
@@ -41,6 +42,7 @@ lib/
     error/               # Result<T>, Failure hierarchy, AppException
     network/             # Dio provider + interceptors (auth, refresh, logging, error)
     storage/             # Token storage, secure storage, shared prefs providers
+    tasks/               # TaskTracker, TaskChannel, progress, cancellation
     routing/             # AppRouter, route guards
     theme/               # FlexColorScheme light/dark themes
     logging/             # IAppLogger, Sentry integration
@@ -113,6 +115,15 @@ entity types, repository abstraction, or failure hierarchy.
 - Feature failures: sealed class extending `Failure` (e.g., `AuthFailure`)
 - ViewModels call `result.when(success:, failure:)` to map to `AsyncValue`
 - Exceptions (`AppException`) live only in the data layer, caught by repositories
+
+### Background Tasks
+- Long-running user tasks (uploads, syncs) use `TaskTracker` in `core/tasks/`
+- Features create a `TaskChannel` provider scoping category, concurrency, retry
+- `TaskChannel.run<T>(id:, label:, work:)` submits work; returns `Future<Result<T>>`
+- Work functions receive `CancellationToken` + `void Function(TaskProgress)` callback
+- Progress types: `indeterminate`, `determinate(fraction)`, `phased(label, [fraction])`
+- Categories with `maxConcurrent` throttle parallel tasks; excess queue as `pending`
+- See `docs/architecture-rules/13-background-tasks.md` for full patterns
 
 ### Navigation
 - Routes defined in `lib/core/routing/app_router.dart`
