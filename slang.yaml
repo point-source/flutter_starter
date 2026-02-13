@@ -8,6 +8,7 @@ input_directory: lib/core/l10n
 input_file_pattern: .i18n.json
 output_directory: lib/gen
 output_file_name: strings.g.dart
+timestamp: false
 string_interpolation: dart
 key_case: camel
 key_map_case: camel
