@@ -35,7 +35,7 @@ void main() {
 
     // Stub void methods.
     when(() => mockResolver.next(any())).thenReturn(null);
-    when(() => mockResolver.redirectUntil(any())).thenReturn(null);
+    when(() => mockRouter.replaceAll(any())).thenAnswer((_) async {});
   });
 
   /// Tests for [AuthGuard.onNavigation].
@@ -55,7 +55,7 @@ void main() {
       guard.onNavigation(mockResolver, mockRouter);
 
       verify(() => mockResolver.next()).called(1);
-      verifyNever(() => mockResolver.redirectUntil(any()));
+      verifyNever(() => mockRouter.replaceAll(any()));
     });
 
     /// Redirects to [LoginRoute] when the user is not authenticated.
@@ -72,8 +72,8 @@ void main() {
 
       guard.onNavigation(mockResolver, mockRouter);
 
-      verifyNever(() => mockResolver.next());
-      verify(() => mockResolver.redirectUntil(const LoginRoute())).called(1);
+      verify(() => mockResolver.next(false)).called(1);
+      verify(() => mockRouter.replaceAll(const [LoginRoute()])).called(1);
     });
   });
 }
