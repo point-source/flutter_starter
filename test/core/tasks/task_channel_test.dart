@@ -37,7 +37,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       final state = container.read(taskTrackerProvider);
@@ -56,25 +56,17 @@ void main() {
         channel.run<String>(
           id: 'task-$i',
           label: 'Task $i',
-          work: (_, _) => completers[i].future,
+          // ignore: avoid-unsafe-collection-methods
+          onExecute: (_, _) => completers[i].future,
         );
       }
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       final state = container.read(taskTrackerProvider);
-      expect(
-        state['test-feature/task-0']?.status,
-        equals(TaskStatus.running),
-      );
-      expect(
-        state['test-feature/task-1']?.status,
-        equals(TaskStatus.running),
-      );
-      expect(
-        state['test-feature/task-2']?.status,
-        equals(TaskStatus.pending),
-      );
+      expect(state['test-feature/task-0']?.status, equals(TaskStatus.running));
+      expect(state['test-feature/task-1']?.status, equals(TaskStatus.running));
+      expect(state['test-feature/task-2']?.status, equals(TaskStatus.pending));
 
       for (final c in completers) {
         c.complete('done');
@@ -88,7 +80,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Fail',
-        work: (_, _) async => throw Exception('fail'),
+        onExecute: (_, _) async => throw Exception('fail'),
       );
 
       // Should be retryable.
@@ -101,7 +93,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Fail',
-        work: (_, _) async => throw Exception('fail'),
+        onExecute: (_, _) async => throw Exception('fail'),
         retryable: false,
       );
 
@@ -118,7 +110,7 @@ void main() {
       final future = channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (token, _) async {
+        onExecute: (token, _) async {
           workStarted.complete();
           await token.cancelled;
           token.throwIfCancelled();
@@ -138,7 +130,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       channel.dismiss('task-1');
@@ -153,7 +145,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       // Submit directly to tracker in a different category.
@@ -161,7 +153,7 @@ void main() {
         id: 'other/task-1',
         category: 'other',
         label: 'Other',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       channel.dismissCompleted();
@@ -177,13 +169,13 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
       await tracker.run<String>(
         id: 'other/task-1',
         category: 'other',
         label: 'Other',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       final state = container.read(taskTrackerProvider);
@@ -196,7 +188,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       final state = container.read(taskTrackerProvider);
@@ -217,14 +209,14 @@ void main() {
       channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) => completer.future,
+        onExecute: (_, _) => completer.future,
       );
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       expect(channel.hasRunning(container.read(taskTrackerProvider)), isTrue);
 
       completer.complete('done');
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       expect(channel.hasRunning(container.read(taskTrackerProvider)), isFalse);
     });
@@ -233,7 +225,7 @@ void main() {
       await channel.run<String>(
         id: 'task-1',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       final state = container.read(taskTrackerProvider);

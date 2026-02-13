@@ -79,8 +79,8 @@ class TrackedTask {
 
   /// Whether this task is in a terminal state.
   bool get isTerminal => switch (status) {
-    TaskStatus.completed || TaskStatus.failed || TaskStatus.cancelled => true,
-    TaskStatus.pending || TaskStatus.running => false,
+    .completed || .failed || .cancelled => true,
+    .pending || .running => false,
   };
 
   /// Create a copy with the given fields replaced.
@@ -96,17 +96,16 @@ class TrackedTask {
     Failure? Function()? failure,
     Object? Function()? result,
     DateTime? createdAt,
-  }) =>
-      TrackedTask(
-        id: id ?? this.id,
-        category: category ?? this.category,
-        label: label ?? this.label,
-        status: status ?? this.status,
-        progress: progress ?? this.progress,
-        failure: failure != null ? failure() : this.failure,
-        result: result != null ? result() : this.result,
-        createdAt: createdAt ?? this.createdAt,
-      );
+  }) => .new(
+    id: id ?? this.id,
+    category: category ?? this.category,
+    label: label ?? this.label,
+    status: status ?? this.status,
+    progress: progress ?? this.progress,
+    failure: failure != null ? failure() : this.failure,
+    result: result != null ? result() : this.result,
+    createdAt: createdAt ?? this.createdAt,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -135,6 +134,6 @@ class TrackedTask {
 
   @override
   String toString() =>
-      'TrackedTask(id: $id, category: $category, status: $status, '
+      'TrackedTask(id: $id, category: $category, status: ${status.name}, '
       'progress: $progress)';
 }

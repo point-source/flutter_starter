@@ -29,28 +29,29 @@ part 'task_tracker.g.dart';
 /// Receives a [CancellationToken] for cooperative cancellation and a
 /// [report] callback for progress updates. Returns the task's result
 /// value — the tracker wraps it in [Result] automatically.
-typedef TaskWork<T> = Future<T> Function(
-  CancellationToken token,
-  void Function(TaskProgress progress) report,
-);
+typedef TaskWork<T> =
+    Future<T> Function(
+      CancellationToken token,
+      void Function(TaskProgress progress) report,
+    );
 
 // ---------------------------------------------------------------------------
 // Internal bookkeeping
 // ---------------------------------------------------------------------------
 
-/// Store the work factory, cancellation token, and completer for a task.
+/// Store the execute callback, cancellation token, and completer for a task.
 ///
 /// Held in a separate mutable map from the public [IMap] state so that
 /// function references and tokens do not leak into the immutable state.
 class _TaskEntry<T> {
-  _TaskEntry({
-    required this.work,
+  const _TaskEntry({
+    required this.onExecute,
     required this.token,
     required this.completer,
     required this.retryable,
   });
 
-  final TaskWork<T> work;
+  final TaskWork<T> onExecute;
   final CancellationToken token;
   final Completer<Result<T>> completer;
   final bool retryable;
@@ -66,7 +67,7 @@ class _TaskEntry<T> {
     }
   }
 
-  /// Execute the work function with proper generic typing preserved.
+  /// Execute the callback with proper generic typing preserved.
   ///
   /// This method exists so that the generic [T] is captured at the
   /// call site (where `_TaskEntry<T>` is constructed) rather than
@@ -79,7 +80,7 @@ class _TaskEntry<T> {
     void Function<R>(String, _TaskEntry<R>) onCancelled,
   ) async {
     try {
-      final result = await work(
+      final result = await onExecute(
         token,
         (progress) => reportProgress(id, progress),
       );
@@ -115,7 +116,7 @@ class _TaskEntry<T> {
 ///   id: 'upload/avatar',
 ///   category: 'uploads',
 ///   label: 'Uploading avatar',
-///   work: (token, report) async {
+///   onExecute: (token, report) async {
 ///     report(TaskProgress.determinate(0));
 ///     // ... do work ...
 ///     return 'https://cdn.example.com/avatar.png';
@@ -124,7 +125,7 @@ class _TaskEntry<T> {
 /// ```
 @Riverpod(keepAlive: true)
 class TaskTracker extends _$TaskTracker {
-  final Map<String, _TaskEntry<dynamic>> _entries = {};
+  final Map<String, _TaskEntry<Object?>> _entries = {};
   final Map<String, int> _categoryLimits = {};
 
   @override
@@ -149,20 +150,20 @@ class TaskTracker extends _$TaskTracker {
 
   /// Submit a background task for tracking.
   ///
-  /// Returns a [Future] that completes with [Success] containing the work
+  /// Returns a [Future] that completes with [Success] containing the
   /// result, or [Err] containing a [Failure] if the task fails, is
   /// cancelled, or cannot be started.
   ///
   /// If a task with the same [id] already exists and is not in a terminal
   /// state, returns [Err] with [TaskAlreadyRunning].
   ///
-  /// When [retryable] is `true` the work factory is retained so the task
+  /// When [retryable] is `true` the [onExecute] callback is retained so the task
   /// can be re-run via [retry] after failure or cancellation.
   Future<Result<T>> run<T>({
     required String id,
     required String category,
     required String label,
-    required TaskWork<T> work,
+    required TaskWork<T> onExecute,
     bool retryable = false,
   }) {
     // Reject duplicate non-terminal tasks.
@@ -177,7 +178,7 @@ class TaskTracker extends _$TaskTracker {
     final completer = Completer<Result<T>>();
 
     _entries[id] = _TaskEntry<T>(
-      work: work,
+      onExecute: onExecute,
       token: token,
       completer: completer,
       retryable: retryable,
@@ -189,7 +190,7 @@ class TaskTracker extends _$TaskTracker {
         id: id,
         category: category,
         label: label,
-        status: TaskStatus.pending,
+        status: .pending,
         createdAt: DateTime.now(),
       ),
     );
@@ -203,7 +204,7 @@ class TaskTracker extends _$TaskTracker {
   ///
   /// Pending tasks are immediately transitioned to [TaskStatus.cancelled].
   /// Running tasks receive a cancellation signal via the
-  /// [CancellationToken]; the work function should cooperatively check
+  /// [CancellationToken]; the callback should cooperatively check
   /// [CancellationToken.throwIfCancelled].
   void cancel(String id) {
     final task = state[id];
@@ -212,9 +213,9 @@ class TaskTracker extends _$TaskTracker {
     final entry = _entries[id];
     entry?.token.cancel();
 
-    if (task.status == TaskStatus.pending) {
+    if (task.status == .pending) {
       // Pending tasks can be cancelled immediately.
-      state = state.add(id, task.copyWith(status: TaskStatus.cancelled));
+      state = state.add(id, task.copyWith(status: .cancelled));
       entry?.completeWithCancellation(id);
       _cleanupEntry(id, retainIfRetryable: true);
       _tryStartNext(task.category);
@@ -222,14 +223,14 @@ class TaskTracker extends _$TaskTracker {
       // Running tasks: set status for immediate UI feedback. The
       // _executeWork method handles completer completion when the
       // work function responds to cancellation.
-      state = state.add(id, task.copyWith(status: TaskStatus.cancelled));
+      state = state.add(id, task.copyWith(status: .cancelled));
     }
   }
 
   /// Retry a previously failed or cancelled task.
   ///
   /// Only works if the task was submitted with `retryable: true` and is
-  /// in a terminal state. The stored work factory is re-executed with a
+  /// in a terminal state. The stored callback is re-executed with a
   /// fresh [CancellationToken].
   Future<Result<T>> retry<T>(String id) {
     final task = state[id];
@@ -244,21 +245,19 @@ class TaskTracker extends _$TaskTracker {
 
     final entry = _entries[id];
     if (entry == null || !entry.retryable) {
-      return Future.value(
-        Err(TaskNotRetryable('Task "$id" is not retryable')),
-      );
+      return Future.value(Err(TaskNotRetryable('Task "$id" is not retryable')));
     }
 
-    // Extract work factory before removing the entry.
-    final work = entry.work as TaskWork<T>;
+    // Extract callback before removing the entry.
+    final onExecute = entry.onExecute as TaskWork<T>;
     _entries.remove(id);
 
-    return run<T>(
+    return run(
       id: id,
       category: task.category,
       label: task.label,
       retryable: true,
-      work: work,
+      onExecute: onExecute,
     );
   }
 
@@ -298,9 +297,7 @@ class TaskTracker extends _$TaskTracker {
       // No throttle — start all pending.
       final pending = state.entries
           .where(
-            (e) =>
-                e.value.category == category &&
-                e.value.status == TaskStatus.pending,
+            (e) => e.value.category == category && e.value.status == .pending,
           )
           .toList();
       for (final e in pending) {
@@ -310,18 +307,14 @@ class TaskTracker extends _$TaskTracker {
     }
 
     final runningCount = state.values
-        .where(
-          (t) => t.category == category && t.status == TaskStatus.running,
-        )
+        .where((t) => t.category == category && t.status == .running)
         .length;
 
     var available = limit - runningCount;
 
     final pending = state.entries
         .where(
-          (e) =>
-              e.value.category == category &&
-              e.value.status == TaskStatus.pending,
+          (e) => e.value.category == category && e.value.status == .pending,
         )
         .toList();
 
@@ -332,13 +325,13 @@ class TaskTracker extends _$TaskTracker {
     }
   }
 
-  /// Transition a task from pending to running and execute its work.
+  /// Transition a task from pending to running and execute its callback.
   void _startTask(String id) {
     final task = state[id];
     final entry = _entries[id];
     if (task == null || entry == null) return;
 
-    state = state.add(id, task.copyWith(status: TaskStatus.running));
+    state = state.add(id, task.copyWith(status: .running));
     // Delegate to the entry's execute method so the generic T is
     // preserved from when the entry was constructed.
     entry.execute(
@@ -353,7 +346,7 @@ class TaskTracker extends _$TaskTracker {
   /// Update a task's progress in the state map.
   void _reportProgress(String id, TaskProgress progress) {
     final task = state[id];
-    if (task == null || task.status != TaskStatus.running) return;
+    if (task == null || task.status != .running) return;
     state = state.add(id, task.copyWith(progress: progress));
   }
 
@@ -364,7 +357,7 @@ class TaskTracker extends _$TaskTracker {
     state = state.add(
       id,
       task.copyWith(
-        status: TaskStatus.completed,
+        status: .completed,
         progress: const TaskProgress.determinate(1),
         result: () => result,
       ),
@@ -382,10 +375,7 @@ class TaskTracker extends _$TaskTracker {
 
     state = state.add(
       id,
-      task.copyWith(
-        status: TaskStatus.failed,
-        failure: () => failure,
-      ),
+      task.copyWith(status: .failed, failure: () => failure),
     );
     if (!entry.completer.isCompleted) {
       entry.completer.complete(Err(failure));
@@ -398,14 +388,12 @@ class TaskTracker extends _$TaskTracker {
     final task = state[id];
     if (task == null) return;
 
-    if (task.status != TaskStatus.cancelled) {
-      state = state.add(id, task.copyWith(status: TaskStatus.cancelled));
+    if (task.status != .cancelled) {
+      state = state.add(id, task.copyWith(status: .cancelled));
     }
 
     if (!entry.completer.isCompleted) {
-      entry.completer.complete(
-        Err(TaskCancelled('Task "$id" was cancelled')),
-      );
+      entry.completer.complete(Err(TaskCancelled('Task "$id" was cancelled')));
     }
     _cleanupEntry(id, retainIfRetryable: true);
     _tryStartNext(task.category);
@@ -415,7 +403,7 @@ class TaskTracker extends _$TaskTracker {
   ///
   /// When [retainIfRetryable] is `true` the entry is kept if the task
   /// was submitted with `retryable: true`, so [retry] can re-use the
-  /// stored work factory.
+  /// stored callback.
   void _cleanupEntry(String id, {required bool retainIfRetryable}) {
     final entry = _entries[id];
     if (entry == null) return;
@@ -471,20 +459,16 @@ extension TaskMapFilters on IMap<String, TrackedTask> {
       removeWhere((_, task) => task.category != category);
 
   /// Return all running tasks in [category].
-  IMap<String, TrackedTask> runningInCategory(String category) =>
-      removeWhere(
-        (_, task) =>
-            task.category != category || task.status != TaskStatus.running,
-      );
+  IMap<String, TrackedTask> runningInCategory(String category) => removeWhere(
+    (_, task) => task.category != category || task.status != .running,
+  );
 
   /// Return all terminal tasks in [category].
   IMap<String, TrackedTask> terminalInCategory(String category) =>
-      removeWhere(
-        (_, task) => task.category != category || !task.isTerminal,
-      );
+      removeWhere((_, task) => task.category != category || !task.isTerminal);
 
   /// Whether any task in [category] is currently running.
   bool hasRunningIn(String category) => values.any(
-    (task) => task.category == category && task.status == TaskStatus.running,
+    (task) => task.category == category && task.status == .running,
   );
 }

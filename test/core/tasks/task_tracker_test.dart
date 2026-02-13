@@ -36,7 +36,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) async => 'hello',
+        onExecute: (_, _) async => 'hello',
       );
 
       expect(result, isA<Success<String>>());
@@ -51,7 +51,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) async {
+        onExecute: (_, _) async {
           workStarted.complete();
           return workComplete.future;
         },
@@ -70,7 +70,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) async => throw Exception('boom'),
+        onExecute: (_, _) async => throw Exception('boom'),
       );
 
       expect(result, isA<Err<String>>());
@@ -86,25 +86,22 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) => workComplete.future,
+        onExecute: (_, _) => workComplete.future,
       );
 
       // Wait for it to start running.
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       // Try to submit another with the same ID.
       final result = await tracker.run<String>(
         id: 'task-1',
         category: 'test',
         label: 'Test 2',
-        work: (_, _) async => 'nope',
+        onExecute: (_, _) async => 'nope',
       );
 
       expect(result, isA<Err<String>>());
-      expect(
-        (result as Err<String>).failure,
-        isA<TaskAlreadyRunning>(),
-      );
+      expect((result as Err<String>).failure, isA<TaskAlreadyRunning>());
 
       // Clean up.
       workComplete.complete('done');
@@ -116,7 +113,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'First',
-        work: (_, _) async => 'first',
+        onExecute: (_, _) async => 'first',
       );
       expect(currentState()['task-1']?.status, equals(TaskStatus.completed));
 
@@ -125,7 +122,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Second',
-        work: (_, _) async => 'second',
+        onExecute: (_, _) async => 'second',
       );
 
       expect(result, isA<Success<String>>());
@@ -141,7 +138,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, report) async {
+        onExecute: (_, report) async {
           workStarted.complete();
           report(const TaskProgress.determinate(0.5));
           await continueWork.future;
@@ -150,12 +147,13 @@ void main() {
 
       await workStarted.future;
       // Give microtask queue a chance to process.
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
       progressValues.add(currentState()['task-1']!.progress);
 
       continueWork.complete();
       await future;
 
+      // ignore: avoid-unsafe-collection-methods
       expect(progressValues.first, equals(const TaskProgress.determinate(0.5)));
       // After completion, progress is set to 1.0.
       expect(
@@ -177,7 +175,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (token, _) async {
+        onExecute: (token, _) async {
           workStarted.complete();
           // Simulate work that checks cancellation.
           await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -206,16 +204,16 @@ void main() {
         id: 'task-1',
         category: 'throttled',
         label: 'First',
-        work: (_, _) => firstComplete.future,
+        onExecute: (_, _) => firstComplete.future,
       );
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       // Second task is pending.
       final secondFuture = tracker.run<String>(
         id: 'task-2',
         category: 'throttled',
         label: 'Second',
-        work: (_, _) async => 'second',
+        onExecute: (_, _) async => 'second',
       );
 
       expect(currentState()['task-2']?.status, equals(TaskStatus.pending));
@@ -241,7 +239,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       expect(() => tracker.cancel('task-1'), returnsNormally);
@@ -263,7 +261,7 @@ void main() {
         category: 'test',
         label: 'Test',
         retryable: true,
-        work: (_, _) async {
+        onExecute: (_, _) async {
           attempts++;
           if (attempts == 1) throw Exception('fail');
           return 'success';
@@ -283,7 +281,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) async => throw Exception('fail'),
+        onExecute: (_, _) async => throw Exception('fail'),
       );
 
       final result = await tracker.retry<String>('task-1');
@@ -306,10 +304,10 @@ void main() {
         category: 'test',
         label: 'Test',
         retryable: true,
-        work: (_, _) => workComplete.future,
+        onExecute: (_, _) => workComplete.future,
       );
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       final result = await tracker.retry<String>('task-1');
       expect(result, isA<Err<String>>());
@@ -329,7 +327,7 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
       expect(currentState()['task-1'], isNotNull);
 
@@ -345,10 +343,10 @@ void main() {
         id: 'task-1',
         category: 'test',
         label: 'Test',
-        work: (_, _) => workComplete.future,
+        onExecute: (_, _) => workComplete.future,
       );
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
       tracker.dismiss('task-1');
       expect(currentState()['task-1'], isNotNull);
 
@@ -360,13 +358,13 @@ void main() {
         id: 'task-1',
         category: 'a',
         label: 'Test 1',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
       await tracker.run<String>(
         id: 'task-2',
         category: 'b',
         label: 'Test 2',
-        work: (_, _) async => throw Exception('fail'),
+        onExecute: (_, _) async => throw Exception('fail'),
       );
 
       expect(currentState().length, equals(2));
@@ -380,13 +378,13 @@ void main() {
         id: 'task-1',
         category: 'a',
         label: 'Test 1',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
       await tracker.run<String>(
         id: 'task-2',
         category: 'b',
         label: 'Test 2',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       tracker.dismissCompleted(category: 'a');
@@ -411,49 +409,32 @@ void main() {
           id: 'task-$i',
           category: 'throttled',
           label: 'Task $i',
-          work: (_, _) => completers[i].future,
+          // ignore: avoid-unsafe-collection-methods
+          onExecute: (_, _) => completers[i].future,
         );
       }
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       // First 2 should be running, last 2 pending.
-      expect(
-        currentState()['task-0']?.status,
-        equals(TaskStatus.running),
-      );
-      expect(
-        currentState()['task-1']?.status,
-        equals(TaskStatus.running),
-      );
-      expect(
-        currentState()['task-2']?.status,
-        equals(TaskStatus.pending),
-      );
-      expect(
-        currentState()['task-3']?.status,
-        equals(TaskStatus.pending),
-      );
+      expect(currentState()['task-0']?.status, equals(TaskStatus.running));
+      expect(currentState()['task-1']?.status, equals(TaskStatus.running));
+      expect(currentState()['task-2']?.status, equals(TaskStatus.pending));
+      expect(currentState()['task-3']?.status, equals(TaskStatus.pending));
 
       // Complete one — a pending task should start.
+      // ignore: avoid-unsafe-collection-methods
       completers[0].complete('done');
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
-      expect(
-        currentState()['task-0']?.status,
-        equals(TaskStatus.completed),
-      );
-      expect(
-        currentState()['task-2']?.status,
-        equals(TaskStatus.running),
-      );
-      expect(
-        currentState()['task-3']?.status,
-        equals(TaskStatus.pending),
-      );
+      expect(currentState()['task-0']?.status, equals(TaskStatus.completed));
+      expect(currentState()['task-2']?.status, equals(TaskStatus.running));
+      // Verify task-3 is still pending after task-2 was promoted.
+      expect(currentState()['task-3']?.status, same(TaskStatus.pending));
 
       // Clean up.
       for (var i = 1; i < 4; i++) {
+        // ignore: avoid-unsafe-collection-methods
         if (!completers[i].isCompleted) completers[i].complete('done');
       }
     });
@@ -469,7 +450,7 @@ void main() {
         id: 'task-1',
         category: 'throttled',
         label: 'First',
-        work: (token, _) async {
+        onExecute: (token, _) async {
           firstStarted.complete();
           await token.cancelled;
           token.throwIfCancelled();
@@ -482,7 +463,7 @@ void main() {
         id: 'task-2',
         category: 'throttled',
         label: 'Second',
-        work: (_, _) => secondComplete.future,
+        onExecute: (_, _) => secondComplete.future,
       );
 
       await firstStarted.future;
@@ -490,7 +471,7 @@ void main() {
 
       // Cancel the running task.
       tracker.cancel('task-1');
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       // The pending task should now be running.
       expect(currentState()['task-2']?.status, equals(TaskStatus.running));
@@ -507,17 +488,15 @@ void main() {
           id: 'task-$i',
           category: 'unlimited',
           label: 'Task $i',
-          work: (_, _) => completers[i].future,
+          // ignore: avoid-unsafe-collection-methods
+          onExecute: (_, _) => completers[i].future,
         );
       }
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       for (var i = 0; i < 3; i++) {
-        expect(
-          currentState()['task-$i']?.status,
-          equals(TaskStatus.running),
-        );
+        expect(currentState()['task-$i']?.status, equals(TaskStatus.running));
       }
 
       // Clean up.
@@ -537,13 +516,13 @@ void main() {
         id: 'a-1',
         category: 'a',
         label: 'A1',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
       await tracker.run<String>(
         id: 'b-1',
         category: 'b',
         label: 'B1',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       final filtered = currentState().byCategory('a');
@@ -562,17 +541,17 @@ void main() {
         id: 'task-1',
         category: 'cat',
         label: 'Running',
-        work: (_, _) => completer1.future,
+        onExecute: (_, _) => completer1.future,
       );
       // ignore: unawaited_futures
       final future2 = tracker.run<String>(
         id: 'task-2',
         category: 'cat',
         label: 'Pending',
-        work: (_, _) => completer2.future,
+        onExecute: (_, _) => completer2.future,
       );
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       final running = currentState().runningInCategory('cat');
       expect(running.length, equals(1));
@@ -594,15 +573,15 @@ void main() {
         id: 'task-1',
         category: 'cat',
         label: 'Test',
-        work: (_, _) => completer.future,
+        onExecute: (_, _) => completer.future,
       );
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       expect(currentState().hasRunningIn('cat'), isTrue);
       expect(currentState().hasRunningIn('other'), isFalse);
 
       completer.complete('done');
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       expect(currentState().hasRunningIn('cat'), isFalse);
     });
@@ -612,7 +591,7 @@ void main() {
         id: 'task-1',
         category: 'cat',
         label: 'Done',
-        work: (_, _) async => 'done',
+        onExecute: (_, _) async => 'done',
       );
 
       final completer = Completer<String>();
@@ -620,10 +599,10 @@ void main() {
         id: 'task-2',
         category: 'cat',
         label: 'Running',
-        work: (_, _) => completer.future,
+        onExecute: (_, _) => completer.future,
       );
 
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
 
       final terminal = currentState().terminalInCategory('cat');
       expect(terminal.length, equals(1));

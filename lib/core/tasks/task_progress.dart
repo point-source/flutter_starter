@@ -28,13 +28,23 @@ sealed class TaskProgress {
   const factory TaskProgress.indeterminate() = IndeterminateProgress;
 
   /// Create determinate progress with a numeric [fraction] (0.0–1.0).
-  const factory TaskProgress.determinate(double fraction) =
-      DeterminateProgress;
+  const factory TaskProgress.determinate(double fraction) = DeterminateProgress;
 
   /// Create phased progress with a human-readable [label] and optional
   /// numeric [fraction].
   const factory TaskProgress.phased(String label, [double? fraction]) =
       PhasedProgress;
+
+  @override
+  String toString() => switch (this) {
+    IndeterminateProgress() => 'TaskProgress.indeterminate()',
+    DeterminateProgress(:final percent) =>
+      'TaskProgress.determinate($percent%)',
+    PhasedProgress(:final label, :final percent) =>
+      percent == null
+          ? 'TaskProgress.phased($label)'
+          : 'TaskProgress.phased($label, $percent%)',
+  };
 }
 
 /// Progress with no numeric value — duration is unknown.
@@ -69,6 +79,9 @@ final class DeterminateProgress extends TaskProgress {
   /// The progress fraction, from 0.0 (not started) to 1.0 (complete).
   final double fraction;
 
+  /// The progress as a percentage, from 0 to 100.
+  int get percent => (fraction * 100).round();
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -96,6 +109,9 @@ final class PhasedProgress extends TaskProgress {
   /// An optional numeric fraction within the current phase (0.0–1.0).
   final double? fraction;
 
+  /// The progress as a percentage, from 0 to 100.
+  int? get percent => fraction == null ? null : (fraction! * 100).round();
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -107,5 +123,5 @@ final class PhasedProgress extends TaskProgress {
   int get hashCode => Object.hash(label, fraction);
 
   @override
-  String toString() => 'TaskProgress.phased($label, $fraction)';
+  String toString() => 'TaskProgress.phased($label, ${fraction ?? 'null'})';
 }

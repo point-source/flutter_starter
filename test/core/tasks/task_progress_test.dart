@@ -68,8 +68,7 @@ void main() {
       expect(a, isNot(equals(b)));
     });
 
-    test('instances with same label but different fractions are not equal',
-        () {
+    test('instances with same label but different fractions are not equal', () {
       const a = PhasedProgress('Uploading', 0.3);
       const b = PhasedProgress('Uploading', 0.7);
       expect(a, isNot(equals(b)));
@@ -104,9 +103,13 @@ void main() {
       const determinate = DeterminateProgress(0.5);
       const phased = PhasedProgress('Test');
 
-      expect(indeterminate, isNot(equals(determinate)));
-      expect(indeterminate, isNot(equals(phased)));
-      expect(determinate, isNot(equals(phased)));
+      final TaskProgress a = indeterminate;
+      final TaskProgress b = determinate;
+      final TaskProgress c = phased;
+
+      expect(a, isNot(equals(b)));
+      expect(a, isNot(equals(c)));
+      expect(b, isNot(equals(c)));
     });
   });
 }

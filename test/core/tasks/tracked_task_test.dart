@@ -11,22 +11,21 @@ void main() {
     String id = 'test-id',
     String category = 'test',
     String label = 'Test task',
-    TaskStatus status = TaskStatus.pending,
+    TaskStatus status = .pending,
     TaskProgress progress = const TaskProgress.indeterminate(),
     Failure? failure,
     Object? result,
     DateTime? createdAt,
-  }) =>
-      TrackedTask(
-        id: id,
-        category: category,
-        label: label,
-        status: status,
-        progress: progress,
-        failure: failure,
-        result: result,
-        createdAt: createdAt,
-      );
+  }) => .new(
+    id: id,
+    category: category,
+    label: label,
+    status: status,
+    progress: progress,
+    failure: failure,
+    result: result,
+    createdAt: createdAt,
+  );
 
   group('isTerminal', () {
     test('returns false for pending', () {
@@ -34,19 +33,19 @@ void main() {
     });
 
     test('returns false for running', () {
-      expect(makeTask(status: TaskStatus.running).isTerminal, isFalse);
+      expect(makeTask(status: .running).isTerminal, isFalse);
     });
 
     test('returns true for completed', () {
-      expect(makeTask(status: TaskStatus.completed).isTerminal, isTrue);
+      expect(makeTask(status: .completed).isTerminal, isTrue);
     });
 
     test('returns true for failed', () {
-      expect(makeTask(status: TaskStatus.failed).isTerminal, isTrue);
+      expect(makeTask(status: .failed).isTerminal, isTrue);
     });
 
     test('returns true for cancelled', () {
-      expect(makeTask(status: TaskStatus.cancelled).isTerminal, isTrue);
+      expect(makeTask(status: .cancelled).isTerminal, isTrue);
     });
   });
 
@@ -57,11 +56,11 @@ void main() {
         id: 'abc',
         category: 'uploads',
         label: 'Upload file',
-        status: TaskStatus.running,
+        status: .running,
         progress: const TaskProgress.determinate(0.5),
         createdAt: now,
       );
-      final copy = task.copyWith(status: TaskStatus.completed);
+      final copy = task.copyWith(status: .completed);
 
       expect(copy.id, equals('abc'));
       expect(copy.category, equals('uploads'));
@@ -73,7 +72,7 @@ void main() {
 
     test('explicitly clears failure with () => null', () {
       final task = makeTask(
-        status: TaskStatus.failed,
+        status: .failed,
         failure: const UnexpectedFailure('oops'),
       );
       expect(task.failure, isNotNull);
@@ -83,10 +82,7 @@ void main() {
     });
 
     test('explicitly clears result with () => null', () {
-      final task = makeTask(
-        status: TaskStatus.completed,
-        result: 'some-url',
-      );
+      final task = makeTask(status: .completed, result: 'some-url');
       expect(task.result, equals('some-url'));
 
       final copy = task.copyWith(result: () => null);
@@ -106,14 +102,13 @@ void main() {
     test('identical tasks are equal', () {
       final now = DateTime(2025);
       final a = makeTask(createdAt: now);
-      final b = makeTask(createdAt: now);
-      expect(a, equals(b));
-      expect(a.hashCode, equals(b.hashCode));
+      expect(a, equals(makeTask(createdAt: now)));
+      expect(a.hashCode, equals(makeTask(createdAt: now).hashCode));
     });
 
     test('tasks with different status are not equal', () {
       final a = makeTask();
-      final b = makeTask(status: TaskStatus.running);
+      final b = makeTask(status: .running);
       expect(a, isNot(equals(b)));
     });
 
@@ -135,7 +130,7 @@ void main() {
       final str = makeTask(
         id: 'abc',
         category: 'uploads',
-        status: TaskStatus.running,
+        status: .running,
       ).toString();
       expect(str, contains('abc'));
       expect(str, contains('uploads'));

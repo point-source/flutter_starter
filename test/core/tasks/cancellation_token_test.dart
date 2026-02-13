@@ -23,10 +23,7 @@ void main() {
 
     test('throwIfCancelled throws after cancellation', () {
       final token = CancellationToken()..cancel();
-      expect(
-        token.throwIfCancelled,
-        throwsA(isA<CancelledException>()),
-      );
+      expect(token.throwIfCancelled, throwsA(isA<CancelledException>()));
     });
 
     test('cancelled future completes after cancel', () async {
@@ -35,11 +32,11 @@ void main() {
       unawaited(token.cancelled.then((_) => completed = true));
 
       // Future should not have completed yet.
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
       expect(completed, isFalse);
 
       token.cancel();
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(.zero);
       expect(completed, isTrue);
     });
 
@@ -64,4 +61,5 @@ void main() {
 }
 
 /// Suppress lints for unawaited futures used intentionally in tests.
+// ignore: avoid-unused-parameters, no-empty-block
 void unawaited(Future<void> future) {}

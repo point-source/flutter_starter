@@ -24,7 +24,7 @@ import 'package:flutter_starter/core/tasks/tracked_task.dart';
 /// A feature-scoped wrapper around [TaskTracker].
 ///
 /// Binds [category], [maxConcurrent], and [retryable] defaults once so
-/// that callers only need to provide [id], [label], and [work].
+/// that callers only need to provide [id], [label], and [onExecute].
 class TaskChannel {
   /// Create a [TaskChannel].
   ///
@@ -60,29 +60,28 @@ class TaskChannel {
   // Mutations (delegate to TaskTracker)
   // -----------------------------------------------------------------------
 
-  /// Submit a task. Only [id], [label], and [work] are required.
+  /// Submit a task. Only [id], [label], and [onExecute] are required.
   ///
   /// [id] is auto-prefixed with [category]. [retryable] defaults to the
   /// channel's default but can be overridden per-call.
   Future<Result<T>> run<T>({
     required String id,
     required String label,
-    required TaskWork<T> work,
+    required TaskWork<T> onExecute,
     bool? retryable,
-  }) =>
-      _tracker.run<T>(
-        id: fullId(id),
-        category: category,
-        label: label,
-        retryable: retryable ?? this.retryable,
-        work: work,
-      );
+  }) => _tracker.run(
+    id: fullId(id),
+    category: category,
+    label: label,
+    retryable: retryable ?? this.retryable,
+    onExecute: onExecute,
+  );
 
   /// Cancel a task by [id] (auto-prefixed).
   void cancel(String id) => _tracker.cancel(fullId(id));
 
   /// Retry a failed or cancelled task by [id] (auto-prefixed).
-  Future<Result<T>> retry<T>(String id) => _tracker.retry<T>(fullId(id));
+  Future<Result<T>> retry<T>(String id) => _tracker.retry(fullId(id));
 
   /// Dismiss a terminal task by [id] (auto-prefixed).
   void dismiss(String id) => _tracker.dismiss(fullId(id));
