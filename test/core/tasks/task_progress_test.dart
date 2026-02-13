@@ -1,0 +1,112 @@
+/// Verify [TaskProgress] sealed hierarchy construction and equality.
+library;
+
+import 'package:flutter_starter/core/tasks/task_progress.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('IndeterminateProgress', () {
+    test('instances are equal', () {
+      const a = IndeterminateProgress();
+      const b = IndeterminateProgress();
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('factory constructor creates correct type', () {
+      const progress = TaskProgress.indeterminate();
+      expect(progress, isA<IndeterminateProgress>());
+    });
+
+    test('toString returns readable representation', () {
+      expect(
+        const IndeterminateProgress().toString(),
+        equals('TaskProgress.indeterminate()'),
+      );
+    });
+  });
+
+  group('DeterminateProgress', () {
+    test('instances with same fraction are equal', () {
+      const a = DeterminateProgress(0.5);
+      const b = DeterminateProgress(0.5);
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('instances with different fractions are not equal', () {
+      const a = DeterminateProgress(0.5);
+      const b = DeterminateProgress(0.7);
+      expect(a, isNot(equals(b)));
+    });
+
+    test('factory constructor creates correct type', () {
+      const progress = TaskProgress.determinate(0.5);
+      expect(progress, isA<DeterminateProgress>());
+      expect((progress as DeterminateProgress).fraction, equals(0.5));
+    });
+
+    test('toString returns readable representation', () {
+      expect(
+        const DeterminateProgress(0.5).toString(),
+        equals('TaskProgress.determinate(0.5)'),
+      );
+    });
+  });
+
+  group('PhasedProgress', () {
+    test('instances with same label and fraction are equal', () {
+      const a = PhasedProgress('Compressing', 0.5);
+      const b = PhasedProgress('Compressing', 0.5);
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('instances with different labels are not equal', () {
+      const a = PhasedProgress('Compressing');
+      const b = PhasedProgress('Uploading');
+      expect(a, isNot(equals(b)));
+    });
+
+    test('instances with same label but different fractions are not equal',
+        () {
+      const a = PhasedProgress('Uploading', 0.3);
+      const b = PhasedProgress('Uploading', 0.7);
+      expect(a, isNot(equals(b)));
+    });
+
+    test('instances with null fraction are equal', () {
+      const a = PhasedProgress('Compressing');
+      const b = PhasedProgress('Compressing');
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('factory constructor creates correct type', () {
+      const progress = TaskProgress.phased('Compressing', 0.5);
+      expect(progress, isA<PhasedProgress>());
+      final phased = progress as PhasedProgress;
+      expect(phased.label, equals('Compressing'));
+      expect(phased.fraction, equals(0.5));
+    });
+
+    test('toString returns readable representation', () {
+      expect(
+        const PhasedProgress('Uploading', 0.5).toString(),
+        equals('TaskProgress.phased(Uploading, 0.5)'),
+      );
+    });
+  });
+
+  group('cross-type inequality', () {
+    test('different progress types are not equal', () {
+      const indeterminate = IndeterminateProgress();
+      const determinate = DeterminateProgress(0.5);
+      const phased = PhasedProgress('Test');
+
+      expect(indeterminate, isNot(equals(determinate)));
+      expect(indeterminate, isNot(equals(phased)));
+      expect(determinate, isNot(equals(phased)));
+    });
+  });
+}
