@@ -32,3 +32,5 @@ targets:
       # slang code generation
       slang_build_runner:
         enabled: true
+        options:
+          timestamp: false
