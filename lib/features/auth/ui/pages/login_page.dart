@@ -56,31 +56,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _onLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref
+    final result = await ref
         .read(authStateRepoProvider.notifier)
         .login(_emailController.text.trim(), _passwordController.text);
+
+    if (!mounted) return;
+
+    result.when(
+      success: (_) => context.router.replaceAll([const ShellRoute()]),
+      failure: (failure) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(failure.message))),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateRepoProvider);
-
-    ref.listen(authStateRepoProvider, (previous, next) {
-      // Navigate on successful authentication
-      if (next case AsyncData(value: final state) when state.isAuthenticated) {
-        context.router.replaceAll([const ShellRoute()]);
-        return;
-      }
-
-      // Show error snackbar on failure
-      if (next case AsyncError(:final error)) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(error.toString())));
-      }
-    });
-
-    final isLoading = authState is AsyncLoading;
+    final isLoading = ref.watch(authStateRepoProvider) is AsyncLoading;
 
     return Scaffold(
       body: Center(
@@ -156,7 +148,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   TextButton(
                     onPressed: isLoading
                         ? null
-                        : () => context.router.push(const RegisterRoute()),
+                        : () =>
+                            context.router.replace(const RegisterRoute()),
                     child: const Text("Don't have an account? Register"),
                   ),
                 ],

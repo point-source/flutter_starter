@@ -99,7 +99,9 @@ void main() {
 
       // Perform login.
       final notifier = container.read(authStateRepoProvider.notifier);
-      await notifier.login('test@example.com', 'password123');
+      final result = await notifier.login('test@example.com', 'password123');
+
+      expect(result.isSuccess, isTrue);
 
       final state = container.read(authStateRepoProvider);
       expect(state.hasValue, isTrue);
@@ -124,7 +126,9 @@ void main() {
 
       // Perform login.
       final notifier = container.read(authStateRepoProvider.notifier);
-      await notifier.login('test@example.com', 'wrong-password');
+      final result = await notifier.login('test@example.com', 'wrong-password');
+
+      expect(result.isFailure, isTrue);
 
       final state = container.read(authStateRepoProvider);
       expect(state.hasError, isTrue);
@@ -157,11 +161,13 @@ void main() {
 
       // Perform registration.
       final notifier = container.read(authStateRepoProvider.notifier);
-      await notifier.register(
+      final result = await notifier.register(
         email: 'test@example.com',
         password: 'password123',
         name: 'Test User',
       );
+
+      expect(result.isSuccess, isTrue);
 
       final state = container.read(authStateRepoProvider);
       expect(state.hasValue, isTrue);
@@ -190,11 +196,13 @@ void main() {
 
       // Perform registration.
       final notifier = container.read(authStateRepoProvider.notifier);
-      await notifier.register(
+      final result = await notifier.register(
         email: 'test@example.com',
         password: 'password123',
         name: 'Test User',
       );
+
+      expect(result.isFailure, isTrue);
 
       final state = container.read(authStateRepoProvider);
       expect(state.hasError, isTrue);

@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
+import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/core/network/dio_provider.dart';
 import 'package:flutter_starter/core/storage/token_storage.dart';
 import 'package:flutter_starter/features/auth/data/repositories/auth_repository.dart';
@@ -76,7 +77,8 @@ class AuthStateRepo extends _$AuthStateRepo {
   /// Authenticate with [email] and [password].
   ///
   /// Sets state to loading, then either authenticated or error.
-  Future<void> login(String email, String password) async {
+  /// Returns a [Result] so callers can react to success or failure.
+  Future<Result<void>> login(String email, String password) async {
     state = const AsyncLoading();
     final repository = ref.read(authRepositoryProvider);
     final result = await repository.login(email, password);
@@ -85,12 +87,15 @@ class AuthStateRepo extends _$AuthStateRepo {
       success: (user) => AsyncData(AuthState.authenticated(user)),
       failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
     );
+
+    return result.map((_) {});
   }
 
   /// Create a new account with [email], [password], and [name].
   ///
   /// Sets state to loading, then either authenticated or error.
-  Future<void> register({
+  /// Returns a [Result] so callers can react to success or failure.
+  Future<Result<void>> register({
     required String email,
     required String password,
     required String name,
@@ -107,6 +112,8 @@ class AuthStateRepo extends _$AuthStateRepo {
       success: (user) => AsyncData(AuthState.authenticated(user)),
       failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
     );
+
+    return result.map((_) {});
   }
 
   /// End the current session and return to the unauthenticated state.
