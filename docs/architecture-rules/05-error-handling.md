@@ -95,9 +95,9 @@ AuthFailure _mapDioException(DioException e, StackTrace st) {
 }
 ```
 
-## ViewModel Consumption
+## Notifier Consumption
 
-ViewModels convert `Result<T>` to `AsyncValue` state:
+Notifiers (in `data/providers/` or `ui/view_models/`) convert `Result<T>` to `AsyncValue` state:
 
 ```dart
 Future<void> login(String email, String password) async {
@@ -116,7 +116,7 @@ Future<void> login(String email, String password) async {
 Views use `AsyncValue.when()` and the failure message mapper:
 
 ```dart
-final state = ref.watch(authViewModelProvider);
+final state = ref.watch(authStateRepoProvider);
 
 state.when(
   loading: () => const CircularProgressIndicator(),

@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/routing/app_router.dart';
 import 'package:flutter_starter/core/theme/app_theme.dart';
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
-import 'package:flutter_starter/features/settings/ui/view_models/theme_view_model.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
+import 'package:flutter_starter/features/settings/data/providers/theme_preference.dart';
 
 /// The root widget of the application.
 ///
@@ -23,7 +23,7 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeViewModelProvider);
+    final themeMode = ref.watch(themePreferenceProvider);
     final appRouter = ref.watch(appRouterProvider);
 
     return MaterialApp.router(

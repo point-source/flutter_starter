@@ -1,13 +1,13 @@
-/// Tests for [LocaleViewModel].
+/// Tests for [LocalePreference].
 ///
 /// Uses a [ProviderContainer] with a mocked [SharedPreferences] instance
-/// to verify that the view model correctly loads and persists the selected
-/// [Locale].
+/// to verify that the preference provider correctly loads and persists the
+/// selected [Locale].
 library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
-import 'package:flutter_starter/features/settings/ui/view_models/locale_view_model.dart';
+import 'package:flutter_starter/features/settings/data/providers/locale_preference.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,7 +25,7 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      final locale = container.read(localeViewModelProvider);
+      final locale = container.read(localePreferenceProvider);
 
       expect(locale, isNull);
     });
@@ -39,14 +39,14 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      final locale = container.read(localeViewModelProvider);
+      final locale = container.read(localePreferenceProvider);
 
       expect(locale, isNotNull);
       expect(locale!.languageCode, 'es');
     });
   });
 
-  /// Tests for [LocaleViewModel.setLocale].
+  /// Tests for [LocalePreference.setLocale].
   group('setLocale', () {
     /// Updates state and persists locale code.
     test('updates state and persists locale code', () async {
@@ -58,10 +58,10 @@ void main() {
       );
 
       container
-          .read(localeViewModelProvider.notifier)
+          .read(localePreferenceProvider.notifier)
           .setLocale(const Locale('fr'));
 
-      final locale = container.read(localeViewModelProvider);
+      final locale = container.read(localePreferenceProvider);
       expect(locale, isNotNull);
       expect(locale!.languageCode, 'fr');
 
@@ -78,9 +78,9 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      container.read(localeViewModelProvider.notifier).setLocale(null);
+      container.read(localePreferenceProvider.notifier).setLocale(null);
 
-      final locale = container.read(localeViewModelProvider);
+      final locale = container.read(localePreferenceProvider);
       expect(locale, isNull);
 
       final persistedCode = prefs.getString('locale');

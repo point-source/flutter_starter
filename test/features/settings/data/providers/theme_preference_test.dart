@@ -1,13 +1,13 @@
-/// Tests for [ThemeViewModel].
+/// Tests for [ThemePreference].
 ///
 /// Uses a [ProviderContainer] with a mocked [SharedPreferences] instance
-/// to verify that the view model correctly loads and persists the selected
-/// [ThemeMode].
+/// to verify that the preference provider correctly loads and persists the
+/// selected [ThemeMode].
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
-import 'package:flutter_starter/features/settings/ui/view_models/theme_view_model.dart';
+import 'package:flutter_starter/features/settings/data/providers/theme_preference.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,7 +25,7 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      final themeMode = container.read(themeViewModelProvider);
+      final themeMode = container.read(themePreferenceProvider);
 
       expect(themeMode, ThemeMode.system);
     });
@@ -39,7 +39,7 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      final themeMode = container.read(themeViewModelProvider);
+      final themeMode = container.read(themePreferenceProvider);
 
       expect(themeMode, ThemeMode.light);
     });
@@ -53,13 +53,13 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      final themeMode = container.read(themeViewModelProvider);
+      final themeMode = container.read(themePreferenceProvider);
 
       expect(themeMode, ThemeMode.dark);
     });
   });
 
-  /// Tests for [ThemeViewModel.setThemeMode].
+  /// Tests for [ThemePreference.setThemeMode].
   group('setThemeMode', () {
     /// Updates state and persists to SharedPreferences.
     test('updates state and persists to SharedPreferences', () async {
@@ -70,9 +70,9 @@ void main() {
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
       );
 
-      container.read(themeViewModelProvider.notifier).setThemeMode(.dark);
+      container.read(themePreferenceProvider.notifier).setThemeMode(.dark);
 
-      final themeMode = container.read(themeViewModelProvider);
+      final themeMode = container.read(themePreferenceProvider);
       expect(themeMode, ThemeMode.dark);
 
       final persistedIndex = prefs.getInt('theme_mode');

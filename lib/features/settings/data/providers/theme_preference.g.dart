@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'theme_view_model.dart';
+part of 'theme_preference.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -14,38 +14,38 @@ part of 'theme_view_model.dart';
 /// it on app startup. The [App] widget watches this provider to
 /// apply the correct theme.
 
-@ProviderFor(ThemeViewModel)
-final themeViewModelProvider = ThemeViewModelProvider._();
+@ProviderFor(ThemePreference)
+final themePreferenceProvider = ThemePreferenceProvider._();
 
 /// Notifier that manages the current [ThemeMode].
 ///
 /// Persists the selected theme to [SharedPreferences] and restores
 /// it on app startup. The [App] widget watches this provider to
 /// apply the correct theme.
-final class ThemeViewModelProvider
-    extends $NotifierProvider<ThemeViewModel, ThemeMode> {
+final class ThemePreferenceProvider
+    extends $NotifierProvider<ThemePreference, ThemeMode> {
   /// Notifier that manages the current [ThemeMode].
   ///
   /// Persists the selected theme to [SharedPreferences] and restores
   /// it on app startup. The [App] widget watches this provider to
   /// apply the correct theme.
-  ThemeViewModelProvider._()
+  ThemePreferenceProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'themeViewModelProvider',
+        name: r'themePreferenceProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$themeViewModelHash();
+  String debugGetCreateSourceHash() => _$themePreferenceHash();
 
   @$internal
   @override
-  ThemeViewModel create() => ThemeViewModel();
+  ThemePreference create() => ThemePreference();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(ThemeMode value) {
@@ -56,7 +56,7 @@ final class ThemeViewModelProvider
   }
 }
 
-String _$themeViewModelHash() => r'b09d3b3380f3fcbdb457b4f068c30b15aec3ef38';
+String _$themePreferenceHash() => r'f8c2f0efad42fa2d4b75ef2fb94d0ba32ed1941e';
 
 /// Notifier that manages the current [ThemeMode].
 ///
@@ -64,7 +64,7 @@ String _$themeViewModelHash() => r'b09d3b3380f3fcbdb457b4f068c30b15aec3ef38';
 /// it on app startup. The [App] widget watches this provider to
 /// apply the correct theme.
 
-abstract class _$ThemeViewModel extends $Notifier<ThemeMode> {
+abstract class _$ThemePreference extends $Notifier<ThemeMode> {
   ThemeMode build();
   @$mustCallSuper
   @override

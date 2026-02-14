@@ -36,12 +36,13 @@ lib/
         models/                # @MappableClass() DTOs
         mappers/               # DTO -> Entity extension methods
         repositories/          # Repository implementations
+        providers/             # @riverpod infrastructure providers (service, repo)
       domain/                  # Domain layer (optional)
         entities/              # @MappableClass() domain models
         repositories/          # Abstract repository interfaces
         failures/              # Feature-specific sealed Failure classes
       ui/                      # UI layer
-        view_models/           # @riverpod AsyncNotifier classes
+        view_models/           # @riverpod AsyncNotifier classes (optional)
         pages/                 # @RoutePage() widgets
         widgets/               # Feature-specific reusable widgets
 
@@ -75,10 +76,11 @@ docs/
 | DTO model | `features/<name>/data/models/` | `user_dto.dart` |
 | DTO-to-entity mapper | `features/<name>/data/mappers/` | `user_mapper.dart` |
 | Repository implementation | `features/<name>/data/repositories/` | `auth_repository.dart` |
+| Infrastructure providers | `features/<name>/data/providers/` | `auth_providers.dart` |
 | Domain entity | `features/<name>/domain/entities/` | `user.dart` |
 | Repository interface | `features/<name>/domain/repositories/` | `i_auth_repository.dart` |
 | Feature failure | `features/<name>/domain/failures/` | `auth_failure.dart` |
-| ViewModel (notifier) | `features/<name>/ui/view_models/` | `auth_view_model.dart` |
+| ViewModel (notifier) | `features/<name>/ui/view_models/` | `profile_view_model.dart` |
 | Page widget | `features/<name>/ui/pages/` | `login_page.dart` |
 | Feature widget | `features/<name>/ui/widgets/` | `auth_form.dart` |
 | Shared widget | `core/presentation/widgets/` | `app_snackbar.dart` |
@@ -97,7 +99,7 @@ docs/
 
 ### DO NOT
 
-- Do not import from one feature's internal files into another feature. Use providers to share data between features.
+- Do not import from one feature's `ui/` layer into another feature. Cross-feature sharing goes through `data/providers/`.
 - Do not put feature-specific logic in `core/`.
 - Do not create barrel files (`index.dart`) that re-export everything -- use explicit imports.
 - Do not manually edit generated files.

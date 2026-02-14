@@ -1,15 +1,15 @@
 /// Display application settings for theme and language preferences.
 ///
-/// Demonstrates the local-only persistence pattern: view models read
-/// from and write to [SharedPreferences] without any API calls.
+/// Demonstrates the local-only persistence pattern: preference providers
+/// read from and write to [SharedPreferences] without any API calls.
 library;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
-import 'package:flutter_starter/features/settings/ui/view_models/locale_view_model.dart';
-import 'package:flutter_starter/features/settings/ui/view_models/theme_view_model.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
+import 'package:flutter_starter/features/settings/data/providers/locale_preference.dart';
+import 'package:flutter_starter/features/settings/data/providers/theme_preference.dart';
 import 'package:flutter_starter/gen/strings.g.dart';
 
 /// The settings page for configuring theme and language.
@@ -20,8 +20,8 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentTheme = ref.watch(themeViewModelProvider);
-    final currentLocale = ref.watch(localeViewModelProvider);
+    final currentTheme = ref.watch(themePreferenceProvider);
+    final currentLocale = ref.watch(localePreferenceProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.settings.title)),
@@ -39,7 +39,7 @@ class SettingsPage extends ConsumerWidget {
             groupValue: currentTheme,
             onChanged: (mode) {
               if (mode != null) {
-                ref.read(themeViewModelProvider.notifier).setThemeMode(mode);
+                ref.read(themePreferenceProvider.notifier).setThemeMode(mode);
               }
             },
             child: Column(
@@ -76,7 +76,7 @@ class SettingsPage extends ConsumerWidget {
               final locale = (code == null || code.isEmpty)
                   ? null
                   : Locale(code);
-              ref.read(localeViewModelProvider.notifier).setLocale(locale);
+              ref.read(localePreferenceProvider.notifier).setLocale(locale);
             },
             child: Column(
               children: [
@@ -96,7 +96,7 @@ class SettingsPage extends ConsumerWidget {
               icon: const Icon(Icons.logout),
               label: Text(t.auth.logout),
               onPressed: () {
-                ref.read(authViewModelProvider.notifier).logout();
+                ref.read(authStateRepoProvider.notifier).logout();
               },
             ),
           ),

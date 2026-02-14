@@ -1,15 +1,15 @@
-/// Tests for [AuthViewModel].
+/// Tests for [AuthStateRepo].
 ///
 /// Uses a [ProviderContainer] with a mocked [IAuthRepository] to verify
-/// that the view model correctly translates repository results into
+/// that the notifier correctly translates repository results into
 /// [AsyncValue<AuthState>] transitions.
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 import 'package:flutter_starter/features/auth/domain/entities/user.dart';
 import 'package:flutter_starter/features/auth/domain/failures/auth_failure.dart';
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -40,7 +40,7 @@ void main() {
       final container = createAuthContainer();
 
       // Read the provider to trigger build().
-      final future = container.read(authViewModelProvider.future);
+      final future = container.read(authStateRepoProvider.future);
       final state = await future;
 
       expect(state.isAuthenticated, isFalse);
@@ -57,7 +57,7 @@ void main() {
 
       final container = createAuthContainer();
 
-      final state = await container.read(authViewModelProvider.future);
+      final state = await container.read(authStateRepoProvider.future);
 
       expect(state.isAuthenticated, isTrue);
       expect(state.user, isNotNull);
@@ -72,13 +72,13 @@ void main() {
 
       final container = createAuthContainer();
 
-      final state = await container.read(authViewModelProvider.future);
+      final state = await container.read(authStateRepoProvider.future);
 
       expect(state.isAuthenticated, isFalse);
     });
   });
 
-  /// Tests for [AuthViewModel.login].
+  /// Tests for [AuthStateRepo.login].
   group('login', () {
     /// Transitions to authenticated state on a successful login.
     test('transitions to authenticated on success', () async {
@@ -95,13 +95,13 @@ void main() {
       final container = createAuthContainer();
 
       // Wait for build() to complete.
-      await container.read(authViewModelProvider.future);
+      await container.read(authStateRepoProvider.future);
 
       // Perform login.
-      final notifier = container.read(authViewModelProvider.notifier);
+      final notifier = container.read(authStateRepoProvider.notifier);
       await notifier.login('test@example.com', 'password123');
 
-      final state = container.read(authViewModelProvider);
+      final state = container.read(authStateRepoProvider);
       expect(state.hasValue, isTrue);
       expect(state.requireValue.isAuthenticated, isTrue);
       expect(state.requireValue.user!.email, 'test@example.com');
@@ -120,19 +120,19 @@ void main() {
       final container = createAuthContainer();
 
       // Wait for build() to complete.
-      await container.read(authViewModelProvider.future);
+      await container.read(authStateRepoProvider.future);
 
       // Perform login.
-      final notifier = container.read(authViewModelProvider.notifier);
+      final notifier = container.read(authStateRepoProvider.notifier);
       await notifier.login('test@example.com', 'wrong-password');
 
-      final state = container.read(authViewModelProvider);
+      final state = container.read(authStateRepoProvider);
       expect(state.hasError, isTrue);
       expect(state.error, isA<InvalidCredentials>());
     });
   });
 
-  /// Tests for [AuthViewModel.register].
+  /// Tests for [AuthStateRepo.register].
   group('register', () {
     /// Transitions to authenticated state on a successful registration.
     test('transitions to authenticated on success', () async {
@@ -153,17 +153,17 @@ void main() {
       final container = createAuthContainer();
 
       // Wait for build() to complete.
-      await container.read(authViewModelProvider.future);
+      await container.read(authStateRepoProvider.future);
 
       // Perform registration.
-      final notifier = container.read(authViewModelProvider.notifier);
+      final notifier = container.read(authStateRepoProvider.notifier);
       await notifier.register(
         email: 'test@example.com',
         password: 'password123',
         name: 'Test User',
       );
 
-      final state = container.read(authViewModelProvider);
+      final state = container.read(authStateRepoProvider);
       expect(state.hasValue, isTrue);
       expect(state.requireValue.isAuthenticated, isTrue);
       expect(state.requireValue.user!.email, 'test@example.com');
@@ -186,23 +186,23 @@ void main() {
       final container = createAuthContainer();
 
       // Wait for build() to complete.
-      await container.read(authViewModelProvider.future);
+      await container.read(authStateRepoProvider.future);
 
       // Perform registration.
-      final notifier = container.read(authViewModelProvider.notifier);
+      final notifier = container.read(authStateRepoProvider.notifier);
       await notifier.register(
         email: 'test@example.com',
         password: 'password123',
         name: 'Test User',
       );
 
-      final state = container.read(authViewModelProvider);
+      final state = container.read(authStateRepoProvider);
       expect(state.hasError, isTrue);
       expect(state.error, isA<EmailAlreadyInUse>());
     });
   });
 
-  /// Tests for [AuthViewModel.logout].
+  /// Tests for [AuthStateRepo.logout].
   group('logout', () {
     /// Transitions to unauthenticated state after logout.
     test('transitions to unauthenticated', () async {
@@ -219,14 +219,14 @@ void main() {
       final container = createAuthContainer();
 
       // Wait for build() -- should be authenticated.
-      final initialState = await container.read(authViewModelProvider.future);
+      final initialState = await container.read(authStateRepoProvider.future);
       expect(initialState.isAuthenticated, isTrue);
 
       // Perform logout.
-      final notifier = container.read(authViewModelProvider.notifier);
+      final notifier = container.read(authStateRepoProvider.notifier);
       await notifier.logout();
 
-      final state = container.read(authViewModelProvider);
+      final state = container.read(authStateRepoProvider);
       expect(state.hasValue, isTrue);
       expect(state.requireValue.isAuthenticated, isFalse);
       expect(state.requireValue.user, isNull);

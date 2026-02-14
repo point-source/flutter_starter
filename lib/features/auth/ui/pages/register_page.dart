@@ -10,11 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_starter/core/routing/app_router.dart';
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 
 /// Page that collects account details and registers a new user.
 ///
-/// Uses [AuthViewModel.register] to create the account and watches
+/// Uses [authStateRepoProvider] to create the account and watches
 /// the provider to react to loading, success, and error states.
 @RoutePage()
 class RegisterPage extends ConsumerStatefulWidget {
@@ -43,7 +43,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     await ref
-        .read(authViewModelProvider.notifier)
+        .read(authStateRepoProvider.notifier)
         .register(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -53,9 +53,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authViewModelProvider);
+    final authState = ref.watch(authStateRepoProvider);
 
-    ref.listen(authViewModelProvider, (previous, next) {
+    ref.listen(authStateRepoProvider, (previous, next) {
       // Navigate on successful authentication
       if (next case AsyncData(value: final state) when state.isAuthenticated) {
         context.router.replaceAll([const ShellRoute()]);

@@ -19,15 +19,22 @@ test/
   features/
     auth/
       data/
+        providers/
+          auth_providers_test.dart    # Tests for AuthStateRepo notifier
         repositories/
           auth_repository_test.dart
-      ui/
-        view_models/
-          auth_view_model_test.dart
     profile/
       data/
         repositories/
           profile_repository_test.dart
+      ui/
+        view_models/
+          profile_view_model_test.dart
+    settings/
+      data/
+        providers/
+          theme_preference_test.dart
+          locale_preference_test.dart
   helpers/
     test_utils.dart       # ProviderContainer setup helpers
     mocks.dart            # Shared mock classes
@@ -137,9 +144,9 @@ void main() {
 }
 ```
 
-## ViewModel Tests
+## Notifier / ViewModel Tests
 
-Test ViewModels using `ProviderContainer` with mock overrides:
+Test notifiers (from `data/providers/` or `ui/view_models/`) using `ProviderContainer` with mock overrides. Override the repository provider from `data/providers/`:
 
 ```dart
 void main() {
@@ -162,11 +169,11 @@ void main() {
     );
 
     // Act
-    final notifier = container.read(authViewModelProvider.notifier);
+    final notifier = container.read(authStateRepoProvider.notifier);
     await notifier.login('test@example.com', 'password');
 
     // Assert
-    final state = container.read(authViewModelProvider);
+    final state = container.read(authStateRepoProvider);
     expect(state.value?.isAuthenticated, isTrue);
     expect(state.value?.user?.email, equals('test@example.com'));
   });

@@ -104,24 +104,23 @@ Widget build(BuildContext context) {
 
 ## Theme Mode Management
 
-The `ThemeViewModel` persists the user's theme preference:
+The `ThemePreference` provider persists the user's theme preference in
+`features/settings/data/providers/theme_preference.dart`:
 
 ```dart
-@riverpod
-class ThemeViewModel extends _$ThemeViewModel {
+@Riverpod(keepAlive: true)
+class ThemePreference extends _$ThemePreference {
   @override
   ThemeMode build() {
     final prefs = ref.read(sharedPrefsProvider);
-    final stored = prefs.getString('theme_mode');
-    return ThemeMode.values.firstWhere(
-      (m) => m.name == stored,
-      orElse: () => ThemeMode.system,
-    );
+    final index = prefs.getInt('theme_mode') ?? 0;
+    final safeIndex = index.clamp(0, ThemeMode.values.length - 1);
+    return ThemeMode.values.elementAt(safeIndex);
   }
 
   void setThemeMode(ThemeMode mode) {
     state = mode;
-    ref.read(sharedPrefsProvider).setString('theme_mode', mode.name);
+    ref.read(sharedPrefsProvider).setInt('theme_mode', mode.index);
   }
 }
 ```
@@ -132,7 +131,7 @@ class ThemeViewModel extends _$ThemeViewModel {
 class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeViewModelProvider);
+    final themeMode = ref.watch(themePreferenceProvider);
 
     return MaterialApp.router(
       theme: AppTheme.light,

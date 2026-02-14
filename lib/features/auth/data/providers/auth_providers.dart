@@ -1,13 +1,15 @@
-/// Manage authentication state and expose auth operations to the UI.
+/// Auth infrastructure providers and the reactive auth state notifier.
 ///
-/// Provides the [AuthViewModel] notifier and several companion providers:
-/// - [authServiceProvider] -- the retrofit [AuthService]
-/// - [authRepositoryProvider] -- the [IAuthRepository] implementation
-/// - [authStateProvider] -- a simple boolean indicating whether the user
-///   is authenticated, consumed by [AuthGuard]
+/// This file is the **public API** for authentication state. External
+/// consumers (route guards, other features, [App] widget) import from
+/// here — never from `ui/view_models/`.
 ///
-/// The view model wraps [IAuthRepository] calls in [AsyncValue] so that
-/// the UI can react to loading, data, and error states declaratively.
+/// Providers:
+/// - [authServiceProvider] — retrofit [AuthService]
+/// - [authRepositoryProvider] — [IAuthRepository] implementation
+/// - [authStateRepoProvider] — reactive [AuthState] with mutations
+/// - [isAuthenticatedProvider] — simple boolean for guards
+/// - [authStateListenableProvider] — [Listenable] for router reevaluation
 library;
 
 import 'package:flutter/foundation.dart';
@@ -17,41 +19,11 @@ import 'package:flutter_starter/core/storage/token_storage.dart';
 import 'package:flutter_starter/features/auth/data/repositories/auth_repository.dart';
 import 'package:flutter_starter/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:flutter_starter/features/auth/data/services/auth_service.dart';
-import 'package:flutter_starter/features/auth/domain/entities/user.dart';
+import 'package:flutter_starter/features/auth/domain/entities/auth_state.dart';
 import 'package:flutter_starter/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'auth_view_model.g.dart';
-
-// ---------------------------------------------------------------------------
-// Auth state
-// ---------------------------------------------------------------------------
-
-/// Represent the current authentication state.
-///
-/// Use the named factories to create the appropriate variant and read
-/// [isAuthenticated] / [user] to inspect the state without pattern matching.
-class AuthState {
-  /// Create an [AuthState] with the given authentication status.
-  const AuthState._({required this.isAuthenticated, this.user});
-
-  /// Create an [AuthState] for a fresh session with no check performed.
-  factory AuthState.initial() => const AuthState._(isAuthenticated: false);
-
-  /// Create an [AuthState] for an authenticated session with [user].
-  factory AuthState.authenticated(User user) =>
-      AuthState._(user: user, isAuthenticated: true);
-
-  /// Create an [AuthState] for an unauthenticated (logged-out) session.
-  factory AuthState.unauthenticated() =>
-      const AuthState._(isAuthenticated: false);
-
-  /// Whether the user is currently authenticated.
-  final bool isAuthenticated;
-
-  /// The authenticated user's profile, or `null` if unauthenticated.
-  final User? user;
-}
+part 'auth_providers.g.dart';
 
 // ---------------------------------------------------------------------------
 // Infrastructure providers
@@ -75,16 +47,16 @@ IAuthRepository authRepository(Ref ref) => switch (AppEnvironment.authBypass) {
 };
 
 // ---------------------------------------------------------------------------
-// Auth view model
+// Auth state notifier (the public API for auth state)
 // ---------------------------------------------------------------------------
 
-/// Notifier that manages the authentication lifecycle.
+/// Notifier that owns the reactive [AuthState] for the entire app.
 ///
-/// The [build] method checks for an existing session on startup.
-/// [login], [register], and [logout] mutate the state and delegate
-/// to [IAuthRepository].
+/// This is the single source of truth for authentication state. External
+/// consumers (guards, other features) watch this provider. Auth UI pages
+/// also use it directly for mutations and loading/error states.
 @Riverpod(keepAlive: true)
-class AuthViewModel extends _$AuthViewModel {
+class AuthStateRepo extends _$AuthStateRepo {
   @override
   Future<AuthState> build() async {
     final repository = ref.read(authRepositoryProvider);
@@ -147,7 +119,7 @@ class AuthViewModel extends _$AuthViewModel {
 }
 
 // ---------------------------------------------------------------------------
-// Derived provider
+// Derived providers
 // ---------------------------------------------------------------------------
 
 /// Expose whether the user is authenticated as a simple boolean.
@@ -155,12 +127,12 @@ class AuthViewModel extends _$AuthViewModel {
 /// Consumed by [AuthGuard] and other components that need a synchronous
 /// check without caring about the full [AuthState].
 @riverpod
-bool authState(Ref ref) {
-  final viewModel = ref.watch(authViewModelProvider);
-  return viewModel.whenOrNull(data: (state) => state.isAuthenticated) ?? false;
+bool isAuthenticated(Ref ref) {
+  final authAsync = ref.watch(authStateRepoProvider);
+  return authAsync.whenOrNull(data: (state) => state.isAuthenticated) ?? false;
 }
 
-/// A [Listenable] that fires whenever [authStateProvider] changes.
+/// A [Listenable] that fires whenever [isAuthenticatedProvider] changes.
 ///
 /// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
 /// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
@@ -169,7 +141,7 @@ bool authState(Ref ref) {
 AuthStateListenable authStateListenable(Ref ref) {
   final notifier = AuthStateListenable();
   ref
-    ..listen(authStateProvider, (_, _) => notifier.notify())
+    ..listen(isAuthenticatedProvider, (_, _) => notifier.notify())
     ..onDispose(notifier.dispose);
   return notifier;
 }

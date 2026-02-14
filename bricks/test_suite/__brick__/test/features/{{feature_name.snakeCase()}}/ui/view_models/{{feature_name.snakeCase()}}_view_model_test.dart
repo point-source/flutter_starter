@@ -8,6 +8,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/providers/{{feature_name.snakeCase()}}_providers.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/entities/{{feature_name.snakeCase()}}.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/failures/{{feature_name.snakeCase()}}_failure.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/ui/view_models/{{feature_name.snakeCase()}}_view_model.dart';

@@ -8,9 +8,11 @@ All providers use the **`@riverpod` / `@Riverpod` annotation** from `riverpod_ge
 
 ### Functional providers (DI wiring)
 
-Use annotated top-level functions for dependency injection. These create and return a dependency.
+Use annotated top-level functions for dependency injection. These live in `data/providers/`.
 
 ```dart
+// data/providers/auth_providers.dart
+
 // Service provider -- creates a Retrofit service
 @riverpod
 AuthService authService(Ref ref) {
@@ -27,16 +29,17 @@ IAuthRepository authRepository(Ref ref) {
 }
 ```
 
-### Class-based notifier providers (state management)
+### Class-based notifier providers (shared state)
 
-Use annotated classes extending the generated `_$ClassName` for stateful logic.
+Use annotated classes extending the generated `_$ClassName` for shared stateful logic.
+These live in `data/providers/` when state is shared across features or consumed by core.
 
 ```dart
+// data/providers/auth_providers.dart
 @Riverpod(keepAlive: true)
-class AuthViewModel extends _$AuthViewModel {
+class AuthStateRepo extends _$AuthStateRepo {
   @override
   Future<AuthState> build() async {
-    // Initial state computation
     final result = await ref.read(authRepositoryProvider).getCurrentUser();
     return result.when(
       success: (user) => user != null
@@ -57,15 +60,38 @@ class AuthViewModel extends _$AuthViewModel {
 }
 ```
 
+### Page-specific ViewModels (optional)
+
+ViewModels live in `ui/view_models/` and are only created when a page needs
+significant data transformation between the domain and the UI. Do not create
+passthrough ViewModels -- pages can watch `data/providers/` directly.
+
+```dart
+// ui/view_models/profile_view_model.dart
+@riverpod
+class ProfileViewModel extends _$ProfileViewModel {
+  @override
+  Future<Profile> build() async {
+    final repository = ref.read(profileRepositoryProvider);
+    final result = await repository.getProfile();
+    return result.when(
+      success: (profile) => profile,
+      failure: (failure) => throw FailureException(failure),
+    );
+  }
+}
+```
+
 ## Naming Conventions
 
-| Provider type | Annotation | Generated name | Example |
-|--------------|-----------|---------------|---------|
-| Service | `@riverpod` (function) | `<functionName>Provider` | `authServiceProvider` |
-| Repository | `@riverpod` (function) | `<functionName>Provider` | `authRepositoryProvider` |
-| ViewModel | `@Riverpod()` (class) | `<className>Provider` | `authViewModelProvider` |
-| Derived state | `@riverpod` (function) | `<functionName>Provider` | `authStateProvider` |
-| Infrastructure | `@Riverpod(keepAlive: true)` | `<name>Provider` | `dioProvider` |
+| Provider type | Annotation | Location | Generated name | Example |
+|--------------|-----------|----------|---------------|---------|
+| Service | `@riverpod` (function) | `data/providers/` | `<functionName>Provider` | `authServiceProvider` |
+| Repository | `@riverpod` (function) | `data/providers/` | `<functionName>Provider` | `authRepositoryProvider` |
+| Shared state notifier | `@Riverpod(keepAlive: true)` (class) | `data/providers/` | `<className>Provider` | `authStateRepoProvider` |
+| Derived state | `@riverpod` (function) | `data/providers/` | `<functionName>Provider` | `isAuthenticatedProvider` |
+| Page ViewModel | `@riverpod` (class) | `ui/view_models/` | `<className>Provider` | `profileViewModelProvider` |
+| App infrastructure | `@Riverpod(keepAlive: true)` | `core/` | `<name>Provider` | `dioProvider` |
 
 ## keepAlive Rules
 
@@ -75,8 +101,9 @@ Use `@Riverpod(keepAlive: true)` **only** for providers that must survive the en
 |----------|-----------|--------|
 | `dioProvider` | `true` | Shared HTTP client, expensive to recreate |
 | `appRouterProvider` | `true` | Router must persist across navigation |
-| `authViewModelProvider` | `true` | Auth state must survive screen changes |
+| `authStateRepoProvider` | `true` | Auth state must survive screen changes |
 | `sharedPrefsProvider` | `true` | Initialized once at startup |
+| `themePreferenceProvider` | `true` | Theme persists across navigation |
 | Feature services | `false` | Auto-dispose when feature is not in use |
 | Feature repositories | `false` | Auto-dispose when feature is not in use |
 | Feature view models | `false` | Auto-dispose when user navigates away |
@@ -87,10 +114,10 @@ Use `@Riverpod(keepAlive: true)` **only** for providers that must survive the en
 
 ```dart
 // WATCH for reactive rebuilds on state changes
-final state = ref.watch(authViewModelProvider);
+final state = ref.watch(authStateRepoProvider);
 
 // READ for one-time access in callbacks
-onPressed: () => ref.read(authViewModelProvider.notifier).login(email, password),
+onPressed: () => ref.read(authStateRepoProvider.notifier).login(email, password),
 ```
 
 ### In providers and notifiers (Ref)
@@ -104,9 +131,9 @@ AuthService authService(Ref ref) {
 
 // WATCH in derived providers that should rebuild
 @riverpod
-bool authState(Ref ref) {
-  final viewModel = ref.watch(authViewModelProvider); // watch for reactivity
-  return viewModel.whenOrNull(data: (s) => s.isAuthenticated) ?? false;
+bool isAuthenticated(Ref ref) {
+  final authAsync = ref.watch(authStateRepoProvider); // watch for reactivity
+  return authAsync.whenOrNull(data: (s) => s.isAuthenticated) ?? false;
 }
 ```
 
@@ -117,7 +144,8 @@ bool authState(Ref ref) {
 - Use `ref.watch` in `build` methods and derived providers for reactivity.
 - Use `ref.read` in event handlers, callbacks, and one-time DI resolution.
 - Return abstract interfaces from repository providers (`IAuthRepository`, not `AuthRepository`).
-- Place provider definitions in the same file as the class they provide (e.g., service provider in the view model file, or its own dedicated file).
+- Place infrastructure providers (services, repositories) in `data/providers/`, not in view model files.
+- Cross-feature sharing goes through `data/providers/`, never `ui/view_models/`.
 
 ## DO NOT
 

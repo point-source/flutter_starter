@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'theme_view_model.g.dart';
+part 'theme_preference.g.dart';
 
 /// Key used to persist the theme mode index in [SharedPreferences].
 const _kThemeModeKey = 'theme_mode';
@@ -19,7 +19,7 @@ const _kThemeModeKey = 'theme_mode';
 /// it on app startup. The [App] widget watches this provider to
 /// apply the correct theme.
 @Riverpod(keepAlive: true)
-class ThemeViewModel extends _$ThemeViewModel {
+class ThemePreference extends _$ThemePreference {
   @override
   ThemeMode build() {
     final prefs = ref.read(sharedPrefsProvider);

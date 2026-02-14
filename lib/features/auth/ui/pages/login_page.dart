@@ -11,11 +11,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/routing/app_router.dart';
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 
 /// Page that collects credentials and authenticates the user.
 ///
-/// Uses [AuthViewModel.login] to perform the sign-in and watches
+/// Uses [authStateRepoProvider] to perform the sign-in and watches
 /// the provider to react to loading, success, and error states.
 @RoutePage()
 class LoginPage extends ConsumerStatefulWidget {
@@ -57,15 +57,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     await ref
-        .read(authViewModelProvider.notifier)
+        .read(authStateRepoProvider.notifier)
         .login(_emailController.text.trim(), _passwordController.text);
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authViewModelProvider);
+    final authState = ref.watch(authStateRepoProvider);
 
-    ref.listen(authViewModelProvider, (previous, next) {
+    ref.listen(authStateRepoProvider, (previous, next) {
       // Navigate on successful authentication
       if (next case AsyncData(value: final state) when state.isAuthenticated) {
         context.router.replaceAll([const ShellRoute()]);

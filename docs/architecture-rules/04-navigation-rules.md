@@ -57,7 +57,7 @@ The `replaceInRouteName: 'Page|Screen,Route'` config means `LoginPage` generates
 
 ### AuthGuard
 
-The `AuthGuard` protects authenticated routes by checking `authStateProvider`:
+The `AuthGuard` protects authenticated routes by checking `isAuthenticatedProvider`:
 
 ```dart
 class AuthGuard extends AutoRouteGuard {
@@ -66,11 +66,12 @@ class AuthGuard extends AutoRouteGuard {
 
   @override
   void onNavigation(NavigationResolver resolver, StackRouter router) {
-    final isAuthenticated = _ref.read(authStateProvider);
+    final isAuthenticated = _ref.read(isAuthenticatedProvider);
     if (isAuthenticated) {
       resolver.next();
     } else {
-      resolver.redirect(const LoginRoute());
+      resolver.next(false);
+      router.replaceAll(const [LoginRoute()]);
     }
   }
 }

@@ -1,10 +1,10 @@
 /// Provide dashboard state derived from the current authentication session.
 ///
-/// Reads the [AuthViewModel] to extract the authenticated user's profile
+/// Reads [authStateRepoProvider] to extract the authenticated user's profile
 /// and exposes it as a simple string for the welcome greeting.
 library;
 
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'dashboard_view_model.g.dart';
@@ -18,7 +18,7 @@ part 'dashboard_view_model.g.dart';
 class DashboardViewModel extends _$DashboardViewModel {
   @override
   String? build() {
-    final authAsync = ref.watch(authViewModelProvider);
+    final authAsync = ref.watch(authStateRepoProvider);
     return authAsync.whenOrNull(data: (state) => state.user?.name);
   }
 }

@@ -10,6 +10,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/features/profile/data/providers/profile_providers.dart';
 import 'package:flutter_starter/features/profile/domain/failures/profile_failure.dart';
 import 'package:flutter_starter/features/profile/ui/view_models/profile_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'locale_view_model.g.dart';
+part 'locale_preference.g.dart';
 
 /// Key used to persist the locale code in [SharedPreferences].
 const _kLocaleKey = 'locale';
@@ -19,7 +19,7 @@ const _kLocaleKey = 'locale';
 /// restores it on app startup. Returns `null` to use the system
 /// locale by default.
 @Riverpod(keepAlive: true)
-class LocaleViewModel extends _$LocaleViewModel {
+class LocalePreference extends _$LocalePreference {
   @override
   Locale? build() {
     final prefs = ref.read(sharedPrefsProvider);

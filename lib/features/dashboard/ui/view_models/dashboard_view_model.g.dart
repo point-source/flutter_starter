@@ -57,7 +57,7 @@ final class DashboardViewModelProvider
 }
 
 String _$dashboardViewModelHash() =>
-    r'5894f059c8487beacf8a9f413e68716e331e64b6';
+    r'286e06bd39c270b9066b2b3f4c8ce142c98ac0d7';
 
 /// View model for the dashboard page.
 ///

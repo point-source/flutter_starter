@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'locale_view_model.dart';
+part of 'locale_preference.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -14,38 +14,38 @@ part of 'locale_view_model.dart';
 /// restores it on app startup. Returns `null` to use the system
 /// locale by default.
 
-@ProviderFor(LocaleViewModel)
-final localeViewModelProvider = LocaleViewModelProvider._();
+@ProviderFor(LocalePreference)
+final localePreferenceProvider = LocalePreferenceProvider._();
 
 /// Notifier that manages the current [Locale].
 ///
 /// Persists the selected locale code to [SharedPreferences] and
 /// restores it on app startup. Returns `null` to use the system
 /// locale by default.
-final class LocaleViewModelProvider
-    extends $NotifierProvider<LocaleViewModel, Locale?> {
+final class LocalePreferenceProvider
+    extends $NotifierProvider<LocalePreference, Locale?> {
   /// Notifier that manages the current [Locale].
   ///
   /// Persists the selected locale code to [SharedPreferences] and
   /// restores it on app startup. Returns `null` to use the system
   /// locale by default.
-  LocaleViewModelProvider._()
+  LocalePreferenceProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'localeViewModelProvider',
+        name: r'localePreferenceProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$localeViewModelHash();
+  String debugGetCreateSourceHash() => _$localePreferenceHash();
 
   @$internal
   @override
-  LocaleViewModel create() => LocaleViewModel();
+  LocalePreference create() => LocalePreference();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(Locale? value) {
@@ -56,7 +56,7 @@ final class LocaleViewModelProvider
   }
 }
 
-String _$localeViewModelHash() => r'60390e3c9ea457d1ea52c89bb5cab4a3d1532ee3';
+String _$localePreferenceHash() => r'b05a3d1f69040d56ded8301c37b53c216e8b94a7';
 
 /// Notifier that manages the current [Locale].
 ///
@@ -64,7 +64,7 @@ String _$localeViewModelHash() => r'60390e3c9ea457d1ea52c89bb5cab4a3d1532ee3';
 /// restores it on app startup. Returns `null` to use the system
 /// locale by default.
 
-abstract class _$LocaleViewModel extends $Notifier<Locale?> {
+abstract class _$LocalePreference extends $Notifier<Locale?> {
   Locale? build();
   @$mustCallSuper
   @override

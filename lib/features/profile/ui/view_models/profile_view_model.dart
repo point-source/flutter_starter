@@ -1,35 +1,17 @@
 /// Manage profile state and expose CRUD operations to the UI.
 ///
-/// Provides the [ProfileViewModel] notifier and companion providers
-/// for the [ProfileService] and [IProfileRepository].
+/// Provides the [ProfileViewModel] notifier that the profile page
+/// watches to react to loading, data, and error states. Infrastructure
+/// providers ([profileServiceProvider], [profileRepositoryProvider])
+/// live in `data/providers/profile_providers.dart`.
 library;
 
 import 'package:flutter_starter/core/error/failures.dart';
-import 'package:flutter_starter/core/network/dio_provider.dart';
-import 'package:flutter_starter/features/profile/data/repositories/profile_repository.dart';
-import 'package:flutter_starter/features/profile/data/services/profile_service.dart';
+import 'package:flutter_starter/features/profile/data/providers/profile_providers.dart';
 import 'package:flutter_starter/features/profile/domain/entities/profile.dart';
-import 'package:flutter_starter/features/profile/domain/repositories/i_profile_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profile_view_model.g.dart';
-
-// ---------------------------------------------------------------------------
-// Infrastructure providers
-// ---------------------------------------------------------------------------
-
-/// Create a [ProfileService] backed by the application's [Dio] instance.
-@riverpod
-ProfileService profileService(Ref ref) => .new(ref.read(dioProvider));
-
-/// Create an [IProfileRepository] wired to the profile service.
-@riverpod
-IProfileRepository profileRepository(Ref ref) =>
-    ProfileRepository(ref.read(profileServiceProvider));
-
-// ---------------------------------------------------------------------------
-// Profile view model
-// ---------------------------------------------------------------------------
 
 /// Notifier that manages the profile lifecycle.
 ///

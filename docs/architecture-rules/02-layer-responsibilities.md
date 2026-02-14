@@ -15,35 +15,35 @@ Each feature is organized into up to three layers: **UI**, **Domain**, and **Dat
        ^
        | implements
        |
-  Data Layer (repositories, services, DTOs, mappers)
+  Data Layer (repositories, services, DTOs, mappers, providers)
 ```
 
 ## UI Layer
 
 **Location**: `features/<name>/ui/`
 
-**Contains**: Pages (widgets), ViewModels (Riverpod notifiers), feature-specific widgets.
+**Contains**: Pages (widgets), ViewModels (optional Riverpod notifiers), feature-specific widgets.
 
 **Responsibilities**:
 
-- Render UI based on ViewModel state (`AsyncValue<T>`).
-- Delegate user actions to ViewModel methods.
+- Render UI based on provider state (`AsyncValue<T>`).
+- Delegate user actions to notifier methods.
 - Handle navigation via auto_route.
 - Display errors using `failure_message_mapper` to convert failures to user-facing strings.
 
 ```dart
-// Page reads ViewModel state and calls ViewModel methods
+// Page watches a data/providers/ notifier directly (no ViewModel needed)
 class LoginPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(authViewModelProvider);
+    final state = ref.watch(authStateRepoProvider);
 
     return state.when(
       loading: () => const CircularProgressIndicator(),
       error: (error, _) => ErrorDisplay(message: mapFailureToMessage(error)),
       data: (authState) => LoginForm(
         onSubmit: (email, password) {
-          ref.read(authViewModelProvider.notifier).login(email, password);
+          ref.read(authStateRepoProvider.notifier).login(email, password);
         },
       ),
     );
@@ -55,8 +55,9 @@ class LoginPage extends ConsumerWidget {
 
 - Views must not contain business logic (validation, data transformation, API calls).
 - Views must not import services, repositories, or DTOs directly.
-- Views access state exclusively through `ref.watch(viewModelProvider)`.
-- Views trigger actions exclusively through `ref.read(viewModelProvider.notifier).method()`.
+- Views access state through `ref.watch()` on either a ViewModel or `data/providers/` notifier.
+- Views trigger actions through `ref.read(...notifier).method()`.
+- ViewModels are optional -- only create them when significant data transformation is needed between the domain and the UI. Pages can watch `data/providers/` directly for simple cases.
 
 ## Domain Layer (Optional)
 
@@ -99,7 +100,7 @@ final class EmailAlreadyInUse extends AuthFailure { ... }
 
 **Location**: `features/<name>/data/`
 
-**Contains**: Repository implementations, Retrofit services, DTOs, DTO-to-entity mappers.
+**Contains**: Repository implementations, Retrofit services, DTOs, DTO-to-entity mappers, infrastructure providers.
 
 **Responsibilities**:
 
@@ -108,6 +109,8 @@ final class EmailAlreadyInUse extends AuthFailure { ... }
 - Map DTOs to domain entities using mapper extensions.
 - Catch exceptions and return `Result<T>` values.
 - Manage side effects (token persistence, cache writes).
+- Provide Riverpod providers for services and repositories in `data/providers/`.
+- Host shared state notifiers (e.g., `AuthStateRepo`) that other features import.
 
 ```dart
 // Repository implementation in data layer

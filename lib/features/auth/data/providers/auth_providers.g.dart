@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_view_model.dart';
+part of 'auth_providers.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -110,55 +110,55 @@ final class AuthRepositoryProvider
 
 String _$authRepositoryHash() => r'91bb9b1084b79484bcb5fc63a21d1b4898b5968a';
 
-/// Notifier that manages the authentication lifecycle.
+/// Notifier that owns the reactive [AuthState] for the entire app.
 ///
-/// The [build] method checks for an existing session on startup.
-/// [login], [register], and [logout] mutate the state and delegate
-/// to [IAuthRepository].
+/// This is the single source of truth for authentication state. External
+/// consumers (guards, other features) watch this provider. Auth UI pages
+/// also use it directly for mutations and loading/error states.
 
-@ProviderFor(AuthViewModel)
-final authViewModelProvider = AuthViewModelProvider._();
+@ProviderFor(AuthStateRepo)
+final authStateRepoProvider = AuthStateRepoProvider._();
 
-/// Notifier that manages the authentication lifecycle.
+/// Notifier that owns the reactive [AuthState] for the entire app.
 ///
-/// The [build] method checks for an existing session on startup.
-/// [login], [register], and [logout] mutate the state and delegate
-/// to [IAuthRepository].
-final class AuthViewModelProvider
-    extends $AsyncNotifierProvider<AuthViewModel, AuthState> {
-  /// Notifier that manages the authentication lifecycle.
+/// This is the single source of truth for authentication state. External
+/// consumers (guards, other features) watch this provider. Auth UI pages
+/// also use it directly for mutations and loading/error states.
+final class AuthStateRepoProvider
+    extends $AsyncNotifierProvider<AuthStateRepo, AuthState> {
+  /// Notifier that owns the reactive [AuthState] for the entire app.
   ///
-  /// The [build] method checks for an existing session on startup.
-  /// [login], [register], and [logout] mutate the state and delegate
-  /// to [IAuthRepository].
-  AuthViewModelProvider._()
+  /// This is the single source of truth for authentication state. External
+  /// consumers (guards, other features) watch this provider. Auth UI pages
+  /// also use it directly for mutations and loading/error states.
+  AuthStateRepoProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authViewModelProvider',
+        name: r'authStateRepoProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authViewModelHash();
+  String debugGetCreateSourceHash() => _$authStateRepoHash();
 
   @$internal
   @override
-  AuthViewModel create() => AuthViewModel();
+  AuthStateRepo create() => AuthStateRepo();
 }
 
-String _$authViewModelHash() => r'e45a5c1508e640300572a0612309dc5fef184c20';
+String _$authStateRepoHash() => r'938331a322580995af5ce648d6db40517e26b674';
 
-/// Notifier that manages the authentication lifecycle.
+/// Notifier that owns the reactive [AuthState] for the entire app.
 ///
-/// The [build] method checks for an existing session on startup.
-/// [login], [register], and [logout] mutate the state and delegate
-/// to [IAuthRepository].
+/// This is the single source of truth for authentication state. External
+/// consumers (guards, other features) watch this provider. Auth UI pages
+/// also use it directly for mutations and loading/error states.
 
-abstract class _$AuthViewModel extends $AsyncNotifier<AuthState> {
+abstract class _$AuthStateRepo extends $AsyncNotifier<AuthState> {
   FutureOr<AuthState> build();
   @$mustCallSuper
   @override
@@ -181,33 +181,34 @@ abstract class _$AuthViewModel extends $AsyncNotifier<AuthState> {
 /// Consumed by [AuthGuard] and other components that need a synchronous
 /// check without caring about the full [AuthState].
 
-@ProviderFor(authState)
-final authStateProvider = AuthStateProvider._();
+@ProviderFor(isAuthenticated)
+final isAuthenticatedProvider = IsAuthenticatedProvider._();
 
 /// Expose whether the user is authenticated as a simple boolean.
 ///
 /// Consumed by [AuthGuard] and other components that need a synchronous
 /// check without caring about the full [AuthState].
 
-final class AuthStateProvider extends $FunctionalProvider<bool, bool, bool>
+final class IsAuthenticatedProvider
+    extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Expose whether the user is authenticated as a simple boolean.
   ///
   /// Consumed by [AuthGuard] and other components that need a synchronous
   /// check without caring about the full [AuthState].
-  AuthStateProvider._()
+  IsAuthenticatedProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authStateProvider',
+        name: r'isAuthenticatedProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authStateHash();
+  String debugGetCreateSourceHash() => _$isAuthenticatedHash();
 
   @$internal
   @override
@@ -216,7 +217,7 @@ final class AuthStateProvider extends $FunctionalProvider<bool, bool, bool>
 
   @override
   bool create(Ref ref) {
-    return authState(ref);
+    return isAuthenticated(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -228,9 +229,9 @@ final class AuthStateProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$authStateHash() => r'eb94a852278acb1bcfccc0543c76917903435085';
+String _$isAuthenticatedHash() => r'2bef2f42d6a6ee87112c5ddf74f60a9aaba8d47a';
 
-/// A [Listenable] that fires whenever [authStateProvider] changes.
+/// A [Listenable] that fires whenever [isAuthenticatedProvider] changes.
 ///
 /// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
 /// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
@@ -239,7 +240,7 @@ String _$authStateHash() => r'eb94a852278acb1bcfccc0543c76917903435085';
 @ProviderFor(authStateListenable)
 final authStateListenableProvider = AuthStateListenableProvider._();
 
-/// A [Listenable] that fires whenever [authStateProvider] changes.
+/// A [Listenable] that fires whenever [isAuthenticatedProvider] changes.
 ///
 /// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
 /// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
@@ -253,7 +254,7 @@ final class AuthStateListenableProvider
           AuthStateListenable
         >
     with $Provider<AuthStateListenable> {
-  /// A [Listenable] that fires whenever [authStateProvider] changes.
+  /// A [Listenable] that fires whenever [isAuthenticatedProvider] changes.
   ///
   /// Pass this to [RootStackRouter.config]'s `reevaluateListenable` so that
   /// route guards (e.g. [AuthGuard]) are automatically re-evaluated on
@@ -293,4 +294,4 @@ final class AuthStateListenableProvider
 }
 
 String _$authStateListenableHash() =>
-    r'a5e74e4fc5b5c697743b3c56c6b054c5f0cd2be7';
+    r'fb80a3172f7f160b06495f77e9841c5262415515';

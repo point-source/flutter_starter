@@ -1,14 +1,14 @@
 /// Tests for [AuthGuard].
 ///
 /// Uses mocked [NavigationResolver] and [StackRouter] to verify that the
-/// guard correctly allows or blocks navigation based on [authStateProvider].
+/// guard correctly allows or blocks navigation based on [isAuthenticatedProvider].
 library;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/routing/app_router.dart';
 import 'package:flutter_starter/core/routing/guards/auth_guard.dart';
-import 'package:flutter_starter/features/auth/ui/view_models/auth_view_model.dart';
+import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -35,6 +35,7 @@ void main() {
 
     // Stub void methods.
     when(() => mockResolver.next(any())).thenReturn(null);
+    // ignore: no-empty-block
     when(() => mockRouter.replaceAll(any())).thenAnswer((_) async {});
   });
 
@@ -43,7 +44,7 @@ void main() {
     /// Allows navigation when the user is authenticated.
     test('allows navigation when authenticated', () {
       final container = createContainer(
-        overrides: [authStateProvider.overrideWithValue(true)],
+        overrides: [isAuthenticatedProvider.overrideWithValue(true)],
       );
 
       late AuthGuard guard;
@@ -61,7 +62,7 @@ void main() {
     /// Redirects to [LoginRoute] when the user is not authenticated.
     test('redirects to LoginRoute when not authenticated', () {
       final container = createContainer(
-        overrides: [authStateProvider.overrideWithValue(false)],
+        overrides: [isAuthenticatedProvider.overrideWithValue(false)],
       );
 
       late AuthGuard guard;

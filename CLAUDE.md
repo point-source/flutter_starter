@@ -69,12 +69,13 @@ features/<name>/
     models/              # @MappableClass() DTOs
     mappers/             # DTO-to-domain mapping extensions
     repositories/        # Repository implementation
+    providers/           # @riverpod infrastructure providers (service, repo)
   domain/
     entities/            # @MappableClass() domain models
     repositories/        # Abstract repository interface (IXxxRepository)
     failures/            # sealed XxxFailure extends Failure
   ui/
-    view_models/         # @riverpod AsyncNotifier + infrastructure providers
+    view_models/         # @riverpod AsyncNotifier (optional, page-specific)
     pages/               # @RoutePage() ConsumerWidget pages
     widgets/             # Feature-specific widgets
   l10n/                  # Feature-scoped translation strings
@@ -82,6 +83,10 @@ features/<name>/
 
 The domain layer is optional -- only add it when the feature needs its own
 entity types, repository abstraction, or failure hierarchy.
+
+View models are optional -- only create them when a page needs significant
+data transformation between the domain and the UI. Pages can watch providers
+from `data/providers/` directly when no transformation is needed.
 
 ## Key Conventions
 
@@ -103,10 +108,13 @@ entity types, repository abstraction, or failure hierarchy.
 
 ### State Management (Riverpod)
 - Views use `ConsumerWidget` or `ConsumerStatefulWidget`
-- ViewModels are `@riverpod` AsyncNotifier classes
-- Infrastructure providers (services, repositories) are `@riverpod` functions
+- Infrastructure providers (services, repositories) live in `data/providers/`
+- ViewModels are optional `@riverpod` AsyncNotifier classes in `ui/view_models/`
+- Only create a ViewModel when the page needs significant data transformation
+- Pages can watch `data/providers/` directly for simple passthrough cases
 - Use `@Riverpod(keepAlive: true)` for app-lifetime providers (Dio, router, auth)
 - Use `ref.read()` for one-shot reads, `ref.watch()` for reactive dependencies
+- Cross-feature sharing happens through `data/providers/`, never `ui/view_models/`
 
 ### Error Handling
 - Repositories return `Future<Result<T>>` (never throw)
@@ -127,7 +135,7 @@ entity types, repository abstraction, or failure hierarchy.
 
 ### Navigation
 - Routes defined in `lib/core/routing/app_router.dart`
-- `AuthGuard` protects authenticated routes via `authStateProvider`
+- `AuthGuard` protects authenticated routes via `isAuthenticatedProvider`
 - Shell route wraps tabbed navigation with `AdaptiveScaffold`
 - Pages annotated with `@RoutePage()` for auto_route generation
 
@@ -198,11 +206,12 @@ Result<T> --> ViewModel .when() --> AsyncValue (AsyncData or AsyncError)
 3. Define feature-specific failures (sealed class extending `Failure`)
 4. Create the retrofit service (`@RestApi()`) and DTOs
 5. Implement the repository (returns `Result<T>`, catches exceptions)
-6. Create the ViewModel (`@riverpod` AsyncNotifier) with infrastructure providers
-7. Build pages (`@RoutePage()`, `ConsumerWidget`) and widgets
-8. Register routes in `app_router.dart`
-9. Run `dart run build_runner build --delete-conflicting-outputs`
-10. Add tests mirroring the `lib/` structure under `test/`
+6. Create infrastructure providers in `data/providers/` (service + repository)
+7. Optionally create a ViewModel (`@riverpod` AsyncNotifier) only if the page needs significant data transformation -- skip if the page would just pass through data
+8. Build pages (`@RoutePage()`, `ConsumerWidget`) and widgets
+9. Register routes in `app_router.dart`
+10. Run `dart run build_runner build --delete-conflicting-outputs`
+11. Add tests mirroring the `lib/` structure under `test/`
 
 ## Detailed Documentation
 

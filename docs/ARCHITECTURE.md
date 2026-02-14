@@ -13,7 +13,7 @@ layering. Each feature is organized into three layers with strict dependency rul
   ┌─────────────────────────────────────────────────────────────┐
   │                        UI LAYER                             │
   │                                                             │
-  │  Views (ConsumerWidget)     ViewModels (@riverpod Notifier) │
+  │  Views (ConsumerWidget)     ViewModels (optional @riverpod)  │
   │  - Render UI from state     - Expose AsyncValue<State>      │
   │  - Dispatch user actions    - Call repositories              │
   │  - Watch providers          - Map Result -> AsyncValue       │
@@ -32,8 +32,8 @@ layering. Each feature is organized into three layers with strict dependency rul
   │  - HTTP endpoints            - Source of truth              │
   │  DTOs (@MappableClass)       - Exception -> Result mapping  │
   │  - JSON serialization        - Token management             │
-  │  Mappers                                                    │
-  │  - DTO -> Domain entity                                     │
+  │  Mappers                     Providers (@riverpod)          │
+  │  - DTO -> Domain entity      - Infrastructure wiring        │
   └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,9 +57,9 @@ The standard request lifecycle follows this path:
       |
       v
   View (ConsumerWidget)
-      |  calls method on
+      |  calls method on notifier or watches provider directly
       v
-  ViewModel (@riverpod AsyncNotifier)
+  ViewModel (@riverpod AsyncNotifier) or data/providers/ notifier
       |  reads provider, calls method
       v
   Repository (implements IXxxRepository)
@@ -242,29 +242,34 @@ are organized by responsibility.
   dioProvider (@Riverpod keepAlive)
       |
       v
-  authServiceProvider (@riverpod)
-      |  creates AuthService(dio)
-      v
-  authRepositoryProvider (@riverpod)
-      |  creates AuthRepository(authService, tokenStorage)
-      v
-  authViewModelProvider (@Riverpod keepAlive)
-      |  AsyncNotifier reading authRepository
-      v
-  authStateProvider (@riverpod)
-      |  derived bool from authViewModel
+  authServiceProvider (@riverpod)          ─┐
+      |  creates AuthService(dio)           │  data/providers/
+      v                                     │  auth_providers.dart
+  authRepositoryProvider (@riverpod)        │
+      |  creates AuthRepository(...)        │
+      v                                     │
+  authStateRepoProvider (@Riverpod keepAlive)│
+      |  AsyncNotifier holding AuthState    │
+      v                                    ─┘
+  isAuthenticatedProvider (@riverpod)
+      |  derived bool from authStateRepo
       v
   AuthGuard / Views
 ```
 
+Infrastructure providers (service, repository) and shared state notifiers
+live in `data/providers/`. View models in `ui/view_models/` are optional
+and only created when a page needs significant data transformation.
+
 ### Provider Patterns
 
-| Pattern | Annotation | Use Case |
-|---|---|---|
-| App-lifetime singleton | `@Riverpod(keepAlive: true)` | Dio, AppRouter, AuthViewModel |
-| Auto-dispose provider | `@riverpod` | Services, repositories, derived state |
-| AsyncNotifier | `@riverpod class Xxx extends _$Xxx` | ViewModels with async state |
-| Simple provider | `@riverpod Type name(Ref ref)` | Infrastructure wiring |
+| Pattern | Annotation | Location | Use Case |
+|---|---|---|---|
+| App-lifetime singleton | `@Riverpod(keepAlive: true)` | `data/providers/` | Dio, AppRouter, AuthStateRepo |
+| Infrastructure wiring | `@riverpod` (function) | `data/providers/` | Services, repositories |
+| Shared state notifier | `@Riverpod(keepAlive: true)` (class) | `data/providers/` | Auth state, preferences |
+| Page-specific ViewModel | `@riverpod` (class) | `ui/view_models/` | Complex data transformation |
+| Derived state | `@riverpod` (function) | `data/providers/` | `isAuthenticatedProvider` |
 
 ## Routing and Navigation
 
@@ -283,7 +288,7 @@ Navigation is handled by `auto_route` with type-safe route generation.
 
 ### AuthGuard
 
-The `AuthGuard` reads `authStateProvider` (a derived boolean) synchronously.
+The `AuthGuard` reads `isAuthenticatedProvider` (a derived boolean) synchronously.
 If the user is not authenticated, navigation is redirected to `LoginRoute`.
 
 The `AppRouter` is created inside a `@Riverpod(keepAlive: true)` provider so
