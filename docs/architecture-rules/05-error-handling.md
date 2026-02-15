@@ -178,7 +178,8 @@ final class ProfileNotFound extends ProfileFailure {
 ```
 
 2. Map exceptions to the failure in the repository's `_mapDioException` method.
-3. Add user-facing messages in `failure_message_mapper.dart`.
+3. Add user-facing messages to `failure_message_mapper.dart` for **each failure subtype**. Every `final class` in the sealed hierarchy must have a corresponding switch case so that the UI displays a specific, localized message rather than falling through to the generic wildcard.
+4. Add the corresponding translation keys to `lib/core/l10n/en.i18n.json` and regenerate with `dart run slang`.
 
 ## DO
 

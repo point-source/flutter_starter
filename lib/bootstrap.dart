@@ -47,32 +47,11 @@ Future<void> bootstrap() async {
   // Set up global error handlers
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    if (AppEnvironment.current.sentryEnabled) {
-      final exception = details.exception;
-      // Unwrap FailureException to report the original failure with its
-      // captured stack trace for better Sentry grouping.
-      if (exception is FailureException) {
-        Sentry.captureException(
-          exception.failure,
-          stackTrace: exception.failure.stackTrace ?? details.stack,
-        );
-      } else {
-        Sentry.captureException(exception, stackTrace: details.stack);
-      }
-    }
+    _reportToSentry(details.exception, details.stack);
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
-    if (AppEnvironment.current.sentryEnabled) {
-      if (error is FailureException) {
-        Sentry.captureException(
-          error.failure,
-          stackTrace: error.failure.stackTrace ?? stack,
-        );
-      } else {
-        Sentry.captureException(error, stackTrace: stack);
-      }
-    }
+    _reportToSentry(error, stack);
     return true;
   };
 
@@ -97,4 +76,23 @@ Future<void> bootstrap() async {
   }
 
   runApp(app);
+}
+
+/// Report an error to Sentry if reporting is enabled.
+///
+/// Unwraps [FailureException] to report the original [Failure] with its
+/// captured stack trace for better Sentry grouping. Falls back to reporting
+/// the raw [error] for all other exception types.
+void _reportToSentry(Object error, StackTrace? stack) {
+  if (!AppEnvironment.current.sentryEnabled) {
+    return;
+  }
+  if (error is FailureException) {
+    Sentry.captureException(
+      error.failure,
+      stackTrace: error.failure.stackTrace ?? stack,
+    );
+  } else {
+    Sentry.captureException(error, stackTrace: stack);
+  }
 }

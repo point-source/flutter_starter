@@ -64,6 +64,14 @@ class SecureTokenStorage implements ITokenStorage {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
 
+  /// Persist both tokens using [Future.wait] for concurrent writes.
+  ///
+  /// **Limitation:** The two writes are **not atomic**. If one write succeeds
+  /// and the other fails (e.g. due to a platform-level keychain error),
+  /// storage will be left in an inconsistent state where only one token is
+  /// updated. Callers should treat a thrown exception as a potential partial
+  /// write. A future improvement would be to write sequentially and roll back
+  /// the first write on failure of the second.
   @override
   Future<void> saveTokens({
     required String accessToken,
