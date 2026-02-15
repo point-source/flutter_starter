@@ -80,9 +80,15 @@ class SettingsPage extends ConsumerWidget {
             },
             child: Column(
               children: [
-                RadioListTile(title: const Text('System'), value: ''),
-                RadioListTile(title: const Text('English'), value: 'en'),
-                RadioListTile(title: const Text('Español'), value: 'es'),
+                RadioListTile(title: Text(t.settings.localeSystem), value: ''),
+                RadioListTile(
+                  title: Text(t.settings.localeEnglish),
+                  value: 'en',
+                ),
+                RadioListTile(
+                  title: Text(t.settings.localeSpanish),
+                  value: 'es',
+                ),
               ],
             ),
           ),

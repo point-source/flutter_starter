@@ -187,13 +187,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         TextFormField(
           controller: _nameController,
-          decoration: const InputDecoration(
-            labelText: 'Name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t.profile.form.name,
+            border: const OutlineInputBorder(),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Name is required';
+              return t.profile.form.nameRequired;
             }
             return null;
           },
@@ -201,18 +201,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         const SizedBox(height: 16),
         TextFormField(
           controller: _bioController,
-          decoration: const InputDecoration(
-            labelText: 'Bio',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t.profile.form.bio,
+            border: const OutlineInputBorder(),
           ),
           maxLines: 3,
         ),
         const SizedBox(height: 16),
         TextFormField(
           controller: _phoneController,
-          decoration: const InputDecoration(
-            labelText: 'Phone',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t.profile.form.phone,
+            border: const OutlineInputBorder(),
           ),
           keyboardType: .phone,
         ),

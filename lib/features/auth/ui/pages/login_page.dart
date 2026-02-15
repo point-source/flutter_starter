@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/routing/app_router.dart';
 import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
+import 'package:flutter_starter/gen/strings.g.dart';
 
 /// Page that collects credentials and authenticates the user.
 ///
@@ -87,29 +88,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 crossAxisAlignment: .stretch,
                 children: [
                   Text(
-                    'Welcome Back',
+                    t.auth.welcomeBack,
                     style: Theme.of(context).textTheme.headlineMedium,
                     textAlign: .center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your account',
+                    t.auth.signInSubtitle,
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: .center,
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: t.auth.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     keyboardType: .emailAddress,
                     textInputAction: .next,
                     autofillHints: const [AutofillHints.email],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your email';
+                        return t.auth.validation.emailRequired;
                       }
                       return null;
                     },
@@ -117,9 +118,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outlined),
+                    decoration: InputDecoration(
+                      labelText: t.auth.password,
+                      prefixIcon: const Icon(Icons.lock_outlined),
                     ),
                     obscureText: true,
                     textInputAction: .done,
@@ -127,7 +128,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     onFieldSubmitted: (_) => _onLogin(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return t.auth.validation.passwordRequired;
                       }
                       return null;
                     },
@@ -142,7 +143,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Log In'),
+                        : Text(t.auth.login),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -150,7 +151,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ? null
                         : () =>
                             context.router.replace(const RegisterRoute()),
-                    child: const Text("Don't have an account? Register"),
+                    child: Text(t.auth.noAccountRegister),
                   ),
                 ],
               ),

@@ -60,6 +60,7 @@ class TranslationsCoreEn {
 
 	late final TranslationsCoreErrorEn error = TranslationsCoreErrorEn.internal(_root);
 	late final TranslationsCoreActionEn action = TranslationsCoreActionEn.internal(_root);
+	late final TranslationsCoreNavEn nav = TranslationsCoreNavEn.internal(_root);
 }
 
 // Path: auth
@@ -97,7 +98,26 @@ class TranslationsAuthEn {
 	/// en: 'Already have an account?'
 	String get hasAccount => 'Already have an account?';
 
+	/// en: 'Welcome Back'
+	String get welcomeBack => 'Welcome Back';
+
+	/// en: 'Sign in to your account'
+	String get signInSubtitle => 'Sign in to your account';
+
+	/// en: 'Create Account'
+	String get createAccount => 'Create Account';
+
+	/// en: 'Sign up to get started'
+	String get signUpSubtitle => 'Sign up to get started';
+
+	/// en: 'Don't have an account? Register'
+	String get noAccountRegister => 'Don\'t have an account? Register';
+
+	/// en: 'Already have an account? Log In'
+	String get hasAccountLogin => 'Already have an account? Log In';
+
 	late final TranslationsAuthErrorEn error = TranslationsAuthErrorEn.internal(_root);
+	late final TranslationsAuthValidationEn validation = TranslationsAuthValidationEn.internal(_root);
 }
 
 // Path: dashboard
@@ -129,6 +149,7 @@ class TranslationsProfileEn {
 	/// en: 'Edit Profile'
 	String get editProfile => 'Edit Profile';
 
+	late final TranslationsProfileFormEn form = TranslationsProfileFormEn.internal(_root);
 	late final TranslationsProfileErrorEn error = TranslationsProfileErrorEn.internal(_root);
 }
 
@@ -157,6 +178,15 @@ class TranslationsSettingsEn {
 
 	/// en: 'Language'
 	String get language => 'Language';
+
+	/// en: 'System'
+	String get localeSystem => 'System';
+
+	/// en: 'English'
+	String get localeEnglish => 'English';
+
+	/// en: 'Español'
+	String get localeSpanish => 'Español';
 }
 
 // Path: core.error
@@ -207,6 +237,24 @@ class TranslationsCoreActionEn {
 	String get ok => 'OK';
 }
 
+// Path: core.nav
+class TranslationsCoreNavEn {
+	TranslationsCoreNavEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Dashboard'
+	String get dashboard => 'Dashboard';
+
+	/// en: 'Profile'
+	String get profile => 'Profile';
+
+	/// en: 'Settings'
+	String get settings => 'Settings';
+}
+
 // Path: auth.error
 class TranslationsAuthErrorEn {
 	TranslationsAuthErrorEn.internal(this._root);
@@ -220,6 +268,54 @@ class TranslationsAuthErrorEn {
 
 	/// en: 'Email is already in use'
 	String get emailTaken => 'Email is already in use';
+
+	/// en: 'Your session has expired. Please log in again.'
+	String get sessionExpired => 'Your session has expired. Please log in again.';
+
+	/// en: 'Authentication failed. Please try again later.'
+	String get serverError => 'Authentication failed. Please try again later.';
+}
+
+// Path: auth.validation
+class TranslationsAuthValidationEn {
+	TranslationsAuthValidationEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Please enter your email'
+	String get emailRequired => 'Please enter your email';
+
+	/// en: 'Please enter your password'
+	String get passwordRequired => 'Please enter your password';
+
+	/// en: 'Password must be at least 8 characters'
+	String get passwordTooShort => 'Password must be at least 8 characters';
+
+	/// en: 'Please enter your name'
+	String get nameRequired => 'Please enter your name';
+}
+
+// Path: profile.form
+class TranslationsProfileFormEn {
+	TranslationsProfileFormEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Name'
+	String get name => 'Name';
+
+	/// en: 'Bio'
+	String get bio => 'Bio';
+
+	/// en: 'Phone'
+	String get phone => 'Phone';
+
+	/// en: 'Name is required'
+	String get nameRequired => 'Name is required';
 }
 
 // Path: profile.error
@@ -256,6 +352,9 @@ extension on Translations {
 			'core.action.delete' => 'Delete',
 			'core.action.edit' => 'Edit',
 			'core.action.ok' => 'OK',
+			'core.nav.dashboard' => 'Dashboard',
+			'core.nav.profile' => 'Profile',
+			'core.nav.settings' => 'Settings',
 			'auth.login' => 'Log In',
 			'auth.register' => 'Register',
 			'auth.logout' => 'Log Out',
@@ -265,12 +364,28 @@ extension on Translations {
 			'auth.forgotPassword' => 'Forgot Password?',
 			'auth.noAccount' => 'Don\'t have an account?',
 			'auth.hasAccount' => 'Already have an account?',
+			'auth.welcomeBack' => 'Welcome Back',
+			'auth.signInSubtitle' => 'Sign in to your account',
+			'auth.createAccount' => 'Create Account',
+			'auth.signUpSubtitle' => 'Sign up to get started',
+			'auth.noAccountRegister' => 'Don\'t have an account? Register',
+			'auth.hasAccountLogin' => 'Already have an account? Log In',
 			'auth.error.invalidCredentials' => 'Invalid email or password',
 			'auth.error.emailTaken' => 'Email is already in use',
+			'auth.error.sessionExpired' => 'Your session has expired. Please log in again.',
+			'auth.error.serverError' => 'Authentication failed. Please try again later.',
+			'auth.validation.emailRequired' => 'Please enter your email',
+			'auth.validation.passwordRequired' => 'Please enter your password',
+			'auth.validation.passwordTooShort' => 'Password must be at least 8 characters',
+			'auth.validation.nameRequired' => 'Please enter your name',
 			'dashboard.title' => 'Dashboard',
 			'dashboard.welcome' => ({required Object name}) => 'Welcome, ${name}',
 			'profile.title' => 'Profile',
 			'profile.editProfile' => 'Edit Profile',
+			'profile.form.name' => 'Name',
+			'profile.form.bio' => 'Bio',
+			'profile.form.phone' => 'Phone',
+			'profile.form.nameRequired' => 'Name is required',
 			'profile.error.loadFailed' => 'Failed to load profile',
 			'profile.error.updateFailed' => 'Failed to update profile',
 			'settings.title' => 'Settings',
@@ -279,6 +394,9 @@ extension on Translations {
 			'settings.themeLight' => 'Light',
 			'settings.themeDark' => 'Dark',
 			'settings.language' => 'Language',
+			'settings.localeSystem' => 'System',
+			'settings.localeEnglish' => 'English',
+			'settings.localeSpanish' => 'Español',
 			_ => null,
 		};
 	}

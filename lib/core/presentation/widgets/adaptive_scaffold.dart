@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_starter/core/presentation/responsive/responsive_builder.dart';
+import 'package:flutter_starter/gen/strings.g.dart';
 
 /// Adaptive navigation scaffold for authenticated routes.
 ///
@@ -59,13 +60,19 @@ class AdaptiveScaffold extends ConsumerWidget {
     bottomNavigationBar: BottomNavigationBar(
       currentIndex: activeIndex,
       onTap: tabsRouter.setActiveIndex,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: 'Dashboard',
+          icon: const Icon(Icons.dashboard),
+          label: t.core.nav.dashboard,
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.person),
+          label: t.core.nav.profile,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.settings),
+          label: t.core.nav.settings,
+        ),
       ],
     ),
   );
@@ -79,21 +86,21 @@ class AdaptiveScaffold extends ConsumerWidget {
               selectedIndex: activeIndex,
               onDestinationSelected: tabsRouter.setActiveIndex,
               labelType: .selected,
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(Icons.dashboard),
-                  label: Text('Dashboard'),
+                  icon: const Icon(Icons.dashboard_outlined),
+                  selectedIcon: const Icon(Icons.dashboard),
+                  label: Text(t.core.nav.dashboard),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.person_outlined),
-                  selectedIcon: Icon(Icons.person),
-                  label: Text('Profile'),
+                  icon: const Icon(Icons.person_outlined),
+                  selectedIcon: const Icon(Icons.person),
+                  label: Text(t.core.nav.profile),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: const Icon(Icons.settings),
+                  label: Text(t.core.nav.settings),
                 ),
               ],
             ),
@@ -115,21 +122,21 @@ class AdaptiveScaffold extends ConsumerWidget {
           selectedIndex: activeIndex,
           onDestinationSelected: tabsRouter.setActiveIndex,
           extended: true,
-          destinations: const [
+          destinations: [
             NavigationRailDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: Text('Dashboard'),
+              icon: const Icon(Icons.dashboard_outlined),
+              selectedIcon: const Icon(Icons.dashboard),
+              label: Text(t.core.nav.dashboard),
             ),
             NavigationRailDestination(
-              icon: Icon(Icons.person_outlined),
-              selectedIcon: Icon(Icons.person),
-              label: Text('Profile'),
+              icon: const Icon(Icons.person_outlined),
+              selectedIcon: const Icon(Icons.person),
+              label: Text(t.core.nav.profile),
             ),
             NavigationRailDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: Text('Settings'),
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings),
+              label: Text(t.core.nav.settings),
             ),
           ],
         ),
@@ -147,28 +154,28 @@ class AdaptiveScaffold extends ConsumerWidget {
             NavigationDrawer(
               selectedIndex: activeIndex,
               onDestinationSelected: tabsRouter.setActiveIndex,
-              children: const [
+              children: [
                 Padding(
-                  padding: .fromLTRB(28, 16, 16, 10),
+                  padding: const .fromLTRB(28, 16, 16, 10),
                   child: Text(
-                    'Flutter Starter',
-                    style: TextStyle(fontSize: 18, fontWeight: .bold),
+                    t.core.appName,
+                    style: const TextStyle(fontSize: 18, fontWeight: .bold),
                   ),
                 ),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(Icons.dashboard),
-                  label: Text('Dashboard'),
+                  icon: const Icon(Icons.dashboard_outlined),
+                  selectedIcon: const Icon(Icons.dashboard),
+                  label: Text(t.core.nav.dashboard),
                 ),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.person_outlined),
-                  selectedIcon: Icon(Icons.person),
-                  label: Text('Profile'),
+                  icon: const Icon(Icons.person_outlined),
+                  selectedIcon: const Icon(Icons.person),
+                  label: Text(t.core.nav.profile),
                 ),
                 NavigationDrawerDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: const Icon(Icons.settings),
+                  label: Text(t.core.nav.settings),
                 ),
               ],
             ),

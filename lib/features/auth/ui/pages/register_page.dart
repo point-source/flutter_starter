@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_starter/core/routing/app_router.dart';
 import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
+import 'package:flutter_starter/gen/strings.g.dart';
 
 /// Page that collects account details and registers a new user.
 ///
@@ -77,28 +78,28 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 crossAxisAlignment: .stretch,
                 children: [
                   Text(
-                    'Create Account',
+                    t.auth.createAccount,
                     style: Theme.of(context).textTheme.headlineMedium,
                     textAlign: .center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign up to get started',
+                    t.auth.signUpSubtitle,
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: .center,
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      prefixIcon: Icon(Icons.person_outlined),
+                    decoration: InputDecoration(
+                      labelText: t.auth.name,
+                      prefixIcon: const Icon(Icons.person_outlined),
                     ),
                     textInputAction: .next,
                     autofillHints: const [AutofillHints.name],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your name';
+                        return t.auth.validation.nameRequired;
                       }
                       return null;
                     },
@@ -106,16 +107,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: t.auth.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     keyboardType: .emailAddress,
                     textInputAction: .next,
                     autofillHints: const [AutofillHints.email],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your email';
+                        return t.auth.validation.emailRequired;
                       }
                       return null;
                     },
@@ -123,9 +124,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outlined),
+                    decoration: InputDecoration(
+                      labelText: t.auth.password,
+                      prefixIcon: const Icon(Icons.lock_outlined),
                     ),
                     obscureText: true,
                     textInputAction: .done,
@@ -133,10 +134,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     onFieldSubmitted: (_) => _onRegister(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                        return t.auth.validation.passwordRequired;
                       }
                       if (value.length < 8) {
-                        return 'Password must be at least 8 characters';
+                        return t.auth.validation.passwordTooShort;
                       }
                       return null;
                     },
@@ -151,7 +152,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Register'),
+                        : Text(t.auth.register),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -159,7 +160,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ? null
                         : () =>
                             context.router.replace(const LoginRoute()),
-                    child: const Text('Already have an account? Log In'),
+                    child: Text(t.auth.hasAccountLogin),
                   ),
                 ],
               ),

@@ -14,6 +14,11 @@
       "delete": "Delete",
       "edit": "Edit",
       "ok": "OK"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "settings": "Settings"
     }
   },
   "auth": {
@@ -26,9 +31,23 @@
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
+    "welcomeBack": "Welcome Back",
+    "signInSubtitle": "Sign in to your account",
+    "createAccount": "Create Account",
+    "signUpSubtitle": "Sign up to get started",
+    "noAccountRegister": "Don't have an account? Register",
+    "hasAccountLogin": "Already have an account? Log In",
     "error": {
       "invalidCredentials": "Invalid email or password",
-      "emailTaken": "Email is already in use"
+      "emailTaken": "Email is already in use",
+      "sessionExpired": "Your session has expired. Please log in again.",
+      "serverError": "Authentication failed. Please try again later."
+    },
+    "validation": {
+      "emailRequired": "Please enter your email",
+      "passwordRequired": "Please enter your password",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "nameRequired": "Please enter your name"
     }
   },
   "dashboard": {
@@ -38,6 +57,12 @@
   "profile": {
     "title": "Profile",
     "editProfile": "Edit Profile",
+    "form": {
+      "name": "Name",
+      "bio": "Bio",
+      "phone": "Phone",
+      "nameRequired": "Name is required"
+    },
     "error": {
       "loadFailed": "Failed to load profile",
       "updateFailed": "Failed to update profile"
@@ -49,6 +74,9 @@
     "themeSystem": "System",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "language": "Language"
+    "language": "Language",
+    "localeSystem": "System",
+    "localeEnglish": "English",
+    "localeSpanish": "Español"
   }
 }
