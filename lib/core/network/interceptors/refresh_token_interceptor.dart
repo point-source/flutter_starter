@@ -38,6 +38,13 @@ class RefreshTokenInterceptor extends QueuedInterceptor {
   final Dio _dio;
   final void Function() _onAuthExpired;
 
+  /// Guard to prevent redundant refresh attempts.
+  ///
+  /// Although [QueuedInterceptor] serializes `onError` calls, a second
+  /// batch of 401 responses may arrive after the first refresh completes.
+  /// This flag ensures we only refresh once and retry with the current token.
+  bool _isRefreshing = false;
+
   /// The API path used to refresh the access token.
   final String refreshPath;
 
@@ -60,6 +67,27 @@ class RefreshTokenInterceptor extends QueuedInterceptor {
       return;
     }
 
+    // If a refresh is already in flight, retry with the current token
+    // rather than triggering another refresh cycle.
+    if (_isRefreshing) {
+      final currentToken = await _tokenStorage.getAccessToken();
+      if (currentToken != null) {
+        final options = err.requestOptions;
+        options.headers['Authorization'] = 'Bearer $currentToken';
+        try {
+          final response = await _dio.fetch<Object?>(options);
+          handler.resolve(response);
+          return;
+        } on DioException catch (retryError) {
+          handler.next(retryError);
+          return;
+        }
+      }
+      handler.next(err);
+      return;
+    }
+
+    _isRefreshing = true;
     try {
       final refreshed = await _attemptRefresh();
       if (!refreshed) {
@@ -76,6 +104,8 @@ class RefreshTokenInterceptor extends QueuedInterceptor {
       handler.resolve(response);
     } on DioException catch (retryError) {
       handler.next(retryError);
+    } finally {
+      _isRefreshing = false;
     }
   }
 

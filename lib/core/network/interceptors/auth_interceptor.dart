@@ -6,6 +6,7 @@
 library;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_starter/core/storage/token_storage.dart';
 
 /// Adds the stored access token to every authenticated request.
@@ -39,9 +40,19 @@ class AuthInterceptor extends Interceptor {
       return;
     }
 
-    final token = await _tokenStorage.getAccessToken();
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
+    try {
+      final token = await _tokenStorage.getAccessToken();
+      if (token != null) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+    } on Exception catch (_) {
+      // Storage read failed — proceed without token rather than crashing
+      // the entire request pipeline. The request will likely receive a 401
+      // which the RefreshTokenInterceptor can handle.
+      assert(() {
+        debugPrint('AuthInterceptor: failed to read access token');
+        return true;
+      }());
     }
 
     handler.next(options);

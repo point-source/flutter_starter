@@ -117,4 +117,20 @@ void main() {
       verifyNever(() => mockTokenStorage.getAccessToken());
     });
   });
+
+  /// Tests for error handling when token storage fails.
+  group('storage failures', () {
+    /// Proceeds without token when storage throws.
+    test('proceeds without token when storage throws', () async {
+      when(
+        () => mockTokenStorage.getAccessToken(),
+      ).thenThrow(Exception('Keychain unavailable'));
+
+      final options = await captureRequest('/api/profile');
+
+      expect(options, isNotNull);
+      expect(options!.headers['Authorization'], isNull);
+      verify(() => mockTokenStorage.getAccessToken()).called(1);
+    });
+  });
 }

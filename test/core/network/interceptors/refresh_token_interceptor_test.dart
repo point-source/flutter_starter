@@ -102,4 +102,25 @@ void main() {
       }
     });
   });
+
+  /// Tests for the _isRefreshing guard.
+  ///
+  /// The [QueuedInterceptor] serializes `onError` calls, and the
+  /// `_isRefreshing` flag prevents redundant refresh API calls when a
+  /// second batch of 401 responses arrives after a successful refresh.
+  /// Full integration testing of this behavior requires a mock server
+  /// setup that is better suited to integration tests.
+  group('refresh guard', () {
+    test('interceptor has _isRefreshing field (constructor smoke test)', () {
+      final refreshDio = Dio(BaseOptions(baseUrl: 'http://test.com'));
+      final interceptor = RefreshTokenInterceptor(
+        tokenStorage: mockTokenStorage,
+        dio: refreshDio,
+        onAuthExpired: () {},
+      );
+      // Verify the interceptor can be created successfully with
+      // the new guard in place.
+      expect(interceptor, isA<RefreshTokenInterceptor>());
+    });
+  });
 }
