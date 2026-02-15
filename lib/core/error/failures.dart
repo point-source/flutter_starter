@@ -8,6 +8,8 @@
 /// via [Result] rather than being thrown and caught.
 library;
 
+import 'package:flutter/foundation.dart' show immutable;
+
 /// Base class for all failures in the application.
 ///
 /// Every failure carries a human-readable [message] for logging and
@@ -19,6 +21,7 @@ library;
 ///   const AuthFailure(super.message, [super.stackTrace]);
 /// }
 /// ```
+@immutable
 abstract class Failure {
   /// Creates a [Failure] with a descriptive [message] and optional [stackTrace].
   const Failure(this.message, [this.stackTrace]);
@@ -30,7 +33,14 @@ abstract class Failure {
   final StackTrace? stackTrace;
 
   @override
-  String toString() => '$runtimeType: $message';
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other.runtimeType == runtimeType &&
+          other is Failure &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
 }
 
 /// Exception wrapper for [Failure] values that need to be thrown.
@@ -71,6 +81,9 @@ final class NoConnection extends NetworkFailure {
   /// Creates a [NoConnection] failure.
   const NoConnection([StackTrace? stackTrace])
     : super('No internet connection', stackTrace);
+
+  @override
+  String toString() => 'NoConnection: $message';
 }
 
 /// The request timed out before receiving a response.
@@ -78,6 +91,9 @@ final class Timeout extends NetworkFailure {
   /// Creates a [Timeout] failure.
   const Timeout([StackTrace? stackTrace])
     : super('Request timed out', stackTrace);
+
+  @override
+  String toString() => 'Timeout: $message';
 }
 
 /// Failures related to server responses.
@@ -94,6 +110,19 @@ final class BadResponse extends ServerFailure {
 
   /// The HTTP status code returned by the server.
   final int statusCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BadResponse &&
+          statusCode == other.statusCode &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(statusCode, message);
+
+  @override
+  String toString() => 'BadResponse($statusCode): $message';
 }
 
 /// The request was rejected because the user is not authenticated.
@@ -101,18 +130,27 @@ final class Unauthorized extends ServerFailure {
   /// Creates an [Unauthorized] failure.
   const Unauthorized([StackTrace? stackTrace])
     : super('Unauthorized', stackTrace);
+
+  @override
+  String toString() => 'Unauthorized: $message';
 }
 
 /// The authenticated user does not have permission for this operation.
 final class Forbidden extends ServerFailure {
   /// Creates a [Forbidden] failure.
   const Forbidden([StackTrace? stackTrace]) : super('Forbidden', stackTrace);
+
+  @override
+  String toString() => 'Forbidden: $message';
 }
 
 /// The requested resource was not found on the server.
 final class NotFound extends ServerFailure {
   /// Creates a [NotFound] failure.
   const NotFound([StackTrace? stackTrace]) : super('Not found', stackTrace);
+
+  @override
+  String toString() => 'NotFound: $message';
 }
 
 /// Failures related to local cache/storage operations.
@@ -126,6 +164,9 @@ final class CacheReadFailure extends CacheFailure {
   /// Creates a [CacheReadFailure].
   const CacheReadFailure([StackTrace? stackTrace])
     : super('Failed to read from cache', stackTrace);
+
+  @override
+  String toString() => 'CacheReadFailure: $message';
 }
 
 /// Failed to write data to local storage.
@@ -133,6 +174,9 @@ final class CacheWriteFailure extends CacheFailure {
   /// Creates a [CacheWriteFailure].
   const CacheWriteFailure([StackTrace? stackTrace])
     : super('Failed to write to cache', stackTrace);
+
+  @override
+  String toString() => 'CacheWriteFailure: $message';
 }
 
 /// An unexpected failure that doesn't fit other categories.
@@ -145,6 +189,16 @@ final class UnexpectedFailure extends Failure {
 
   /// The original error or exception that caused this failure.
   final Object error;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnexpectedFailure &&
+          error == other.error &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(error, message);
 
   @override
   String toString() => 'UnexpectedFailure: $error';

@@ -169,9 +169,9 @@ void main() {
       );
     });
 
-    /// Two Err instances with the same failure type are equal when the
-    /// failure class supports equality (the built-in failures do not
-    /// override ==, so we test identity-based equality with const).
+    /// Two Err instances with the same failure type are equal because
+    /// Failure subclasses implement value equality based on their
+    /// semantic fields.
     test('equality holds for identical failures', () {
       const a = Err<int>(NotFound());
       const b = Err<int>(NotFound());
@@ -179,6 +179,25 @@ void main() {
       // NotFound is a const constructor, so const instances are identical.
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);
+    });
+
+    /// Non-const Err instances with equal failures are equal.
+    test('equality holds for non-const failures with same fields', () {
+      // ignore: prefer_const_constructors
+      final a = Err<int>(BadResponse(404));
+      // ignore: prefer_const_constructors
+      final b = Err<int>(BadResponse(404));
+
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+    });
+
+    /// BadResponse with different status codes are not equal.
+    test('inequality for failures with different fields', () {
+      const a = Err<int>(BadResponse(404));
+      const b = Err<int>(BadResponse(500));
+
+      expect(a, isNot(equals(b)));
     });
   });
 

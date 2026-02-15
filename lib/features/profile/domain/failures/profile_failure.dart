@@ -17,6 +17,9 @@ final class ProfileNotFound extends ProfileFailure {
   /// Create a [ProfileNotFound] failure.
   const ProfileNotFound([StackTrace? stackTrace])
     : super('Profile not found', stackTrace);
+
+  @override
+  String toString() => 'ProfileNotFound: $message';
 }
 
 /// The profile update was rejected by the server.
@@ -24,4 +27,7 @@ final class ProfileUpdateRejected extends ProfileFailure {
   /// Create a [ProfileUpdateRejected] failure.
   const ProfileUpdateRejected([String? message, StackTrace? stackTrace])
     : super(message ?? 'Profile update failed', stackTrace);
+
+  @override
+  String toString() => 'ProfileUpdateRejected: $message';
 }

@@ -77,6 +77,43 @@ Failure (abstract base)
         +-- ...
 ```
 
+## Failure Equality
+
+`Failure` subclasses implement **value equality** based on their semantic
+fields. This ensures that `Err(NotFound()) == Err(NotFound())` works
+correctly with `Result<T>`.
+
+**Equality rules:**
+- The base `Failure.==` compares `runtimeType` + `message`.
+- `stackTrace` is **excluded** from equality (it is diagnostic, not semantic).
+- Subclasses with extra fields (e.g., `BadResponse.statusCode`,
+  `UnexpectedFailure.error`) must override `==` and `hashCode` to include
+  those fields.
+
+**When adding a new failure with extra fields:**
+
+```dart
+final class RateLimited extends ServerFailure {
+  const RateLimited(this.retryAfter, [StackTrace? stackTrace])
+      : super('Rate limited', stackTrace);
+
+  final Duration retryAfter;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RateLimited &&
+          retryAfter == other.retryAfter &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(retryAfter, message);
+
+  @override
+  String toString() => 'RateLimited: $message (retry after $retryAfter)';
+}
+```
+
 ## Exception-to-Failure Mapping
 
 Repositories map `DioException` (which wraps `AppException` from `ErrorInterceptor`) to feature-specific failures:

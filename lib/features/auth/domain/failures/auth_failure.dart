@@ -22,6 +22,9 @@ final class InvalidCredentials extends AuthFailure {
   /// Create an [InvalidCredentials] failure.
   const InvalidCredentials([StackTrace? stackTrace])
     : super('Invalid email or password', stackTrace);
+
+  @override
+  String toString() => 'InvalidCredentials: $message';
 }
 
 /// A user account with the given email already exists.
@@ -29,6 +32,9 @@ final class EmailAlreadyInUse extends AuthFailure {
   /// Create an [EmailAlreadyInUse] failure.
   const EmailAlreadyInUse([StackTrace? stackTrace])
     : super('An account with this email already exists', stackTrace);
+
+  @override
+  String toString() => 'EmailAlreadyInUse: $message';
 }
 
 /// The user's session has expired and re-authentication is required.
@@ -36,6 +42,9 @@ final class SessionExpired extends AuthFailure {
   /// Create a [SessionExpired] failure.
   const SessionExpired([StackTrace? stackTrace])
     : super('Your session has expired, please log in again', stackTrace);
+
+  @override
+  String toString() => 'SessionExpired: $message';
 }
 
 /// An unexpected server-side error occurred during authentication.
@@ -45,4 +54,7 @@ final class AuthServerError extends AuthFailure {
     super.message = 'Authentication server error',
     super.stackTrace,
   ]);
+
+  @override
+  String toString() => 'AuthServerError: $message';
 }
