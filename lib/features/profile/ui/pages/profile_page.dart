@@ -30,6 +30,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   late final TextEditingController _bioController;
   late final TextEditingController _phoneController;
   bool _isEditing = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -58,6 +59,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_isSaving) return;
+
+    setState(() => _isSaving = true);
 
     await ref
         .read(profileViewModelProvider.notifier)
@@ -70,6 +74,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         );
 
     if (mounted) {
+      setState(() => _isSaving = false);
       final hasError = ref.read(profileViewModelProvider).hasError;
       if (hasError) {
         AppSnackbar.showError(context, t.profile.error.updateFailed);
@@ -213,9 +218,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         const SizedBox(height: 24),
         FilledButton(
-          // ignore: avoid-passing-async-when-sync-expected
-          onPressed: _saveProfile,
-          child: Text(t.core.action.save),
+          onPressed: _isSaving ? null : _saveProfile,
+          child: _isSaving
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(t.core.action.save),
         ),
       ],
     ),

@@ -50,11 +50,14 @@ class FeatureFlagNotifier extends _$FeatureFlagNotifier {
   }
 
   /// Reset all flags to their default (disabled) state.
-  void resetAll() {
+  ///
+  /// State is updated immediately for UI responsiveness. Storage removal
+  /// is awaited to ensure persistence consistency.
+  Future<void> resetAll() async {
     state = {for (final flag in FeatureFlag.values) flag: false};
-    for (final flag in FeatureFlag.values) {
-      _prefs.remove(_storageKey(flag));
-    }
+    await Future.wait([
+      for (final flag in FeatureFlag.values) _prefs.remove(_storageKey(flag)),
+    ]);
   }
 
   String _storageKey(FeatureFlag flag) => 'feature_flag_${flag.key}';

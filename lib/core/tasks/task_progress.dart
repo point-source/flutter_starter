@@ -74,7 +74,9 @@ final class IndeterminateProgress extends TaskProgress {
 @immutable
 final class DeterminateProgress extends TaskProgress {
   /// Create a [DeterminateProgress] with the given [fraction].
-  const DeterminateProgress(this.fraction);
+  const DeterminateProgress(this.fraction)
+      : assert(fraction >= 0.0 && fraction <= 1.0,
+            'fraction must be between 0.0 and 1.0');
 
   /// The progress fraction, from 0.0 (not started) to 1.0 (complete).
   final double fraction;
@@ -101,7 +103,9 @@ final class DeterminateProgress extends TaskProgress {
 @immutable
 final class PhasedProgress extends TaskProgress {
   /// Create a [PhasedProgress] with a [label] and optional [fraction].
-  const PhasedProgress(this.label, [this.fraction]);
+  const PhasedProgress(this.label, [this.fraction])
+      : assert(fraction == null || (fraction >= 0.0 && fraction <= 1.0),
+            'fraction must be null or between 0.0 and 1.0');
 
   /// A human-readable description of the current phase.
   final String label;

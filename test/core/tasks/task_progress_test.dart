@@ -52,6 +52,25 @@ void main() {
         equals('TaskProgress.determinate(0.5)'),
       );
     });
+
+    test('asserts on fraction below 0.0', () {
+      expect(
+        () => DeterminateProgress(-0.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('asserts on fraction above 1.0', () {
+      expect(
+        () => DeterminateProgress(1.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('accepts boundary values 0.0 and 1.0', () {
+      expect(const DeterminateProgress(0.0).fraction, 0.0);
+      expect(const DeterminateProgress(1.0).fraction, 1.0);
+    });
   });
 
   group('PhasedProgress', () {
@@ -94,6 +113,24 @@ void main() {
         const PhasedProgress('Uploading', 0.5).toString(),
         equals('TaskProgress.phased(Uploading, 0.5)'),
       );
+    });
+
+    test('asserts on fraction below 0.0', () {
+      expect(
+        () => PhasedProgress('Test', -0.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('asserts on fraction above 1.0', () {
+      expect(
+        () => PhasedProgress('Test', 1.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('accepts null fraction', () {
+      expect(const PhasedProgress('Test').fraction, isNull);
     });
   });
 
