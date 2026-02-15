@@ -55,6 +55,13 @@ abstract class IAppLogger {
     Map<String, dynamic>? data,
     String? tag,
   });
+
+  /// Set the current user context for all subsequent log events.
+  ///
+  /// Pass `null` for both [userId] and [email] to clear the user context
+  /// (e.g. on logout).  Implementations that forward to error-tracking
+  /// services should attach these identifiers to future reports.
+  void setUser(String? userId, String? email);
 }
 
 /// Implement [IAppLogger] by writing structured entries to the Dart developer
@@ -117,6 +124,12 @@ class ConsoleLogger implements IAppLogger {
       error: error,
       stackTrace: stackTrace,
     );
+  }
+
+  @override
+  void setUser(String? userId, String? email) {
+    // No-op for console logging — user context is only meaningful for
+    // error-tracking services like Sentry.
   }
 
   void _log(

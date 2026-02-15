@@ -101,6 +101,7 @@ class SentryReporter implements IAppLogger {
   ///
   /// Pass `null` for both [userId] and [email] to clear the user context
   /// (e.g. on logout).
+  @override
   void setUser(String? userId, String? email) {
     if (userId == null && email == null) {
       Sentry.configureScope((scope) => scope.setUser(null));
