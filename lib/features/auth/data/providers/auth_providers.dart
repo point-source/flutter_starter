@@ -88,6 +88,7 @@ class AuthStateRepo extends _$AuthStateRepo {
       failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
     );
 
+    // ignore: no-empty-block
     return result.map((_) {});
   }
 
@@ -113,6 +114,7 @@ class AuthStateRepo extends _$AuthStateRepo {
       failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
     );
 
+    // ignore: no-empty-block
     return result.map((_) {});
   }
 

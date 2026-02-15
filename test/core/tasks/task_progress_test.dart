@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_int_literals
+
 /// Verify [TaskProgress] sealed hierarchy construction and equality.
 library;
 
@@ -54,17 +56,11 @@ void main() {
     });
 
     test('asserts on fraction below 0.0', () {
-      expect(
-        () => DeterminateProgress(-0.1),
-        throwsA(isA<AssertionError>()),
-      );
+      expect(() => DeterminateProgress(-0.1), throwsA(isA<AssertionError>()));
     });
 
     test('asserts on fraction above 1.0', () {
-      expect(
-        () => DeterminateProgress(1.1),
-        throwsA(isA<AssertionError>()),
-      );
+      expect(() => DeterminateProgress(1.1), throwsA(isA<AssertionError>()));
     });
 
     test('accepts boundary values 0.0 and 1.0', () {
@@ -123,10 +119,7 @@ void main() {
     });
 
     test('asserts on fraction above 1.0', () {
-      expect(
-        () => PhasedProgress('Test', 1.1),
-        throwsA(isA<AssertionError>()),
-      );
+      expect(() => PhasedProgress('Test', 1.1), throwsA(isA<AssertionError>()));
     });
 
     test('accepts null fraction', () {

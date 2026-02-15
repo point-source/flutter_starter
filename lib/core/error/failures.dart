@@ -41,6 +41,9 @@ abstract class Failure {
 
   @override
   int get hashCode => Object.hash(runtimeType, message);
+
+  @override
+  String toString() => '$runtimeType: $message';
 }
 
 /// Exception wrapper for [Failure] values that need to be thrown.

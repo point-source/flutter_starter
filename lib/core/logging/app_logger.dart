@@ -127,6 +127,7 @@ class ConsoleLogger implements IAppLogger {
   }
 
   @override
+  // ignore: no-empty-block
   void setUser(String? userId, String? email) {
     // No-op for console logging — user context is only meaningful for
     // error-tracking services like Sentry.
