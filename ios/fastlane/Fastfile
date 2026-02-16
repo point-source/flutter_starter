@@ -1,0 +1,120 @@
+# frozen_string_literal: true
+
+# For more information about the Fastfile, see:
+#   https://docs.fastlane.tools/
+
+default_platform(:ios)
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+def flutter_build_cmd(platform, environment, build_number = nil)
+  config = "config/#{environment}.json"
+  cmd = "flutter build #{platform} --release --dart-define-from-file=#{config}"
+  cmd += " --build-number=#{build_number}" if build_number
+  cmd
+end
+
+PLACEHOLDER_VALUES = %w[
+  com.example.myapp
+  you@example.com
+  XXXXXXXXXX
+  123456789
+  git@github.com:your-org/certificates.git
+].freeze
+
+def check_env(name, label)
+  value = ENV[name]
+  if value.nil? || value.empty?
+    UI.error("  FAIL  #{label} (#{name} is not set)")
+    return false
+  end
+  if PLACEHOLDER_VALUES.include?(value)
+    UI.error("  FAIL  #{label} (#{name} is still set to the placeholder value)")
+    return false
+  end
+  UI.success("  OK    #{label}")
+  true
+end
+
+# ── Lanes ────────────────────────────────────────────────────────────────────
+
+platform :ios do
+  desc 'Validate that iOS deployment is properly configured'
+  lane :preflight do |options|
+    UI.header('iOS Deployment Preflight Check')
+
+    all_ok = true
+
+    all_ok &= check_env('APP_IDENTIFIER', 'App identifier')
+    all_ok &= check_env('APPLE_ID', 'Apple ID')
+    all_ok &= check_env('TEAM_ID', 'Apple Developer Team ID')
+    all_ok &= check_env('ITC_TEAM_ID', 'App Store Connect Team ID')
+    all_ok &= check_env('MATCH_GIT_URL', 'match certificates repo URL')
+
+    # Check environment config file
+    environment = options[:environment] || 'staging'
+    config_path = File.join('..', 'config', "#{environment}.json")
+    if File.exist?(config_path)
+      UI.success("  OK    Environment config (config/#{environment}.json)")
+    else
+      UI.error("  FAIL  Environment config (config/#{environment}.json not found)")
+      all_ok = false
+    end
+
+    # Check flutter CLI
+    if system('which flutter > /dev/null 2>&1')
+      UI.success('  OK    Flutter CLI')
+    else
+      UI.error('  FAIL  Flutter CLI (flutter not found on PATH)')
+      all_ok = false
+    end
+
+    if all_ok
+      UI.success("\nAll iOS preflight checks passed!")
+    else
+      UI.user_error!("\nSome iOS preflight checks failed. See docs/FASTLANE.md for setup instructions.")
+    end
+  end
+
+  desc 'Sync code signing certificates and provisioning profiles'
+  lane :certificates do
+    setup_ci if is_ci
+    match(type: 'appstore', readonly: is_ci)
+  end
+
+  desc 'Build and upload to TestFlight'
+  lane :beta do |options|
+    environment = options[:environment] || 'staging'
+    build_number = options[:build_number]
+
+    certificates
+
+    Dir.chdir('..') do
+      sh(flutter_build_cmd('ipa', environment, build_number))
+    end
+
+    upload_to_testflight(
+      ipa: Dir['../build/ios/ipa/*.ipa'].first,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc 'Build and upload to App Store'
+  lane :release do |options|
+    build_number = options[:build_number]
+
+    certificates
+
+    Dir.chdir('..') do
+      sh(flutter_build_cmd('ipa', 'production', build_number))
+    end
+
+    upload_to_app_store(
+      ipa: Dir['../build/ios/ipa/*.ipa'].first,
+      submit_for_review: false,
+      automatic_release: false,
+      skip_metadata: true,
+      skip_screenshots: true
+    )
+  end
+end

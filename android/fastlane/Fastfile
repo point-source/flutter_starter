@@ -1,0 +1,139 @@
+# frozen_string_literal: true
+
+# For more information about the Fastfile, see:
+#   https://docs.fastlane.tools/
+
+default_platform(:android)
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+def flutter_build_cmd(platform, environment, build_number = nil)
+  config = "config/#{environment}.json"
+  cmd = "flutter build #{platform} --release --dart-define-from-file=#{config}"
+  cmd += " --build-number=#{build_number}" if build_number
+  cmd
+end
+
+# ── Lanes ────────────────────────────────────────────────────────────────────
+
+platform :android do
+  desc 'Validate that Android deployment is properly configured'
+  lane :preflight do |options|
+    UI.header('Android Deployment Preflight Check')
+
+    all_ok = true
+
+    # Check key.properties
+    key_props_path = File.join('..', 'android', 'key.properties')
+    if File.exist?(key_props_path)
+      UI.success('  OK    key.properties exists')
+
+      # Check for placeholder values
+      key_props = File.read(key_props_path)
+      if key_props.include?('changeme')
+        UI.error('  FAIL  key.properties still contains placeholder passwords (changeme)')
+        all_ok = false
+      else
+        UI.success('  OK    key.properties passwords configured')
+      end
+
+      # Check keystore file exists
+      store_file_line = key_props.lines.find { |l| l.start_with?('storeFile=') }
+      if store_file_line
+        store_file = store_file_line.strip.sub('storeFile=', '')
+        resolved = File.expand_path(store_file, File.join('..', 'android'))
+        if File.exist?(resolved)
+          UI.success("  OK    Keystore file (#{store_file})")
+        else
+          UI.error("  FAIL  Keystore file not found (#{store_file})")
+          all_ok = false
+        end
+      end
+    else
+      UI.error('  FAIL  key.properties not found (copy from key.properties.example)')
+      all_ok = false
+    end
+
+    # Check package name
+    package_name = ENV.fetch('PACKAGE_NAME', '')
+    if package_name.empty? || package_name == 'com.example.myapp'
+      UI.error('  FAIL  Package name (PACKAGE_NAME is not set or is still the placeholder)')
+      all_ok = false
+    else
+      UI.success('  OK    Package name')
+    end
+
+    # Check Google Play JSON key
+    json_key = ENV.fetch('GOOGLE_PLAY_JSON_KEY', '')
+    if json_key.empty?
+      UI.error('  FAIL  Google Play JSON key (GOOGLE_PLAY_JSON_KEY is not set)')
+      all_ok = false
+    elsif File.exist?(json_key)
+      UI.success('  OK    Google Play JSON key')
+    else
+      UI.error("  FAIL  Google Play JSON key file not found (#{json_key})")
+      all_ok = false
+    end
+
+    # Check environment config file
+    environment = options[:environment] || 'staging'
+    config_path = File.join('..', 'config', "#{environment}.json")
+    if File.exist?(config_path)
+      UI.success("  OK    Environment config (config/#{environment}.json)")
+    else
+      UI.error("  FAIL  Environment config (config/#{environment}.json not found)")
+      all_ok = false
+    end
+
+    # Check flutter CLI
+    if system('which flutter > /dev/null 2>&1')
+      UI.success('  OK    Flutter CLI')
+    else
+      UI.error('  FAIL  Flutter CLI (flutter not found on PATH)')
+      all_ok = false
+    end
+
+    if all_ok
+      UI.success("\nAll Android preflight checks passed!")
+    else
+      UI.user_error!("\nSome Android preflight checks failed. See docs/FASTLANE.md for setup instructions.")
+    end
+  end
+
+  desc 'Build and upload to Play Store internal testing'
+  lane :beta do |options|
+    environment = options[:environment] || 'staging'
+    build_number = options[:build_number]
+
+    Dir.chdir('..') do
+      sh(flutter_build_cmd('appbundle', environment, build_number))
+    end
+
+    upload_to_play_store(
+      track: 'internal',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc 'Build and upload to Play Store production'
+  lane :release do |options|
+    build_number = options[:build_number]
+
+    Dir.chdir('..') do
+      sh(flutter_build_cmd('appbundle', 'production', build_number))
+    end
+
+    upload_to_play_store(
+      track: 'production',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

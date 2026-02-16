@@ -1,0 +1,10 @@
+# Android release signing configuration.
+# Copy this file to key.properties and fill in your values.
+# See fastlane/README.md for instructions on creating a keystore.
+#
+# IMPORTANT: Do NOT commit key.properties to version control.
+
+storePassword=changeme
+keyPassword=changeme
+keyAlias=upload
+storeFile=../keystore/upload.jks

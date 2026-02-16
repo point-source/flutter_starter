@@ -1,0 +1,174 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to deploy'
+        required: true
+        type: choice
+        options:
+          - ios
+          - android
+          - both
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      lane:
+        description: 'Fastlane lane (beta = internal testing, release = store)'
+        required: true
+        type: choice
+        options:
+          - beta
+          - release
+
+concurrency:
+  group: deploy-${{ github.event.inputs.platform }}-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  ios:
+    name: Deploy iOS (${{ github.event.inputs.lane }})
+    if: github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Provision config
+        working-directory: .
+        run: ./scripts/setup.sh
+
+      - name: Override config from secrets
+        if: vars.API_URL != ''
+        working-directory: .
+        run: |
+          jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
+            config/${{ github.event.inputs.environment }}.json > tmp.$$.json \
+            && mv tmp.$$.json config/${{ github.event.inputs.environment }}.json
+
+      - name: Install Flutter dependencies
+        working-directory: .
+        run: flutter pub get
+
+      - name: Preflight check
+        env:
+          APP_IDENTIFIER: ${{ vars.APP_IDENTIFIER }}
+          APPLE_ID: ${{ vars.APPLE_ID }}
+          TEAM_ID: ${{ vars.TEAM_ID }}
+          ITC_TEAM_ID: ${{ vars.ITC_TEAM_ID }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: bundle exec fastlane preflight environment:${{ github.event.inputs.environment }}
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        env:
+          # match
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          # App Store Connect API key
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          # App identifiers
+          APP_IDENTIFIER: ${{ vars.APP_IDENTIFIER }}
+          APPLE_ID: ${{ vars.APPLE_ID }}
+          TEAM_ID: ${{ vars.TEAM_ID }}
+          ITC_TEAM_ID: ${{ vars.ITC_TEAM_ID }}
+        run: |
+          bundle exec fastlane ${{ github.event.inputs.lane }} \
+            environment:${{ github.event.inputs.environment }} \
+            build_number:${{ github.run_number }}
+
+  android:
+    name: Deploy Android (${{ github.event.inputs.lane }})
+    if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: android
+
+      - name: Provision config
+        working-directory: .
+        run: ./scripts/setup.sh
+
+      - name: Override config from secrets
+        if: vars.API_URL != ''
+        working-directory: .
+        run: |
+          jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
+            config/${{ github.event.inputs.environment }}.json > tmp.$$.json \
+            && mv tmp.$$.json config/${{ github.event.inputs.environment }}.json
+
+      - name: Decode Android keystore
+        run: |
+          mkdir -p keystore
+          echo "$ANDROID_KEYSTORE" | base64 -d > keystore/upload.jks
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+
+      - name: Write key.properties
+        run: echo "$ANDROID_KEY_PROPERTIES" > key.properties
+        env:
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+
+      - name: Write Google Play service account key
+        run: echo "$GOOGLE_PLAY_JSON_KEY" > fastlane/google-play-key.json
+        env:
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+
+      - name: Install Flutter dependencies
+        working-directory: .
+        run: flutter pub get
+
+      - name: Preflight check
+        env:
+          PACKAGE_NAME: ${{ vars.PACKAGE_NAME }}
+          GOOGLE_PLAY_JSON_KEY: ./fastlane/google-play-key.json
+        run: bundle exec fastlane preflight environment:${{ github.event.inputs.environment }}
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        env:
+          PACKAGE_NAME: ${{ vars.PACKAGE_NAME }}
+          GOOGLE_PLAY_JSON_KEY: ./fastlane/google-play-key.json
+        run: |
+          bundle exec fastlane ${{ github.event.inputs.lane }} \
+            environment:${{ github.event.inputs.environment }} \
+            build_number:${{ github.run_number }}

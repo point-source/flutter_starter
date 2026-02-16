@@ -50,3 +50,20 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android release signing
+android/key.properties
+*.jks
+*.keystore
+keystore/
+
+# Fastlane (per-platform)
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+**/fastlane/google-play-key.json
+
+# Ruby
+vendor/bundle/
+.bundle/

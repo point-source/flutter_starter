@@ -50,6 +50,23 @@ if [[ $skipped -gt 0 && "$FORCE" == false ]]; then
   echo "Run with --force to overwrite existing files."
 fi
 
+# ── Android signing ──────────────────────────────────────────────────────────
+# Copy key.properties.example to key.properties if it doesn't exist yet.
+ANDROID_DIR="$SCRIPT_DIR/../android"
+KEY_PROPS_EXAMPLE="$ANDROID_DIR/key.properties.example"
+KEY_PROPS_TARGET="$ANDROID_DIR/key.properties"
+
+if [[ -f "$KEY_PROPS_EXAMPLE" ]]; then
+  if [[ -f "$KEY_PROPS_TARGET" && "$FORCE" == false ]]; then
+    echo ""
+    echo "  skip  android/key.properties (already exists)"
+  else
+    cp "$KEY_PROPS_EXAMPLE" "$KEY_PROPS_TARGET"
+    echo ""
+    echo "  create android/key.properties (update with your signing config)"
+  fi
+fi
+
 # ── Git hooks ───────────────────────────────────────────────────────────────
 # Point git to the checked-in .githooks directory so the pre-commit hook is
 # active for every developer without manual setup.
