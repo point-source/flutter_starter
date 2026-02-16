@@ -10,7 +10,7 @@ Each feature's API surface is defined as an abstract Retrofit class:
 
 ```dart
 // features/auth/data/services/auth_service.dart
-@RestApi()
+@RestApi(parser: .DartMappable)
 abstract class AuthService {
   factory AuthService(Dio dio) = _AuthService;
 

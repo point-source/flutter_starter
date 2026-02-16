@@ -38,7 +38,7 @@ class _ProfileService implements ProfileService {
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late ProfileDto _value;
     try {
-      _value = ProfileDto.fromJson(_result.data!);
+      _value = ProfileDtoMapper.fromMap(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -51,7 +51,8 @@ class _ProfileService implements ProfileService {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toMap());
     final _options = _setStreamType<ProfileDto>(
       Options(method: 'PUT', headers: _headers, extra: _extra)
           .compose(
@@ -65,7 +66,7 @@ class _ProfileService implements ProfileService {
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late ProfileDto _value;
     try {
-      _value = ProfileDto.fromJson(_result.data!);
+      _value = ProfileDtoMapper.fromMap(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

@@ -444,7 +444,7 @@ This is the **canonical example** that all other features follow.
 #### 2.2 Data layer — `lib/features/auth/data/`
 - **`auth_service.dart`** — Retrofit API:
   ```dart
-  @RestApi()
+  @RestApi(parser: .DartMappable)
   abstract class AuthService {
     factory AuthService(Dio dio) = _AuthService;
 

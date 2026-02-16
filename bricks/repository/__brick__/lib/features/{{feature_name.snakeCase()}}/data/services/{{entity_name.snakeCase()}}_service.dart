@@ -17,7 +17,7 @@ part '{{entity_name.snakeCase()}}_service.g.dart';
 /// Each method maps to a single REST endpoint. The generated
 /// [_{{entity_name.pascalCase()}}Service] implementation handles request
 /// building, body serialisation, and response parsing.
-@RestApi()
+@RestApi(parser: .DartMappable)
 abstract class {{entity_name.pascalCase()}}Service {
   /// Create a [{{entity_name.pascalCase()}}Service] backed by the given
   /// [dio] instance.

@@ -24,7 +24,8 @@ class _AuthService implements AuthService {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toMap());
     final _options = _setStreamType<AuthResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -38,7 +39,7 @@ class _AuthService implements AuthService {
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late AuthResponse _value;
     try {
-      _value = AuthResponse.fromJson(_result.data!);
+      _value = AuthResponseMapper.fromMap(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -51,7 +52,8 @@ class _AuthService implements AuthService {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toMap());
     final _options = _setStreamType<AuthResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
@@ -65,7 +67,7 @@ class _AuthService implements AuthService {
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late AuthResponse _value;
     try {
-      _value = AuthResponse.fromJson(_result.data!);
+      _value = AuthResponseMapper.fromMap(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -111,7 +113,7 @@ class _AuthService implements AuthService {
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
     late UserDto _value;
     try {
-      _value = UserDto.fromJson(_result.data!);
+      _value = UserDtoMapper.fromMap(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

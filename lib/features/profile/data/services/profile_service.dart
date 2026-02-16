@@ -12,7 +12,7 @@ import 'package:retrofit/retrofit.dart';
 part 'profile_service.g.dart';
 
 /// HTTP client for the profile API.
-@RestApi()
+@RestApi(parser: .DartMappable)
 abstract class ProfileService {
   /// Create a [ProfileService] backed by the given [dio] instance.
   factory ProfileService(Dio dio) = _ProfileService;

@@ -18,7 +18,7 @@ part '{{service_name.snakeCase()}}_service.g.dart';
 ///
 /// Add imports for request/response DTOs and update the return types
 /// below once the corresponding models are created.
-@RestApi()
+@RestApi(parser: .DartMappable)
 abstract class {{service_name.pascalCase()}}Service {
   /// Create a [{{service_name.pascalCase()}}Service] backed by the given
   /// [dio] instance.

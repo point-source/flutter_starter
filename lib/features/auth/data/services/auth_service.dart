@@ -19,7 +19,7 @@ part 'auth_service.g.dart';
 /// Each method maps to a single REST endpoint. The generated
 /// [_AuthService] implementation handles request building, body
 /// serialisation, and response parsing.
-@RestApi()
+@RestApi(parser: .DartMappable)
 abstract class AuthService {
   /// Create an [AuthService] backed by the given [dio] instance.
   factory AuthService(Dio dio) = _AuthService;
