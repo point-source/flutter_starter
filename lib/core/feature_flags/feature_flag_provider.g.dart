@@ -78,7 +78,7 @@ final class FeatureFlagNotifierProvider
 }
 
 String _$featureFlagNotifierHash() =>
-    r'a1abf301b5b2dc96deb66837e921933090745ed5';
+    r'73ab43df988cda172a933ffaf4770296b051a1ef';
 
 /// Manage the enabled/disabled state of all [FeatureFlag]s.
 ///
