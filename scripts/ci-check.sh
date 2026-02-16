@@ -110,14 +110,24 @@ run_test() {
 
 # ── Code Generation Freshness ──────────────────────────────────────────────
 
+# Patterns that code generators produce. Only these are checked for staleness
+# so that unrelated changes (e.g. pubspec.lock) don't cause false failures.
+GENERATED_PATTERNS=('*.g.dart' '*.gr.dart' '*.mapper.dart' 'lib/gen/*')
+
 run_codegen() {
   step "Code generation (build_runner + slang)"
   dart run build_runner build --delete-conflicting-outputs
   dart run slang
 
+  # Build git diff args that scope to generated file patterns only.
+  local diff_args=()
+  for pattern in "${GENERATED_PATTERNS[@]}"; do
+    diff_args+=("$pattern")
+  done
+
   if [ "$CHECK_ONLY" = true ]; then
     step "Verify generated files are up to date"
-    if git diff --exit-code; then
+    if git diff --exit-code -- "${diff_args[@]}"; then
       pass "Generated files are up to date"
     else
       fail "Generated files are out of date."
@@ -125,11 +135,11 @@ run_codegen() {
     fi
   else
     # Stage any regenerated files so they're included in the commit.
-    if ! git diff --quiet; then
+    if ! git diff --quiet -- "${diff_args[@]}"; then
       echo ""
       echo -e "${YELLOW}Generated files were out of date — staging updates:${NC}"
-      git diff --name-only
-      git add -A
+      git diff --name-only -- "${diff_args[@]}"
+      git add -- $(git diff --name-only -- "${diff_args[@]}")
       pass "Generated files updated (staged)"
     else
       pass "Generated files are up to date"
