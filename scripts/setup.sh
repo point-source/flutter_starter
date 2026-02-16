@@ -49,3 +49,17 @@ echo "Done. $copied file(s) created, $skipped file(s) skipped."
 if [[ $skipped -gt 0 && "$FORCE" == false ]]; then
   echo "Run with --force to overwrite existing files."
 fi
+
+# ── Git hooks ───────────────────────────────────────────────────────────────
+# Point git to the checked-in .githooks directory so the pre-commit hook is
+# active for every developer without manual setup.
+REPO_ROOT="$SCRIPT_DIR/.."
+current_hooks_path="$(git -C "$REPO_ROOT" config --local core.hooksPath 2>/dev/null || true)"
+if [[ "$current_hooks_path" != ".githooks" ]]; then
+  git -C "$REPO_ROOT" config --local core.hooksPath .githooks
+  echo ""
+  echo "Git hooks path set to .githooks (pre-commit CI checks enabled)."
+else
+  echo ""
+  echo "Git hooks path already configured."
+fi

@@ -158,8 +158,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   TextButton(
                     onPressed: isLoading
                         ? null
-                        : () =>
-                            context.router.replace(const LoginRoute()),
+                        : () => context.router.replace(const LoginRoute()),
                     child: Text(t.auth.hasAccountLogin),
                   ),
                 ],

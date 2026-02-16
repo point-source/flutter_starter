@@ -149,8 +149,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   TextButton(
                     onPressed: isLoading
                         ? null
-                        : () =>
-                            context.router.replace(const RegisterRoute()),
+                        : () => context.router.replace(const RegisterRoute()),
                     child: Text(t.auth.noAccountRegister),
                   ),
                 ],

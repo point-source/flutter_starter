@@ -25,18 +25,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze
-        run: dart analyze --fatal-warnings
-
-      - name: Check formatting
-        run: >
-          dart format --output=none --set-exit-if-changed
-          --line-length=80
-          $(find lib test -name '*.dart'
-          ! -name '*.g.dart'
-          ! -name '*.gr.dart'
-          ! -name '*.mapper.dart'
-          ! -path 'lib/gen/*')
+      - name: Analyze & check formatting
+        run: ./scripts/ci-check.sh --check lint
 
   test:
     name: Test
@@ -53,7 +43,7 @@ jobs:
         run: flutter pub get
 
       - name: Run tests with coverage
-        run: flutter test --coverage
+        run: ./scripts/ci-check.sh --check --coverage test
 
       - name: Upload coverage report
         if: always()
@@ -104,15 +94,5 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run build_runner
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Run slang
-        run: dart run slang
-
       - name: Verify generated files are up to date
-        run: |
-          if ! git diff --exit-code; then
-            echo "::error::Generated files are out of date. Run 'dart run build_runner build --delete-conflicting-outputs && dart run slang' and commit the changes."
-            exit 1
-          fi
+        run: ./scripts/ci-check.sh --check codegen

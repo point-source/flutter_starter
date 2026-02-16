@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Pre-commit hook: auto-fixes formatting and codegen, then runs CI checks.
+# If fixes produce changes, they are staged into the current commit
+# automatically. The commit is only blocked by analysis errors or test
+# failures.
+#
+# Skip with: git commit --no-verify
+#
+# Install with: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+echo "Running CI checks before commit (auto-fixing where possible)..."
+echo "(skip with: git commit --no-verify)"
+echo ""
+
+exec "$REPO_ROOT/scripts/ci-check.sh"

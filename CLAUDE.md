@@ -174,6 +174,12 @@ flutter test --coverage
 # Static analysis
 dart analyze
 
+# Run CI checks locally (same as GitHub Actions)
+./scripts/ci-check.sh          # All checks: lint, test, codegen
+./scripts/ci-check.sh lint     # Analyze + format only
+./scripts/ci-check.sh test     # Tests only
+./scripts/ci-check.sh codegen  # Codegen freshness only
+
 # Run the app (development)
 flutter run --dart-define-from-file=config/development.json
 
