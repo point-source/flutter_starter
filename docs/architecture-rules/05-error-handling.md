@@ -4,10 +4,12 @@
 
 Errors are handled through a two-tier system: **exceptions** at the data layer boundary and **Result values** above the repository layer. Exceptions are thrown and caught. Results are returned and pattern-matched.
 
+`DioApiException` is **Dio-specific** and lives in `core/http/`. It is internal to the Dio integration layer and not a general concern. Features that use non-Dio backends (e.g., Supabase, Firebase) catch their own backend-specific exceptions in their repository implementations and map them to `Failure` types directly.
+
 ## Error Flow
 
 ```
-Service (throws AppException)
+Service (throws backend-specific exception, e.g. DioApiException from Dio)
     |
     v
 Repository (catches exception, returns Result<T>)
@@ -116,12 +118,12 @@ final class RateLimited extends ServerFailure {
 
 ## Exception-to-Failure Mapping
 
-Repositories map `DioException` (which wraps `AppException` from `ErrorInterceptor`) to feature-specific failures:
+Repositories catch backend-specific exceptions and map them to feature-specific failures. For Dio-based backends, this means catching `DioException` (which wraps `DioApiException` from `ErrorInterceptor` in `core/http/`). Other backends (e.g., Supabase, Firebase) have their own exception types that repositories catch directly.
 
 ```dart
 AuthFailure _mapDioException(DioException e, StackTrace st) {
   final error = e.error;
-  if (error is AppException) {
+  if (error is DioApiException) {
     return switch (error.statusCode) {
       401 => InvalidCredentials(st),
       409 => EmailAlreadyInUse(st),
@@ -192,7 +194,7 @@ final class ProfileNotFound extends ProfileFailure {
 ## DO NOT
 
 - Do not throw exceptions from repository methods -- return `Err` instead.
-- Do not let `AppException` or `DioException` propagate to the ViewModel or UI layer.
+- Do not let `DioApiException`, `DioException`, or any backend-specific exception propagate to the ViewModel or UI layer.
 - Do not catch errors in ViewModels -- let the `Result` type handle it.
 - Do not use generic `Failure` where a feature-specific failure exists.
 - Do not put user-facing error messages in `Failure.message` -- use the failure message mapper.

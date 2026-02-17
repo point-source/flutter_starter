@@ -8,73 +8,45 @@ part of 'auth_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Create an [AuthService] backed by the application's [Dio] instance.
-
-@ProviderFor(authService)
-final authServiceProvider = AuthServiceProvider._();
-
-/// Create an [AuthService] backed by the application's [Dio] instance.
-
-final class AuthServiceProvider
-    extends $FunctionalProvider<AuthService, AuthService, AuthService>
-    with $Provider<AuthService> {
-  /// Create an [AuthService] backed by the application's [Dio] instance.
-  AuthServiceProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'authServiceProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$authServiceHash();
-
-  @$internal
-  @override
-  $ProviderElement<AuthService> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  AuthService create(Ref ref) {
-    return authService(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AuthService value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AuthService>(value),
-    );
-  }
-}
-
-String _$authServiceHash() => r'75151e3e3f192c812b9d9cd4c7aef6af2973808a';
-
-/// Create an [IAuthRepository] wired to the auth service and token storage.
+/// Provide the [IAuthRepository] implementation.
 ///
-/// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
-/// provides a fake user with no network calls.
+/// Returns [MockAuthRepository] by default. To connect a real backend,
+/// replace this with your own implementation of [IAuthRepository]:
+///
+/// ```dart
+/// @riverpod
+/// IAuthRepository authRepository(Ref ref) =>
+///     MyBackendAuthRepository(ref.read(myServiceProvider));
+/// ```
 
 @ProviderFor(authRepository)
 final authRepositoryProvider = AuthRepositoryProvider._();
 
-/// Create an [IAuthRepository] wired to the auth service and token storage.
+/// Provide the [IAuthRepository] implementation.
 ///
-/// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
-/// provides a fake user with no network calls.
+/// Returns [MockAuthRepository] by default. To connect a real backend,
+/// replace this with your own implementation of [IAuthRepository]:
+///
+/// ```dart
+/// @riverpod
+/// IAuthRepository authRepository(Ref ref) =>
+///     MyBackendAuthRepository(ref.read(myServiceProvider));
+/// ```
 
 final class AuthRepositoryProvider
     extends
         $FunctionalProvider<IAuthRepository, IAuthRepository, IAuthRepository>
     with $Provider<IAuthRepository> {
-  /// Create an [IAuthRepository] wired to the auth service and token storage.
+  /// Provide the [IAuthRepository] implementation.
   ///
-  /// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
-  /// provides a fake user with no network calls.
+  /// Returns [MockAuthRepository] by default. To connect a real backend,
+  /// replace this with your own implementation of [IAuthRepository]:
+  ///
+  /// ```dart
+  /// @riverpod
+  /// IAuthRepository authRepository(Ref ref) =>
+  ///     MyBackendAuthRepository(ref.read(myServiceProvider));
+  /// ```
   AuthRepositoryProvider._()
     : super(
         from: null,
@@ -108,7 +80,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'91bb9b1084b79484bcb5fc63a21d1b4898b5968a';
+String _$authRepositoryHash() => r'035e1a3e48df32bb49de920789a3c2c28d7a9126';
 
 /// Notifier that owns the reactive [AuthState] for the entire app.
 ///

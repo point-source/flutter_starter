@@ -1,4 +1,4 @@
-/// Implement [I{{feature_name.pascalCase()}}Repository] using the REST API.
+{{#dio}}/// Implement [I{{feature_name.pascalCase()}}Repository] using the REST API.
 ///
 /// This is the concrete data-layer implementation of the
 /// {{feature_name.camelCase()}} repository contract. It delegates network
@@ -9,7 +9,7 @@ library;
 
 import 'package:dio/dio.dart';
 
-import 'package:flutter_starter/core/error/app_exception.dart';
+import 'package:flutter_starter/core/http/dio_api_exception.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/mappers/{{feature_name.snakeCase()}}_mapper.dart';
@@ -58,14 +58,14 @@ class {{feature_name.pascalCase()}}Repository implements I{{feature_name.pascalC
   /// Map a [DioException] to the appropriate
   /// [{{feature_name.pascalCase()}}Failure].
   ///
-  /// The [ErrorInterceptor] wraps the original error as an [AppException]
+  /// The [ErrorInterceptor] wraps the original error as an [DioApiException]
   /// inside [DioException.error], preserving the HTTP status code.
   {{feature_name.pascalCase()}}Failure _mapDioException(
     DioException e,
     StackTrace st,
   ) {
     final error = e.error;
-    if (error is AppException) {
+    if (error is DioApiException) {
       return switch (error.statusCode) {
         404 => {{feature_name.pascalCase()}}NotFound(st),
         _ => {{feature_name.pascalCase()}}ServerError(error.message, st),
@@ -77,3 +77,4 @@ class {{feature_name.pascalCase()}}Repository implements I{{feature_name.pascalC
     );
   }
 }
+{{/dio}}

@@ -8,7 +8,7 @@ library;
 
 import 'package:dio/dio.dart';
 
-import 'package:flutter_starter/core/error/app_exception.dart';
+import 'package:flutter_starter/core/http/dio_api_exception.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/mappers/{{entity_name.snakeCase()}}_mapper.dart';
@@ -54,11 +54,11 @@ class {{entity_name.pascalCase()}}Repository implements I{{entity_name.pascalCas
 
   /// Map a [DioException] to an appropriate [Failure].
   ///
-  /// The [ErrorInterceptor] wraps the original error as an [AppException]
+  /// The [ErrorInterceptor] wraps the original error as an [DioApiException]
   /// inside [DioException.error], preserving the HTTP status code.
   Failure _mapDioException(DioException e, StackTrace st) {
     final error = e.error;
-    if (error is AppException) {
+    if (error is DioApiException) {
       return switch (error.statusCode) {
         404 => NotFound(st),
         _ => BadResponse(error.statusCode ?? 0, error.message, st),

@@ -54,9 +54,9 @@ Pattern: Repositories return `Result<T>`. ViewModels consume results via `.when(
 
 - **Wrapping overhead**: Every repository method must wrap service calls in `try`/`catch` and return `Success` or `Err`.
 - **Custom code to maintain**: Unlike using a well-tested library, the Result type is owned by the project.
-- **Two error systems**: `AppException` is used at the service boundary (thrown/caught), while `Failure` is used above the repository boundary (returned as values). Developers must understand the boundary.
+- **Two error systems**: `DioApiException` is used at the service boundary (thrown/caught), while `Failure` is used above the repository boundary (returned as values). Developers must understand the boundary.
 
 ### Neutral
 
-- Exceptions (`AppException` subtypes) still exist in the data layer -- they are thrown by services/interceptors and caught at the repository boundary.
+- Exceptions (`DioApiException` subtypes) still exist in the data layer -- they are thrown by services/interceptors and caught at the repository boundary.
 - The `UnexpectedFailure` catch-all prevents unknown exceptions from escaping the Result wrapper.

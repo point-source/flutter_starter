@@ -4,7 +4,7 @@
 /// 1. [AuthInterceptor] — adds Bearer token
 /// 2. [RefreshTokenInterceptor] — auto-refreshes on 401
 /// 3. [LoggingInterceptor] — logs requests/responses
-/// 4. [ErrorInterceptor] — maps DioException to AppException
+/// 4. [ErrorInterceptor] — maps DioException to DioApiException
 ///
 /// Also provides a separate "plain" Dio instance for the refresh
 /// interceptor to use, avoiding interceptor recursion.
@@ -12,11 +12,11 @@ library;
 
 import 'package:dio/dio.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
+import 'package:flutter_starter/core/http/interceptors/auth_interceptor.dart';
+import 'package:flutter_starter/core/http/interceptors/error_interceptor.dart';
+import 'package:flutter_starter/core/http/interceptors/logging_interceptor.dart';
+import 'package:flutter_starter/core/http/interceptors/refresh_token_interceptor.dart';
 import 'package:flutter_starter/core/logging/logger_provider.dart';
-import 'package:flutter_starter/core/network/interceptors/auth_interceptor.dart';
-import 'package:flutter_starter/core/network/interceptors/error_interceptor.dart';
-import 'package:flutter_starter/core/network/interceptors/logging_interceptor.dart';
-import 'package:flutter_starter/core/network/interceptors/refresh_token_interceptor.dart';
 import 'package:flutter_starter/core/storage/token_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

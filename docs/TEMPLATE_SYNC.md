@@ -114,7 +114,7 @@ These files should generally be synced from the template:
 ```
 lib/core/                          # Shared infrastructure
   ├── env/                         # Environment configuration
-  ├── error/                       # Result<T>, Failure, AppException
+  ├── error/                       # Result<T>, Failure
   ├── network/                     # Dio setup, interceptors
   ├── storage/                     # Storage providers
   ├── routing/                     # Router setup (merge routes carefully)

@@ -1,4 +1,4 @@
-/// Map [{{feature_name.pascalCase()}}Dto] to the domain [{{feature_name.pascalCase()}}] entity.
+{{#dio}}/// Map [{{feature_name.pascalCase()}}Dto] to the domain [{{feature_name.pascalCase()}}] entity.
 ///
 /// This extension keeps mapping logic close to the DTO while allowing
 /// the domain layer to remain free of data-layer dependencies.
@@ -20,3 +20,4 @@ extension {{feature_name.pascalCase()}}DtoMapper on {{feature_name.pascalCase()}
     );
   }
 }
+{{/dio}}

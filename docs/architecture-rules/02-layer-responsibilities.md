@@ -100,12 +100,12 @@ final class EmailAlreadyInUse extends AuthFailure { ... }
 
 **Location**: `features/<name>/data/`
 
-**Contains**: Repository implementations, Retrofit services, DTOs, DTO-to-entity mappers, infrastructure providers.
+**Contains**: Repository implementations, infrastructure providers, and optionally Retrofit services, DTOs, and DTO-to-entity mappers when connecting a backend.
 
 **Responsibilities**:
 
 - Implement repository interfaces defined in the domain layer.
-- Call external services (REST APIs via Retrofit, local storage).
+- Call external services (REST APIs via Retrofit, SDK clients, local storage).
 - Map DTOs to domain entities using mapper extensions.
 - Catch exceptions and return `Result<T>` values.
 - Manage side effects (token persistence, cache writes).
@@ -144,7 +144,7 @@ class AuthRepository implements IAuthRepository {
 
 - Repositories must always return `Result<T>`, never throw exceptions.
 - DTOs must not leak into the domain or UI layers -- always map to entities.
-- Services must be stateless HTTP wrappers (Retrofit-generated).
+- Retrofit services must be stateless HTTP wrappers (code-generated). SDK clients are injected directly.
 - The repository is the single source of truth for data operations within the feature.
 
 ## Dependency Direction Summary

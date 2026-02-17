@@ -8,58 +8,30 @@ part of 'profile_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Create a [ProfileService] backed by the application's [Dio] instance.
-
-@ProviderFor(profileService)
-final profileServiceProvider = ProfileServiceProvider._();
-
-/// Create a [ProfileService] backed by the application's [Dio] instance.
-
-final class ProfileServiceProvider
-    extends $FunctionalProvider<ProfileService, ProfileService, ProfileService>
-    with $Provider<ProfileService> {
-  /// Create a [ProfileService] backed by the application's [Dio] instance.
-  ProfileServiceProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'profileServiceProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$profileServiceHash();
-
-  @$internal
-  @override
-  $ProviderElement<ProfileService> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  ProfileService create(Ref ref) {
-    return profileService(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProfileService value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProfileService>(value),
-    );
-  }
-}
-
-String _$profileServiceHash() => r'68cfb178de166de1e206ee268959cb913f005020';
-
-/// Create an [IProfileRepository] wired to the profile service.
+/// Provide the [IProfileRepository] implementation.
+///
+/// Returns [MockProfileRepository] by default. To connect a real backend,
+/// replace this with your own implementation of [IProfileRepository]:
+///
+/// ```dart
+/// @riverpod
+/// IProfileRepository profileRepository(Ref ref) =>
+///     MyBackendProfileRepository(ref.read(myServiceProvider));
+/// ```
 
 @ProviderFor(profileRepository)
 final profileRepositoryProvider = ProfileRepositoryProvider._();
 
-/// Create an [IProfileRepository] wired to the profile service.
+/// Provide the [IProfileRepository] implementation.
+///
+/// Returns [MockProfileRepository] by default. To connect a real backend,
+/// replace this with your own implementation of [IProfileRepository]:
+///
+/// ```dart
+/// @riverpod
+/// IProfileRepository profileRepository(Ref ref) =>
+///     MyBackendProfileRepository(ref.read(myServiceProvider));
+/// ```
 
 final class ProfileRepositoryProvider
     extends
@@ -69,7 +41,16 @@ final class ProfileRepositoryProvider
           IProfileRepository
         >
     with $Provider<IProfileRepository> {
-  /// Create an [IProfileRepository] wired to the profile service.
+  /// Provide the [IProfileRepository] implementation.
+  ///
+  /// Returns [MockProfileRepository] by default. To connect a real backend,
+  /// replace this with your own implementation of [IProfileRepository]:
+  ///
+  /// ```dart
+  /// @riverpod
+  /// IProfileRepository profileRepository(Ref ref) =>
+  ///     MyBackendProfileRepository(ref.read(myServiceProvider));
+  /// ```
   ProfileRepositoryProvider._()
     : super(
         from: null,
@@ -104,4 +85,4 @@ final class ProfileRepositoryProvider
   }
 }
 
-String _$profileRepositoryHash() => r'4a25173557b96caebbf7096f4f0eb6c79c375892';
+String _$profileRepositoryHash() => r'1c984d019fbca26b4fcbb9815bd6920b8b552b1a';

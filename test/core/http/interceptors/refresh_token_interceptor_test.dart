@@ -12,7 +12,7 @@
 library;
 
 import 'package:dio/dio.dart';
-import 'package:flutter_starter/core/network/interceptors/refresh_token_interceptor.dart';
+import 'package:flutter_starter/core/http/interceptors/refresh_token_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/mocks.dart';

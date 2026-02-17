@@ -39,8 +39,8 @@ lib/
 
   core/                  # Shared infrastructure
     env/                 # AppEnvironment enum + compile-time config
-    error/               # Result<T>, Failure hierarchy, AppException
-    network/             # Dio provider + interceptors (auth, refresh, logging, error)
+    error/               # Result<T>, Failure hierarchy
+    http/                # Dio HTTP infrastructure (self-contained, optional)
     storage/             # Token storage, secure storage, shared prefs providers
     tasks/               # TaskTracker, TaskChannel, progress, cancellation
     routing/             # AppRouter, route guards
@@ -65,11 +65,12 @@ Each feature follows this structure:
 ```
 features/<name>/
   data/
-    services/            # @RestApi() retrofit service
-    models/              # @MappableClass() DTOs
-    mappers/             # DTO-to-domain mapping extensions
-    repositories/        # Repository implementation
-    providers/           # @riverpod infrastructure providers (service, repo)
+    repositories/        # Repository implementation (mock by default)
+    providers/           # @riverpod infrastructure providers
+    # Optional -- added when connecting a backend:
+    # services/          # @RestApi() retrofit service (Dio backends)
+    # models/            # @MappableClass() DTOs (any backend with its own response types)
+    # mappers/           # DTO-to-domain mapping extensions (any backend with DTOs)
   domain/
     entities/            # @MappableClass() domain models
     repositories/        # Abstract repository interface (IXxxRepository)
@@ -122,7 +123,7 @@ from `data/providers/` directly when no transformation is needed.
 - Infrastructure failures: `NetworkFailure`, `ServerFailure`, `CacheFailure`
 - Feature failures: sealed class extending `Failure` (e.g., `AuthFailure`)
 - ViewModels call `result.when(success:, failure:)` to map to `AsyncValue`
-- Exceptions (`AppException`) live only in the data layer, caught by repositories
+- `DioApiException` is Dio-specific and lives in `core/http/`; caught by Dio-backed repositories
 
 ### Background Tasks
 - Long-running user tasks (uploads, syncs) use `TaskTracker` in `core/tasks/`
@@ -193,10 +194,10 @@ flutter build apk --release --dart-define-from-file=config/production.json
 ## Error Handling Flow
 
 ```
-DioException --> ErrorInterceptor --> AppException
+DioException --> ErrorInterceptor --> DioApiException     (core/http/)
     (in Dio)                          (in DioException.error)
 
-AppException --> Repository catch --> Failure (feature-specific)
+DioApiException --> Repository catch --> Failure (feature-specific)
                                   --> Result<T> (Success or Err)
 
 Result<T> --> ViewModel .when() --> AsyncValue (AsyncData or AsyncError)
@@ -207,17 +208,21 @@ Result<T> --> ViewModel .when() --> AsyncValue (AsyncData or AsyncError)
 
 **Follow the Auth feature (`lib/features/auth/`) as the canonical reference.**
 
-1. Create the directory structure under `lib/features/<name>/`
+New features use a **mock-first** approach: start with a mock repository, then
+optionally add Dio/Retrofit integration later.
+
+1. Run `mason make feature` to scaffold the feature with a mock repository
+   - Use `mason make feature --dio` to generate the full Dio data layer
+     (services, models, mappers) connecting to `core/http/`
 2. Define domain entities (`@MappableClass()`) and repository interface
 3. Define feature-specific failures (sealed class extending `Failure`)
-4. Create the retrofit service (`@RestApi()`) and DTOs
-5. Implement the repository (returns `Result<T>`, catches exceptions)
-6. Create infrastructure providers in `data/providers/` (service + repository)
-7. Optionally create a ViewModel (`@riverpod` AsyncNotifier) only if the page needs significant data transformation -- skip if the page would just pass through data
-8. Build pages (`@RoutePage()`, `ConsumerWidget`) and widgets
-9. Register routes in `app_router.dart`
-10. Run `dart run build_runner build --delete-conflicting-outputs`
-11. Add tests mirroring the `lib/` structure under `test/`
+4. Implement the mock repository (returns `Result<T>`, hard-coded or in-memory data)
+5. Create infrastructure providers in `data/providers/` (repository)
+6. Optionally create a ViewModel (`@riverpod` AsyncNotifier) only if the page needs significant data transformation -- skip if the page would just pass through data
+7. Build pages (`@RoutePage()`, `ConsumerWidget`) and widgets
+8. Register routes in `app_router.dart`
+9. Run `dart run build_runner build --delete-conflicting-outputs`
+10. Add tests mirroring the `lib/` structure under `test/`
 
 ## Detailed Documentation
 

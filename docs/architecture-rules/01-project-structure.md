@@ -14,8 +14,8 @@ lib/
 
   core/                        # Shared infrastructure (no feature-specific logic)
     env/                       # Environment configuration
-    error/                     # Result, Failure, AppException
-    network/                   # Dio provider, interceptors
+    error/                     # Result, Failure hierarchy
+    http/                      # Dio provider, interceptors, DioApiException
       interceptors/
     routing/                   # AppRouter, route guards
       guards/
@@ -32,11 +32,11 @@ lib/
   features/
     <feature_name>/
       data/                    # Data layer
-        services/              # Retrofit @RestApi() classes
-        models/                # @MappableClass() DTOs
-        mappers/               # DTO -> Entity extension methods
-        repositories/          # Repository implementations
-        providers/             # @riverpod infrastructure providers (service, repo)
+        repositories/          # Repository implementations (mock by default)
+        providers/             # @riverpod infrastructure providers (repo, service)
+        services/              # Retrofit @RestApi() classes (optional, Dio backends)
+        models/                # @MappableClass() DTOs (optional, any backend with its own response types)
+        mappers/               # DTO -> Entity extension methods (optional, any backend with DTOs)
       domain/                  # Domain layer (optional)
         entities/              # @MappableClass() domain models
         repositories/          # Abstract repository interfaces
@@ -72,11 +72,11 @@ docs/
 
 | File type | Location | Example |
 |-----------|----------|---------|
-| Retrofit service | `features/<name>/data/services/` | `auth_service.dart` |
-| DTO model | `features/<name>/data/models/` | `user_dto.dart` |
-| DTO-to-entity mapper | `features/<name>/data/mappers/` | `user_mapper.dart` |
 | Repository implementation | `features/<name>/data/repositories/` | `auth_repository.dart` |
 | Infrastructure providers | `features/<name>/data/providers/` | `auth_providers.dart` |
+| Retrofit service (Dio backends) | `features/<name>/data/services/` | `auth_service.dart` |
+| DTO model (optional) | `features/<name>/data/models/` | `user_dto.dart` |
+| DTO-to-entity mapper (optional) | `features/<name>/data/mappers/` | `user_mapper.dart` |
 | Domain entity | `features/<name>/domain/entities/` | `user.dart` |
 | Repository interface | `features/<name>/domain/repositories/` | `i_auth_repository.dart` |
 | Feature failure | `features/<name>/domain/failures/` | `auth_failure.dart` |
@@ -84,7 +84,7 @@ docs/
 | Page widget | `features/<name>/ui/pages/` | `login_page.dart` |
 | Feature widget | `features/<name>/ui/widgets/` | `auth_form.dart` |
 | Shared widget | `core/presentation/widgets/` | `app_snackbar.dart` |
-| Dio interceptor | `core/network/interceptors/` | `auth_interceptor.dart` |
+| Dio interceptor | `core/http/interceptors/` | `auth_interceptor.dart` |
 | Route guard | `core/routing/guards/` | `auth_guard.dart` |
 | Translation file | `core/l10n/` | `strings.i18n.json` |
 | Test file | `test/<mirror_of_lib_path>/` | `test/features/auth/data/repositories/auth_repository_test.dart` |

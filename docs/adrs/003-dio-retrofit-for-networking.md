@@ -4,6 +4,8 @@
 
 Accepted
 
+**Status update:** Dio is now reference infrastructure in `core/http/`. Features default to mock implementations. See ADR-011.
+
 ## Context
 
 The application needs a structured HTTP client layer with:
@@ -28,7 +30,7 @@ Architecture:
 - A single `Dio` instance is created in `dio_provider.dart` with the full interceptor chain: `AuthInterceptor` -> `RefreshTokenInterceptor` -> `LoggingInterceptor` -> `ErrorInterceptor`.
 - A separate "plain" Dio instance (no auth/refresh interceptors) is created for the refresh token endpoint to avoid interceptor recursion.
 - Each feature defines a Retrofit `@RestApi()` abstract class (e.g., `AuthService`, `ProfileService`) that takes `Dio` as a constructor parameter.
-- `ErrorInterceptor` maps `DioException` to `AppException` subtypes, which repositories then convert to `Failure` values.
+- `ErrorInterceptor` maps `DioException` to `DioApiException` subtypes, which repositories then convert to `Failure` values.
 
 ## Consequences
 

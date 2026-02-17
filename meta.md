@@ -65,16 +65,16 @@ lib/
 │   │
 │   ├── error/
 │   │   ├── result.dart                 # sealed Result<T> = Success | Failure
-│   │   ├── app_exception.dart          # Exception types (ServerException, NetworkException, etc.)
 │   │   └── failures.dart               # Failure hierarchy (sealed classes)
 │   │
-│   ├── network/
+│   ├── http/
 │   │   ├── dio_provider.dart           # Riverpod provider for configured Dio instance
+│   │   ├── dio_api_exception.dart      # Dio-specific exception types (ServerException, etc.)
 │   │   └── interceptors/
 │   │       ├── auth_interceptor.dart       # Adds Bearer token
 │   │       ├── refresh_token_interceptor.dart  # Auto-refresh on 401 (QueuedInterceptor)
 │   │       ├── logging_interceptor.dart    # Logs requests/responses
-│   │       └── error_interceptor.dart      # Maps DioException → AppException
+│   │       └── error_interceptor.dart      # Maps DioException → DioApiException
 │   │
 │   ├── storage/
 │   │   ├── secure_storage_provider.dart    # FlutterSecureStorage provider
@@ -303,7 +303,7 @@ bricks/
 
   // Feature failures defined in each feature's domain/failures/
   ```
-- **`app_exception.dart`** — Exception types caught at the service/repository boundary
+- **`dio_api_exception.dart`** — Dio-specific exception types caught at the service/repository boundary
 
 #### 1.3 Environment configuration — `lib/core/env/`
 - **`app_environment.dart`** — Adapted from original's `application_environment.dart`
@@ -319,7 +319,7 @@ bricks/
   - `saveTokens(accessToken, refreshToken)`
   - `getAccessToken()`, `getRefreshToken()`, `clearTokens()`
 
-#### 1.5 Networking — `lib/core/network/`
+#### 1.5 HTTP Infrastructure — `lib/core/http/`
 - **`dio_provider.dart`** — Riverpod provider creating Dio with all interceptors:
   ```dart
   @riverpod
@@ -340,7 +340,7 @@ bricks/
   - Queues concurrent requests while refresh is in progress
   - On refresh failure, clears tokens and signals auth state change
 - **`logging_interceptor.dart`** — Logs request/response via IAppLogger with sensitive data redaction
-- **`error_interceptor.dart`** — Maps DioException → AppException (ServerException, NetworkException, TimeoutException)
+- **`error_interceptor.dart`** — Maps DioException → DioApiException (ServerException, NetworkException, TimeoutException)
 
 #### 1.6 Logging — `lib/core/logging/`
 - **`app_logger.dart`** — `IAppLogger` interface with `debug`, `info`, `warning`, `error`, `fatal`

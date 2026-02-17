@@ -5,7 +5,6 @@
 /// here — never from `ui/view_models/`.
 ///
 /// Providers:
-/// - [authServiceProvider] — retrofit [AuthService]
 /// - [authRepositoryProvider] — [IAuthRepository] implementation
 /// - [authStateRepoProvider] — reactive [AuthState] with mutations
 /// - [isAuthenticatedProvider] — simple boolean for guards
@@ -13,13 +12,8 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/error/result.dart';
-import 'package:flutter_starter/core/network/dio_provider.dart';
-import 'package:flutter_starter/core/storage/token_storage.dart';
-import 'package:flutter_starter/features/auth/data/repositories/auth_repository.dart';
 import 'package:flutter_starter/features/auth/data/repositories/mock_auth_repository.dart';
-import 'package:flutter_starter/features/auth/data/services/auth_service.dart';
 import 'package:flutter_starter/features/auth/domain/entities/auth_state.dart';
 import 'package:flutter_starter/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -30,22 +24,18 @@ part 'auth_providers.g.dart';
 // Infrastructure providers
 // ---------------------------------------------------------------------------
 
-/// Create an [AuthService] backed by the application's [Dio] instance.
-@riverpod
-AuthService authService(Ref ref) => .new(ref.read(dioProvider));
-
-/// Create an [IAuthRepository] wired to the auth service and token storage.
+/// Provide the [IAuthRepository] implementation.
 ///
-/// When `AUTH_BYPASS=mock` is set, returns a [MockAuthRepository] that
-/// provides a fake user with no network calls.
+/// Returns [MockAuthRepository] by default. To connect a real backend,
+/// replace this with your own implementation of [IAuthRepository]:
+///
+/// ```dart
+/// @riverpod
+/// IAuthRepository authRepository(Ref ref) =>
+///     MyBackendAuthRepository(ref.read(myServiceProvider));
+/// ```
 @riverpod
-IAuthRepository authRepository(Ref ref) => switch (AppEnvironment.authBypass) {
-  'mock' => const MockAuthRepository(),
-  _ => AuthRepository(
-    ref.read(authServiceProvider),
-    ref.read(tokenStorageProvider),
-  ),
-};
+IAuthRepository authRepository(Ref ref) => const MockAuthRepository();
 
 // ---------------------------------------------------------------------------
 // Auth state notifier (the public API for auth state)

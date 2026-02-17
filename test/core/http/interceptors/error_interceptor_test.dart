@@ -1,13 +1,13 @@
 /// Tests for [ErrorInterceptor].
 ///
 /// Validates that the interceptor correctly maps all [DioExceptionType]
-/// values to the appropriate [AppException] subtypes, preserving status
+/// values to the appropriate [DioApiException] subtypes, preserving status
 /// codes and error messages where applicable.
 library;
 
 import 'package:dio/dio.dart';
-import 'package:flutter_starter/core/error/app_exception.dart';
-import 'package:flutter_starter/core/network/interceptors/error_interceptor.dart';
+import 'package:flutter_starter/core/http/dio_api_exception.dart';
+import 'package:flutter_starter/core/http/interceptors/error_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

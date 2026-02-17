@@ -1,23 +1,25 @@
 /// Profile infrastructure providers.
 ///
-/// Provides the [ProfileService] and [IProfileRepository] instances
-/// used by the profile feature. Import this file (not the view model)
-/// when you need access to profile infrastructure providers.
+/// Provides the [IProfileRepository] instance used by the profile feature.
+/// Import this file (not the view model) when you need access to profile
+/// infrastructure providers.
 library;
 
-import 'package:flutter_starter/core/network/dio_provider.dart';
-import 'package:flutter_starter/features/profile/data/repositories/profile_repository.dart';
-import 'package:flutter_starter/features/profile/data/services/profile_service.dart';
+import 'package:flutter_starter/features/profile/data/repositories/mock_profile_repository.dart';
 import 'package:flutter_starter/features/profile/domain/repositories/i_profile_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profile_providers.g.dart';
 
-/// Create a [ProfileService] backed by the application's [Dio] instance.
+/// Provide the [IProfileRepository] implementation.
+///
+/// Returns [MockProfileRepository] by default. To connect a real backend,
+/// replace this with your own implementation of [IProfileRepository]:
+///
+/// ```dart
+/// @riverpod
+/// IProfileRepository profileRepository(Ref ref) =>
+///     MyBackendProfileRepository(ref.read(myServiceProvider));
+/// ```
 @riverpod
-ProfileService profileService(Ref ref) => .new(ref.read(dioProvider));
-
-/// Create an [IProfileRepository] wired to the profile service.
-@riverpod
-IProfileRepository profileRepository(Ref ref) =>
-    ProfileRepository(ref.read(profileServiceProvider));
+IProfileRepository profileRepository(Ref ref) => const MockProfileRepository();

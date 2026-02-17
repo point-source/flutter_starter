@@ -1,14 +1,15 @@
-/// Dio interceptor that converts [DioException] into typed [AppException]s.
+/// Dio interceptor that converts [DioException] into typed
+/// [DioApiException]s.
 ///
 /// This is the boundary where Dio's error model is translated into the
-/// application's exception model. Repositories then catch [AppException]s
+/// application's exception model. Repositories then catch [DioApiException]s
 /// and convert them into [Failure]s wrapped in [Result].
 library;
 
 import 'package:dio/dio.dart';
-import 'package:flutter_starter/core/error/app_exception.dart';
+import 'package:flutter_starter/core/http/dio_api_exception.dart';
 
-/// Converts [DioException] errors into typed [AppException] subtypes.
+/// Converts [DioException] errors into typed [DioApiException] subtypes.
 ///
 /// Placed last in the interceptor chain so it processes errors after
 /// all other interceptors (auth, refresh, logging) have had their turn.
@@ -29,7 +30,7 @@ class ErrorInterceptor extends Interceptor {
     );
   }
 
-  AppException _mapDioException(DioException err) {
+  DioApiException _mapDioException(DioException err) {
     switch (err.type) {
       case .connectionTimeout:
       case .sendTimeout:

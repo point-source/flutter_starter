@@ -1,4 +1,4 @@
-/// Retrofit service for {{feature_name.camelCase()}} API endpoints.
+{{#dio}}/// Retrofit service for {{feature_name.camelCase()}} API endpoints.
 ///
 /// Defines the HTTP contract for {{feature_name.camelCase()}} operations.
 /// The generated implementation delegates to [Dio] and handles JSON
@@ -31,3 +31,4 @@ abstract class {{feature_name.pascalCase()}}Service {
   @GET('/{{feature_name.paramCase()}}')
   Future<List<{{feature_name.pascalCase()}}Dto>> getAll();
 }
+{{/dio}}

@@ -4,8 +4,7 @@
 /// {{feature_name.camelCase()}} page watches to react to loading, data, and
 /// error states.
 ///
-/// Infrastructure providers ([{{feature_name.camelCase()}}ServiceProvider],
-/// [{{feature_name.camelCase()}}RepositoryProvider]) live in
+/// Infrastructure providers live in
 /// `data/providers/{{feature_name.snakeCase()}}_providers.dart`.
 ///
 /// **Note:** View models are optional. Only create one when the page needs

@@ -28,12 +28,12 @@ layering. Each feature is organized into three layers with strict dependency rul
   ├─────────────────────────────────────────────────────────────┤
   │                       DATA LAYER                            │
   │                                                             │
-  │  Services (@RestApi)         Repositories (impl)            │
-  │  - HTTP endpoints            - Source of truth              │
-  │  DTOs (@MappableClass)       - Exception -> Result mapping  │
-  │  - JSON serialization        - Token management             │
-  │  Mappers                     Providers (@riverpod)          │
-  │  - DTO -> Domain entity      - Infrastructure wiring        │
+  │  Repositories (impl)         Providers (@riverpod)          │
+  │  - Source of truth            - Infrastructure wiring        │
+  │  - Exception -> Result        Services (@RestApi, optional) │
+  │  - Backend integration        - HTTP endpoints (Dio)        │
+  │  DTOs (optional)              Mappers (optional)            │
+  │  - JSON serialization         - DTO -> Domain entity        │
   └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -47,6 +47,10 @@ layering. Each feature is organized into three layers with strict dependency rul
 The domain layer is optional. Simple features (like Settings) that only persist
 local preferences may skip the domain layer entirely. Add it when the feature
 has its own entity types, repository abstraction, or failure hierarchy.
+
+Features default to **mock implementations**. The data layer starts with a mock
+repository and providers wired to it. Services, DTOs, and mappers are added
+later when connecting a real backend (REST API, SDK, etc.).
 
 ## Data Flow
 
@@ -106,12 +110,12 @@ The standard request lifecycle follows this path:
   Dio throws DioException
       |
       v
-  ErrorInterceptor
-      |  wraps as AppException (preserves status code)
-      |  re-throws as DioException with AppException in .error
+  ErrorInterceptor (in core/http/)
+      |  wraps as DioApiException (Dio-specific, lives in core/http/)
+      |  re-throws as DioException with DioApiException in .error
       v
   Repository catch block
-      |  inspects AppException.statusCode
+      |  inspects DioApiException.statusCode
       |  maps to feature-specific Failure subtype
       |  returns Err(failure)
       v
@@ -136,7 +140,7 @@ typed, pattern-matchable values.
       |
       | ErrorInterceptor converts to:
       v
-  AppException (sealed class)
+  DioApiException (sealed class, Dio-specific, in core/http/)
       |-- ServerException       statusCode, message
       |-- NetworkException      no connectivity
       |-- TimeoutException      request timed out
@@ -351,7 +355,7 @@ for CI pipelines.
 6. Create `ProviderScope` with `SharedPreferences` override
 7. Run `App` widget
 
-## Dio Interceptor Chain
+## Dio Interceptor Chain (core/http/)
 
 HTTP requests pass through four interceptors in order:
 
@@ -363,7 +367,7 @@ HTTP requests pass through four interceptors in order:
    clears tokens and fires `onAuthExpired` callback to invalidate auth state
 3. **LoggingInterceptor** -- logs request/response details via `IAppLogger`
    with sensitive data redaction
-4. **ErrorInterceptor** -- converts `DioException` into `AppException` subtypes
+4. **ErrorInterceptor** -- converts `DioException` into `DioApiException` subtypes
    preserving the HTTP status code for downstream mapping
 
 ## Testing Strategy

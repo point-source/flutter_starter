@@ -1,4 +1,4 @@
-/// Data transfer object for {{feature_name.camelCase()}} data returned by the API.
+{{#dio}}/// Data transfer object for {{feature_name.camelCase()}} data returned by the API.
 ///
 /// This DTO mirrors the JSON shape returned by the server. Use the
 /// [{{feature_name.pascalCase()}}DtoMapper] extension to convert it to a
@@ -24,3 +24,4 @@ class {{feature_name.pascalCase()}}Dto with {{feature_name.pascalCase()}}DtoMapp
   /// Unique identifier assigned by the server.
   final String id;
 }
+{{/dio}}
