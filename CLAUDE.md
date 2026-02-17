@@ -146,7 +146,8 @@ from `data/providers/` directly when no transformation is needed.
 - Config templates live in `config/examples/`; active configs are gitignored
 - Run `./scripts/setup.sh` to provision `config/*.json` from templates
 - `AppEnvironment` enum reads compile-time constants
-- Auth bypass: `AUTH_BYPASS=mock` (fake user, no backend) or `AUTH_BYPASS=prefill` (pre-fill login from `DEV_EMAIL`/`DEV_PASSWORD`)
+- Backend mode: `BACKEND=mock` (default, mock repos) or `BACKEND=real` (backend-backed repos)
+- Dev prefill: `DEV_PREFILL=true` pre-fills login with `DEV_EMAIL`/`DEV_PASSWORD` (only with `BACKEND=real`)
 
 ## Common Commands
 

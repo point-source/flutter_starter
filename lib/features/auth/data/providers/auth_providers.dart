@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:flutter_starter/features/auth/domain/entities/auth_state.dart';
@@ -26,16 +27,20 @@ part 'auth_providers.g.dart';
 
 /// Provide the [IAuthRepository] implementation.
 ///
-/// Returns [MockAuthRepository] by default. To connect a real backend,
-/// replace this with your own implementation of [IAuthRepository]:
-///
-/// ```dart
-/// @riverpod
-/// IAuthRepository authRepository(Ref ref) =>
-///     MyBackendAuthRepository(ref.read(myServiceProvider));
-/// ```
+/// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
+/// When `BACKEND=real`, replace the [UnimplementedError] with your own
+/// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
 @riverpod
-IAuthRepository authRepository(Ref ref) => const MockAuthRepository();
+IAuthRepository authRepository(Ref ref) {
+  if (AppEnvironment.backendMode == BackendMode.mock) {
+    return const MockAuthRepository();
+  }
+  // TODO: Replace with your backend implementation.
+  throw UnimplementedError(
+    'BACKEND is set to "real" but no auth backend is configured. '
+    'Implement IAuthRepository and return it here.',
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Auth state notifier (the public API for auth state)

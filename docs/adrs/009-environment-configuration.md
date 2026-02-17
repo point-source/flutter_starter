@@ -46,28 +46,25 @@ flutter run --dart-define-from-file=config/staging.json
 flutter build apk --release --dart-define-from-file=config/production.json
 ```
 
-### Auth Bypass (Development)
+### Backend Mode and Dev Prefill
 
-Additional compile-time constants support bypassing or simplifying the login flow:
+Two orthogonal compile-time constants control backend selection and login convenience:
 
-- `AUTH_BYPASS` -- `"mock"` (fake user, no network) or `"prefill"` (pre-fill login form)
-- `DEV_EMAIL` / `DEV_PASSWORD` -- credentials for prefill mode
+- `BACKEND` -- `"mock"` (default, in-memory repositories) or `"real"` (backend-backed repositories)
+- `DEV_PREFILL` -- `"true"` to pre-fill the login form with `DEV_EMAIL` / `DEV_PASSWORD` (only meaningful with `BACKEND=real`)
 
-These are provided via overlay config files layered on top of the base environment config:
+Mock mode is the default, so the app works out of the box without any backend. The development config includes `BACKEND=mock`; staging and production configs use `BACKEND=real`.
+
+For real-backend development with pre-filled credentials, layer the overlay config:
 
 ```bash
-# Mock mode (no backend needed)
+# Real backend with pre-filled credentials
 flutter run \
   --dart-define-from-file=config/development.json \
-  --dart-define-from-file=config/auth_bypass_mock.json
-
-# Prefill mode (real backend, pre-filled credentials)
-flutter run \
-  --dart-define-from-file=config/development.json \
-  --dart-define-from-file=config/auth_bypass_prefill.json
+  --dart-define-from-file=config/dev_prefill.json
 ```
 
-VS Code launch configurations are provided for each mode.
+VS Code launch configurations are provided for both modes.
 
 ## Consequences
 

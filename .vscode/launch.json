@@ -11,23 +11,13 @@
             ]
         },
         {
-            "name": "Dev (Auth Bypass - Mock)",
+            "name": "Dev (Real Backend + Prefill)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
             "args": [
                 "--dart-define-from-file=config/development.json",
-                "--dart-define-from-file=config/auth_bypass_mock.json"
-            ]
-        },
-        {
-            "name": "Dev (Auth Bypass - Prefill)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": [
-                "--dart-define-from-file=config/development.json",
-                "--dart-define-from-file=config/auth_bypass_prefill.json"
+                "--dart-define-from-file=config/dev_prefill.json"
             ]
         },
         {

@@ -16,6 +16,18 @@
 /// ```
 library;
 
+/// Which repository implementations providers return.
+///
+/// - [mock] — use in-memory mock repositories (no backend needed).
+/// - [real] — use backend-backed repositories (Supabase, Firebase, etc.).
+enum BackendMode {
+  /// Mock repositories with hard-coded data.
+  mock,
+
+  /// Real backend-backed repositories.
+  real,
+}
+
 /// Enumerate the supported application environments.
 ///
 /// Use [current] to read the compile-time environment. Each variant
@@ -62,22 +74,30 @@ enum AppEnvironment {
   static bool get isProduction => current == .production;
 
   // ---------------------------------------------------------------------------
-  // Development auth bypass
+  // Backend mode and dev prefill
   // ---------------------------------------------------------------------------
 
-  /// The auth bypass mode from compile-time config.
+  /// Which repository implementations to use.
   ///
-  /// Supported values:
-  /// - `""` (empty/absent) -- normal auth flow
-  /// - `"mock"` -- skip auth entirely with a fake user (no backend needed)
-  /// - `"prefill"` -- pre-fill login form with [devEmail] / [devPassword]
-  static const String authBypass = String.fromEnvironment('AUTH_BYPASS');
+  /// Reads the `BACKEND` compile-time constant. Defaults to [BackendMode.mock]
+  /// when absent or unrecognized, so the app works out of the box without a
+  /// backend.
+  static BackendMode get backendMode {
+    const raw = String.fromEnvironment('BACKEND');
+    return BackendMode.values.asNameMap()[raw.toLowerCase()] ??
+        BackendMode.mock;
+  }
 
-  /// Dev email to pre-fill on the login page when [authBypass] is `"prefill"`.
+  /// Whether to pre-fill the login form with [devEmail] / [devPassword].
+  ///
+  /// Only meaningful when [backendMode] is [BackendMode.real]. Set
+  /// `DEV_PREFILL=true` in a config overlay alongside your dev credentials.
+  static const bool devPrefill = bool.fromEnvironment('DEV_PREFILL');
+
+  /// Dev email to pre-fill on the login page when [devPrefill] is `true`.
   static const String devEmail = String.fromEnvironment('DEV_EMAIL');
 
-  /// Dev password to pre-fill on the login page when [authBypass] is
-  /// `"prefill"`.
+  /// Dev password to pre-fill on the login page when [devPrefill] is `true`.
   static const String devPassword = String.fromEnvironment('DEV_PASSWORD');
 
   // ---------------------------------------------------------------------------

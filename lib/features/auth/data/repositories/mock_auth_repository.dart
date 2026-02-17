@@ -1,17 +1,18 @@
 /// Fake [IAuthRepository] for development without a backend.
 ///
-/// Returns a hard-coded [User] for all auth operations, with no network
-/// calls or token storage. Activated when `AUTH_BYPASS=mock` is set in
-/// the compile-time config.
+/// Returns a hard-coded [User] for login/register and `null` from
+/// [getCurrentUser] so the auth guard shows the login page on startup.
+/// Activated when `BACKEND=mock` (the default).
 library;
 
 import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/features/auth/domain/entities/user.dart';
 import 'package:flutter_starter/features/auth/domain/repositories/i_auth_repository.dart';
 
-/// [IAuthRepository] implementation that returns a fake user immediately.
+/// [IAuthRepository] that returns a fake user on login/register.
 ///
-/// Useful for UI and navigation development when no backend is available.
+/// [getCurrentUser] returns `null` (unauthenticated) so the login page is
+/// shown on startup, making the login form visible and testable.
 class MockAuthRepository implements IAuthRepository {
   /// Create a [MockAuthRepository].
   const MockAuthRepository();
@@ -37,5 +38,5 @@ class MockAuthRepository implements IAuthRepository {
   Future<Result<void>> logout() async => const Success(null);
 
   @override
-  Future<Result<User?>> getCurrentUser() async => const Success(_mockUser);
+  Future<Result<User?>> getCurrentUser() async => const Success(null);
 }

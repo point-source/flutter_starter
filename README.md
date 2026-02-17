@@ -123,8 +123,7 @@ config/
     development.json                 -- Dev environment template
     staging.json                     -- Staging environment template
     production.json                  -- Production environment template
-    auth_bypass_mock.json            -- Auth bypass (mock) overlay
-    auth_bypass_prefill.json         -- Auth bypass (prefill) overlay
+    dev_prefill.json                 -- Dev prefill overlay (real backend)
   *.json                             -- Active configs (gitignored, from setup.sh)
 scripts/
   setup.sh                           -- Provision config files from templates
@@ -223,30 +222,31 @@ Each config file defines:
 
 See `lib/core/env/app_environment.dart` for how these values are consumed at runtime.
 
-### Auth Bypass (Development Only)
+### Backend Mode
 
-Two overlay configs let you skip or simplify the login flow during development. Layer them on top of the base config using multiple `--dart-define-from-file` args (or use the VS Code launch configs):
+The `BACKEND` compile-time constant controls which repository implementations are used:
 
-| Mode | Overlay File | Behavior |
+| Mode | Config Value | Behavior |
 |------|-------------|----------|
-| Mock | `config/auth_bypass_mock.json` | Fake user, no backend needed |
-| Prefill | `config/auth_bypass_prefill.json` | Pre-fills login form with dev credentials |
+| Mock | `"BACKEND": "mock"` | In-memory mock repositories, no backend needed (default) |
+| Real | `"BACKEND": "real"` | Backend-backed repositories (Supabase, Firebase, Dio, etc.) |
 
-**Mock mode** -- returns a fake user immediately, bypassing the login screen entirely. Useful for UI and navigation work when no backend is available.
+**Mock mode** (default) -- uses mock repositories that return hard-coded data. The login page is shown with pre-filled dummy credentials so the full auth flow is visible and testable. No backend setup required.
 
-**Prefill mode** -- uses the real auth flow but pre-fills the email and password fields from `DEV_EMAIL` and `DEV_PASSWORD` in the config. Edit `config/auth_bypass_prefill.json` with your credentials (this file is gitignored).
+**Real mode** -- uses your backend-backed repository implementations. You must implement each `IXxxRepository` interface and return it from the corresponding provider.
+
+### Dev Prefill (Real Backend Only)
+
+When using `BACKEND=real`, you can pre-fill the login form with dev credentials by layering the `dev_prefill.json` overlay:
 
 ```bash
-# Mock mode (no backend)
+# Real backend with pre-filled credentials
 flutter run \
   --dart-define-from-file=config/development.json \
-  --dart-define-from-file=config/auth_bypass_mock.json
-
-# Prefill mode (real backend, pre-filled credentials)
-flutter run \
-  --dart-define-from-file=config/development.json \
-  --dart-define-from-file=config/auth_bypass_prefill.json
+  --dart-define-from-file=config/dev_prefill.json
 ```
+
+Edit `config/dev_prefill.json` with your credentials (this file is gitignored).
 
 ---
 

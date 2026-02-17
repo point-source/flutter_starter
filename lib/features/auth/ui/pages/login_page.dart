@@ -35,15 +35,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   void initState() {
     super.initState();
-    switch (AppEnvironment.authBypass) {
-      case 'prefill':
-        _emailController.text = AppEnvironment.devEmail;
-        _passwordController.text = AppEnvironment.devPassword;
-      case 'mock':
-        _emailController.text = 'dev@example.com';
-        _passwordController.text = 'password';
-      default:
-        break;
+    if (AppEnvironment.backendMode == BackendMode.mock) {
+      _emailController.text = 'dev@example.com';
+      _passwordController.text = 'password';
+    } else if (AppEnvironment.devPrefill) {
+      _emailController.text = AppEnvironment.devEmail;
+      _passwordController.text = AppEnvironment.devPassword;
     }
   }
 

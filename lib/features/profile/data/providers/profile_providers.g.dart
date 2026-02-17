@@ -10,28 +10,18 @@ part of 'profile_providers.dart';
 // ignore_for_file: type=lint, type=warning
 /// Provide the [IProfileRepository] implementation.
 ///
-/// Returns [MockProfileRepository] by default. To connect a real backend,
-/// replace this with your own implementation of [IProfileRepository]:
-///
-/// ```dart
-/// @riverpod
-/// IProfileRepository profileRepository(Ref ref) =>
-///     MyBackendProfileRepository(ref.read(myServiceProvider));
-/// ```
+/// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
+/// When `BACKEND=real`, replace the [UnimplementedError] with your own
+/// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
 
 @ProviderFor(profileRepository)
 final profileRepositoryProvider = ProfileRepositoryProvider._();
 
 /// Provide the [IProfileRepository] implementation.
 ///
-/// Returns [MockProfileRepository] by default. To connect a real backend,
-/// replace this with your own implementation of [IProfileRepository]:
-///
-/// ```dart
-/// @riverpod
-/// IProfileRepository profileRepository(Ref ref) =>
-///     MyBackendProfileRepository(ref.read(myServiceProvider));
-/// ```
+/// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
+/// When `BACKEND=real`, replace the [UnimplementedError] with your own
+/// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
 
 final class ProfileRepositoryProvider
     extends
@@ -43,14 +33,9 @@ final class ProfileRepositoryProvider
     with $Provider<IProfileRepository> {
   /// Provide the [IProfileRepository] implementation.
   ///
-  /// Returns [MockProfileRepository] by default. To connect a real backend,
-  /// replace this with your own implementation of [IProfileRepository]:
-  ///
-  /// ```dart
-  /// @riverpod
-  /// IProfileRepository profileRepository(Ref ref) =>
-  ///     MyBackendProfileRepository(ref.read(myServiceProvider));
-  /// ```
+  /// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
+  /// When `BACKEND=real`, replace the [UnimplementedError] with your own
+  /// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
   ProfileRepositoryProvider._()
     : super(
         from: null,
@@ -85,4 +70,4 @@ final class ProfileRepositoryProvider
   }
 }
 
-String _$profileRepositoryHash() => r'1c984d019fbca26b4fcbb9815bd6920b8b552b1a';
+String _$profileRepositoryHash() => r'8acd949cca89e1b5ce8b096e42246fb675c03171';

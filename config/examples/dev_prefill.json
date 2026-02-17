@@ -1,5 +1,6 @@
 {
-  "AUTH_BYPASS": "prefill",
+  "BACKEND": "real",
+  "DEV_PREFILL": "true",
   "DEV_EMAIL": "your-dev-email@example.com",
   "DEV_PASSWORD": "your-dev-password"
 }

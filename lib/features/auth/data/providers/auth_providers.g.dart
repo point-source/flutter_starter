@@ -10,28 +10,18 @@ part of 'auth_providers.dart';
 // ignore_for_file: type=lint, type=warning
 /// Provide the [IAuthRepository] implementation.
 ///
-/// Returns [MockAuthRepository] by default. To connect a real backend,
-/// replace this with your own implementation of [IAuthRepository]:
-///
-/// ```dart
-/// @riverpod
-/// IAuthRepository authRepository(Ref ref) =>
-///     MyBackendAuthRepository(ref.read(myServiceProvider));
-/// ```
+/// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
+/// When `BACKEND=real`, replace the [UnimplementedError] with your own
+/// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
 
 @ProviderFor(authRepository)
 final authRepositoryProvider = AuthRepositoryProvider._();
 
 /// Provide the [IAuthRepository] implementation.
 ///
-/// Returns [MockAuthRepository] by default. To connect a real backend,
-/// replace this with your own implementation of [IAuthRepository]:
-///
-/// ```dart
-/// @riverpod
-/// IAuthRepository authRepository(Ref ref) =>
-///     MyBackendAuthRepository(ref.read(myServiceProvider));
-/// ```
+/// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
+/// When `BACKEND=real`, replace the [UnimplementedError] with your own
+/// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
 
 final class AuthRepositoryProvider
     extends
@@ -39,14 +29,9 @@ final class AuthRepositoryProvider
     with $Provider<IAuthRepository> {
   /// Provide the [IAuthRepository] implementation.
   ///
-  /// Returns [MockAuthRepository] by default. To connect a real backend,
-  /// replace this with your own implementation of [IAuthRepository]:
-  ///
-  /// ```dart
-  /// @riverpod
-  /// IAuthRepository authRepository(Ref ref) =>
-  ///     MyBackendAuthRepository(ref.read(myServiceProvider));
-  /// ```
+  /// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
+  /// When `BACKEND=real`, replace the [UnimplementedError] with your own
+  /// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
   AuthRepositoryProvider._()
     : super(
         from: null,
@@ -80,7 +65,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'035e1a3e48df32bb49de920789a3c2c28d7a9126';
+String _$authRepositoryHash() => r'63f44367d6f0d68567bc2abc5dce1f72a7650822';
 
 /// Notifier that owns the reactive [AuthState] for the entire app.
 ///

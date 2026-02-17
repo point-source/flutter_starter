@@ -15,7 +15,7 @@ The template originally shipped every feature with a full Dio/Retrofit data laye
 
 Alternatives considered:
 
-- **Keep Dio as default, add mock option**: This is the previous approach. It privileges one backend choice over others and adds AUTH_BYPASS complexity.
+- **Keep Dio as default, add mock option**: This is the previous approach. It privileges one backend choice over others and adds complexity to the environment config.
 - **Generate separate bricks per backend**: Too many bricks to maintain; the repository interface pattern already handles this.
 - **No default implementation**: Features with only an interface and no implementation don't compile, slowing down iteration.
 

@@ -1,5 +1,6 @@
 {
   "ENVIRONMENT": "development",
   "API_URL": "http://localhost:3000",
-  "SENTRY_DSN": ""
+  "SENTRY_DSN": "",
+  "BACKEND": "mock"
 }
