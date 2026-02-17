@@ -2,7 +2,8 @@
 # Runs the same checks as the GitHub Actions CI workflow locally.
 # Use this before committing to catch failures early and avoid wasting CI compute.
 #
-# By default, formatting and codegen are applied and staged automatically.
+# By default, formatting and codegen are applied automatically. Only files that
+# were already staged are re-staged; unstaged files stay unstaged.
 # The script only fails if analysis errors or test failures remain.
 #
 # Usage:
@@ -21,6 +22,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+# Files that were staged before the hook ran. Populated in main().
+STAGED_FILES=""
 
 # Resolve to repo root regardless of where the script is invoked from.
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -44,6 +48,15 @@ pass() {
 
 fail() {
   echo -e "${RED}✗ $1${NC}"
+}
+
+# Filter stdin (one file path per line) to only paths that were staged before
+# the hook ran. Prints matching paths to stdout.
+only_staged() {
+  if [ -z "$STAGED_FILES" ]; then
+    return 0
+  fi
+  grep -xF -f <(echo "$STAGED_FILES") || true
 }
 
 # ── Lint ────────────────────────────────────────────────────────────────────
@@ -72,10 +85,16 @@ run_lint() {
       step "Format (dart format --line-length=80)"
       # shellcheck disable=SC2086
       dart format --line-length=80 $dart_files
-      # Stage any formatting changes so they're included in the commit.
-      # shellcheck disable=SC2086
-      git add $dart_files
-      pass "Formatting applied (staged)"
+      # Re-stage only files that were already staged before the hook ran.
+      local to_stage
+      to_stage=$(echo "$dart_files" | tr ' ' '\n' | only_staged)
+      if [ -n "$to_stage" ]; then
+        # shellcheck disable=SC2086
+        git add $to_stage
+        pass "Formatting applied (staged)"
+      else
+        pass "Formatting applied"
+      fi
     fi
   fi
 
@@ -134,13 +153,22 @@ run_codegen() {
       return 1
     fi
   else
-    # Stage any regenerated files so they're included in the commit.
-    if ! git diff --quiet -- "${diff_args[@]}"; then
-      echo ""
-      echo -e "${YELLOW}Generated files were out of date — staging updates:${NC}"
-      git diff --name-only -- "${diff_args[@]}"
-      git add -- $(git diff --name-only -- "${diff_args[@]}")
-      pass "Generated files updated (staged)"
+    # Only re-stage generated files that were already staged before the hook.
+    local changed_generated
+    changed_generated=$(git diff --name-only -- "${diff_args[@]}" || true)
+    if [ -n "$changed_generated" ]; then
+      local gen_to_stage
+      gen_to_stage=$(echo "$changed_generated" | only_staged)
+      if [ -n "$gen_to_stage" ]; then
+        echo ""
+        echo -e "${YELLOW}Generated files were out of date — staging updates:${NC}"
+        echo "$gen_to_stage"
+        # shellcheck disable=SC2086
+        git add $gen_to_stage
+        pass "Generated files updated (staged)"
+      else
+        pass "Generated files changed (not staged — not in original commit)"
+      fi
     else
       pass "Generated files are up to date"
     fi
@@ -150,6 +178,10 @@ run_codegen() {
 # ── Main ────────────────────────────────────────────────────────────────────
 
 main() {
+  # Snapshot which files are staged now, so we only re-stage those after
+  # formatting / codegen. Files that weren't staged stay unstaged.
+  STAGED_FILES=$(git diff --cached --name-only --diff-filter=d 2>/dev/null || true)
+
   local targets=()
 
   for arg in "$@"; do
