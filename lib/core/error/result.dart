@@ -78,6 +78,19 @@ sealed class Result<T> {
 
   /// Whether this result represents a failure.
   bool get isFailure;
+
+  /// Return the success value or throw a [FailureException].
+  ///
+  /// Useful inside try/catch blocks where failures should propagate
+  /// as exceptions (e.g. inside [TaskTracker] work functions).
+  ///
+  /// ```dart
+  /// final user = (await repo.getUser(id)).getOrThrow();
+  /// ```
+  T getOrThrow();
+
+  /// Return the [Failure] if this is an [Err], or `null` if [Success].
+  Failure? get failureOrNull;
 }
 
 /// A successful [Result] containing a [data] value of type [T].
@@ -112,6 +125,12 @@ final class Success<T> extends Result<T> {
 
   @override
   bool get isFailure => false;
+
+  @override
+  T getOrThrow() => data;
+
+  @override
+  Failure? get failureOrNull => null;
 
   @override
   bool operator ==(Object other) =>
@@ -156,6 +175,12 @@ final class Err<T> extends Result<T> {
 
   @override
   bool get isFailure => true;
+
+  @override
+  T getOrThrow() => throw FailureException(failure);
+
+  @override
+  Failure? get failureOrNull => failure;
 
   @override
   bool operator ==(Object other) =>
