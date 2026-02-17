@@ -93,6 +93,8 @@ class _TaskEntry<T> {
       onCompleted<T>(id, this, result);
     } on CancelledException catch (_) {
       onCancelled<T>(id, this);
+    } on FailureException catch (e) {
+      onFailed<T>(id, this, e.failure);
     } on Exception catch (e, st) {
       onFailed<T>(id, this, UnexpectedFailure(e, st));
     }
