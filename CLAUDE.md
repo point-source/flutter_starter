@@ -134,6 +134,19 @@ from `data/providers/` directly when no transformation is needed.
 - Categories with `maxConcurrent` throttle parallel tasks; excess queue as `pending`
 - See `docs/architecture-rules/13-background-tasks.md` for full patterns
 
+### UI Structure
+- **Pages are layout orchestrators** -- they assemble and arrange widget components,
+  not implement fine-grained UI logic inline. Extract meaningful chunks into
+  dedicated widgets in `ui/widgets/` to keep pages modular and readable.
+- **Input placement in compact portrait** -- when a page has a small number of
+  input fields (1-3), position them near the bottom of the viewport so they are
+  thumb-accessible on phones. Exception: pages that are primarily forms (e.g.,
+  profile editing) should use conventional top-down form layout.
+- **Mock backends for UI work** -- always ensure a mock repository is available
+  before building out UI pages. This enables running and testing the UI without
+  a live backend (`BACKEND=mock` is the default). Add or extend mock repositories
+  as needed so new pages are exercisable immediately.
+
 ### Navigation
 - Routes defined in `lib/core/routing/app_router.dart`
 - `AuthGuard` protects authenticated routes via `isAuthenticatedProvider`

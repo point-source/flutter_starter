@@ -34,6 +34,7 @@ Adopt **MVVM** (as recommended by the Flutter Architecture Guide) combined with 
 ### Key Rules
 
 - Views know only their ViewModel (accessed via a Riverpod provider).
+- Pages act as layout orchestrators: they assemble extracted widget components from `ui/widgets/` rather than implementing UI details inline.
 - ViewModels call repository interfaces (or use cases when needed).
 - Repositories call services and map DTOs to domain entities.
 - Services are stateless HTTP wrappers (Retrofit-generated).

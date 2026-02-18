@@ -53,6 +53,8 @@ class LoginPage extends ConsumerWidget {
 
 **Rules**:
 
+- **Pages are layout orchestrators**: Pages should assemble and arrange extracted widget components, not implement fine-grained UI logic inline. Extract meaningful UI chunks into dedicated widgets in `ui/widgets/` to keep pages modular and readable.
+- **Input placement in compact portrait**: When a page has a small number of input fields (1-3), position them near the bottom of the viewport so they are thumb-accessible on phones. Exception: pages that are primarily forms (e.g., profile editing) should use conventional top-down form layout.
 - Views must not contain business logic (validation, data transformation, API calls).
 - Views must not import services, repositories, or DTOs directly.
 - Views access state through `ref.watch()` on either a ViewModel or `data/providers/` notifier.
