@@ -228,5 +228,7 @@ optionally add Dio/Retrofit integration later.
 ## Detailed Documentation
 
 - **Architecture overview**: `docs/ARCHITECTURE.md`
-- **Architecture Decision Records**: `docs/adrs/`
+- **Architecture Decision Records** (template): `docs/adrs/`
+- **Project-specific ADRs** (app-level decisions): `docs/project-decisions/`
 - **Architecture rules and patterns**: `docs/architecture-rules/`
+- **Template update migration guides**: `docs/migrations/`

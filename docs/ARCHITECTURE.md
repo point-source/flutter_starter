@@ -551,6 +551,15 @@ Rationale for major architectural choices is documented in ADRs:
 | [008](adrs/008-mvvm-with-clean-architecture.md) | MVVM with Clean Architecture layers |
 | [009](adrs/009-environment-configuration.md) | Environment configuration strategy |
 | [010](adrs/010-logging-and-monitoring.md) | Logging and monitoring approach |
+| [011](adrs/011-mock-first-features.md) | Mock-first feature implementation |
+
+## Additional Documentation
+
+| Directory | Purpose |
+|---|---|
+| [`project-decisions/`](project-decisions/) | Project-specific ADRs (app-level decisions, not template) |
+| [`migrations/`](migrations/) | Template update migration guides for downstream projects |
+| [`TEMPLATE_SYNC.md`](TEMPLATE_SYNC.md) | How to keep derived projects in sync with template updates |
 
 ## Architecture Rules
 

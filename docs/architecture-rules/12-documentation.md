@@ -111,7 +111,11 @@ Use the `library;` directive to attach the file-level doc comment to the library
 
 ## ADRs (Architecture Decision Records)
 
+### Template ADRs
+
 Location: `docs/adrs/`
+
+Template ADRs record decisions about the template itself: tech stack choices, architecture patterns, and infrastructure conventions (e.g., "Use Riverpod for state management", "Sealed Result type for error handling").
 
 Format:
 1. **Title**: `NNN-short-descriptive-name.md`
@@ -123,6 +127,22 @@ Format:
 Update ADRs when:
 - A technology choice changes (create a new ADR, mark the old one as Superseded).
 - A decision is revisited with new information.
+
+### Project Decisions
+
+Location: `docs/project-decisions/`
+
+Project decisions record ADRs specific to the app being built on top of the template: backend choice, business domain modeling, deployment strategy, third-party service integrations.
+
+Same format as template ADRs. Numbering starts at 100 for visual separation. See the [project-decisions README](../project-decisions/README.md) for details.
+
+## Migrations
+
+Location: `docs/migrations/`
+
+Migration files are written by template maintainers at each tagged release. They provide structured guidance for downstream projects merging template updates: what changed, what might break, and step-by-step migration instructions.
+
+See the [migrations README](../migrations/README.md) for the file format and [`_TEMPLATE.md`](../migrations/_TEMPLATE.md) for a copy-paste starting point.
 
 ## Architecture Rules
 

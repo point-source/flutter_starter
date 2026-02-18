@@ -1,3 +1,6 @@
+<!-- TEMPLATE README — Replace this file with your project's README.
+     See docs/TEMPLATE_SYNC.md for template sync guidance. -->
+
 # Flutter Starter
 
 An enterprise-ready Flutter starter template with clean architecture, code generation, and opinionated project structure.
@@ -306,6 +309,11 @@ Generated files are committed to the repository. The CI pipeline includes a `cod
 - **Architecture Rules** -- [docs/architecture-rules/](docs/architecture-rules/)
 - **Template Synchronization** -- [docs/TEMPLATE_SYNC.md](docs/TEMPLATE_SYNC.md)
 - **Mason Bricks** -- [bricks/](bricks/) (feature, repository, view_model scaffolding)
+
+### For Derived Projects
+
+- **Project Decisions** -- [docs/project-decisions/](docs/project-decisions/) for your app-specific ADRs
+- **Migration Guides** -- [docs/migrations/](docs/migrations/) for template update instructions
 
 ---
 
