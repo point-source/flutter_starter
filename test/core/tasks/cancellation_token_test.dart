@@ -61,5 +61,5 @@ void main() {
 }
 
 /// Suppress lints for unawaited futures used intentionally in tests.
-// ignore: avoid-unused-parameters, no-empty-block
+// ignore: avoid-unused-parameters
 void unawaited(Future<void> future) {}

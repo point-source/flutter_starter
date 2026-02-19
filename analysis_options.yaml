@@ -24,6 +24,22 @@ dcm:
     - prefer-match-file-name: false
     - avoid-shadowing:
         ignore-parameters: true
+    - prefer-shorthands-with-constructors: false
+    - prefer-correct-callback-field-name: false
+    - prefer-prefixed-global-constants: false
+    - prefer-single-widget-per-file: false
+    - no-empty-block:
+        exclude:
+          - test/**
+    - avoid-unsafe-collection-methods:
+        exclude:
+          - test/**
+    - avoid-default-tostring:
+        exclude:
+          - test/**
+    - avoid-dynamic:
+        exclude:
+          - test/**
 
 linter:
   rules:

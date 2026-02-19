@@ -116,7 +116,6 @@ void main() {
       final interceptor = RefreshTokenInterceptor(
         tokenStorage: mockTokenStorage,
         dio: refreshDio,
-        // ignore: no-empty-block
         onAuthExpired: () {},
       );
       // Verify the interceptor can be created successfully with

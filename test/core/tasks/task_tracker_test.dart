@@ -157,7 +157,6 @@ void main() {
       continueWork.complete();
       await future;
 
-      // ignore: avoid-unsafe-collection-methods
       expect(progressValues.first, equals(const TaskProgress.determinate(0.5)));
       // After completion, progress is set to 1.0.
       expect(
@@ -413,7 +412,6 @@ void main() {
           id: 'task-$i',
           category: 'throttled',
           label: 'Task $i',
-          // ignore: avoid-unsafe-collection-methods
           onExecute: (_, _) => completers[i].future,
         );
       }
@@ -427,7 +425,6 @@ void main() {
       expect(currentState()['task-3']?.status, equals(TaskStatus.pending));
 
       // Complete one — a pending task should start.
-      // ignore: avoid-unsafe-collection-methods
       completers[0].complete('done');
       await Future<void>.delayed(.zero);
 
@@ -438,7 +435,6 @@ void main() {
 
       // Clean up.
       for (var i = 1; i < 4; i++) {
-        // ignore: avoid-unsafe-collection-methods
         if (!completers[i].isCompleted) completers[i].complete('done');
       }
     });
@@ -492,7 +488,6 @@ void main() {
           id: 'task-$i',
           category: 'unlimited',
           label: 'Task $i',
-          // ignore: avoid-unsafe-collection-methods
           onExecute: (_, _) => completers[i].future,
         );
       }

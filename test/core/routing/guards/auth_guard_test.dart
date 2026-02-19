@@ -35,7 +35,6 @@ void main() {
 
     // Stub void methods.
     when(() => mockResolver.next(any())).thenReturn(null);
-    // ignore: no-empty-block
     when(() => mockRouter.replaceAll(any())).thenAnswer((_) async {});
   });
 

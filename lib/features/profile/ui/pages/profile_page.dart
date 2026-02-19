@@ -218,6 +218,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         const SizedBox(height: 24),
         FilledButton(
+          // ignore: avoid-passing-async-when-sync-expected
           onPressed: _isSaving ? null : _saveProfile,
           child: _isSaving
               ? const SizedBox(

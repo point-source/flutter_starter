@@ -56,7 +56,6 @@ void main() {
         channel.run<String>(
           id: 'task-$i',
           label: 'Task $i',
-          // ignore: avoid-unsafe-collection-methods
           onExecute: (_, _) => completers[i].future,
         );
       }
