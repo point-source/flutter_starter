@@ -22,7 +22,10 @@ if [ "$(basename "$REPO_ROOT")" != "flutter_starter" ]; then
   exit 0
 fi
 
-# Template-significant file patterns (paths that downstream projects care about).
+# Template-significant file patterns -- only paths whose changes could require
+# downstream projects to refactor or reconcile their own code.
+# Excludes developer tooling (scripts/, config/examples/, bricks/, .githooks/)
+# since those can be adopted as-is without project-level code changes.
 TEMPLATE_PATTERNS=(
   '^CLAUDE\.md$'
   '^pubspec\.yaml$'
@@ -31,9 +34,6 @@ TEMPLATE_PATTERNS=(
   '^docs/architecture-rules/'
   '^lib/core/'
   '^lib/features/auth/'
-  '^scripts/'
-  '^config/examples/'
-  '^bricks/'
 )
 
 # Check uncommitted changes (staged + unstaged) for template-significant files.

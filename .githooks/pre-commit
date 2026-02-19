@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Pre-commit hook: auto-fixes formatting and codegen, then runs CI checks.
-# If fixes produce changes, they are staged into the current commit
-# automatically. The commit is only blocked by analysis errors or test
-# failures.
+# Pre-commit hook: auto-fixes formatting, runs codegen, and validates.
+# Formatting fixes are staged automatically. If codegen produces changes,
+# the commit is aborted so you can review the updates and commit again.
+# Also blocked by analysis errors or test failures.
 #
 # Skip with: git commit --no-verify
 #

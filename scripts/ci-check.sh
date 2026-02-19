@@ -2,9 +2,11 @@
 # Runs the same checks as the GitHub Actions CI workflow locally.
 # Use this before committing to catch failures early and avoid wasting CI compute.
 #
-# By default, formatting and codegen are applied automatically. Only files that
-# were already staged are re-staged; unstaged files stay unstaged.
-# The script only fails if analysis errors or test failures remain.
+# By default, formatting is applied and re-staged automatically (only files that
+# were already staged are re-staged; unstaged files stay unstaged).
+# If codegen produces changes, the commit is aborted so you can review the
+# updated files and commit again. The script also fails on analysis errors
+# or test failures.
 #
 # Usage:
 #   ./scripts/ci-check.sh              # Run all checks (lint, test, codegen)
@@ -144,34 +146,31 @@ run_codegen() {
     diff_args+=("$pattern")
   done
 
-  if [ "$CHECK_ONLY" = true ]; then
-    step "Verify generated files are up to date"
-    if git diff --exit-code -- "${diff_args[@]}"; then
-      pass "Generated files are up to date"
+  # Check whether codegen changed any generated files (staged or unstaged).
+  local changed_generated
+  changed_generated=$(git diff --name-only -- "${diff_args[@]}" || true)
+  # Also check for newly created (untracked) generated files.
+  local untracked_generated
+  untracked_generated=$(git ls-files --others --exclude-standard -- "${diff_args[@]}" 2>/dev/null || true)
+  # Combine both lists.
+  local all_changed
+  all_changed=$(printf '%s\n%s' "$changed_generated" "$untracked_generated" | sed '/^$/d' | sort -u)
+
+  if [ -n "$all_changed" ]; then
+    echo ""
+    echo -e "${YELLOW}Generated files are out of date:${NC}"
+    echo "$all_changed"
+    if [ "$CHECK_ONLY" = true ]; then
+      fail "Generated files are out of date — commit blocked."
     else
-      fail "Generated files are out of date."
-      return 1
+      echo ""
+      echo -e "${YELLOW}The files above have been updated on disk.${NC}"
+      echo -e "${YELLOW}Review the changes, stage them, and commit again.${NC}"
+      fail "Generated files were stale — commit aborted so you can review."
     fi
+    return 1
   else
-    # Only re-stage generated files that were already staged before the hook.
-    local changed_generated
-    changed_generated=$(git diff --name-only -- "${diff_args[@]}" || true)
-    if [ -n "$changed_generated" ]; then
-      local gen_to_stage
-      gen_to_stage=$(echo "$changed_generated" | only_staged)
-      if [ -n "$gen_to_stage" ]; then
-        echo ""
-        echo -e "${YELLOW}Generated files were out of date — staging updates:${NC}"
-        echo "$gen_to_stage"
-        # shellcheck disable=SC2086
-        git add $gen_to_stage
-        pass "Generated files updated (staged)"
-      else
-        pass "Generated files changed (not staged — not in original commit)"
-      fi
-    else
-      pass "Generated files are up to date"
-    fi
+    pass "Generated files are up to date"
   fi
 }
 
