@@ -5,6 +5,7 @@
 /// generation.
 library;
 
+import 'package:flutter_starter/core/logging/app_logger.dart';
 import 'package:flutter_starter/core/storage/token_storage.dart';
 import 'package:flutter_starter/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:flutter_starter/features/profile/domain/repositories/i_profile_repository.dart';
@@ -18,3 +19,6 @@ class MockProfileRepository extends Mock implements IProfileRepository {}
 
 /// Mock implementation of [ITokenStorage].
 class MockTokenStorage extends Mock implements ITokenStorage {}
+
+/// Mock implementation of [IAppLogger].
+class MockAppLogger extends Mock implements IAppLogger {}

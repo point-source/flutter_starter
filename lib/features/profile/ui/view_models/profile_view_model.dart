@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter_starter/core/error/failures.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/profile/data/providers/profile_providers.dart';
 import 'package:flutter_starter/features/profile/domain/entities/profile.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -26,7 +27,16 @@ class ProfileViewModel extends _$ProfileViewModel {
 
     return result.when(
       success: (profile) => profile,
-      failure: (failure) => throw FailureException(failure),
+      failure: (failure) {
+        ref
+            .read(loggerProvider)
+            .warning(
+              'Failed to load profile',
+              data: {'failure': failure.toString()},
+              tag: 'profile',
+            );
+        throw FailureException(failure);
+      },
     );
   }
 
@@ -48,8 +58,19 @@ class ProfileViewModel extends _$ProfileViewModel {
 
     state = result.when(
       success: AsyncData.new,
-      failure: (failure) =>
-          AsyncError(FailureException(failure), failure.stackTrace ?? .current),
+      failure: (failure) {
+        ref
+            .read(loggerProvider)
+            .warning(
+              'Failed to update profile',
+              data: {'failure': failure.toString()},
+              tag: 'profile',
+            );
+        return AsyncError(
+          FailureException(failure),
+          failure.stackTrace ?? .current,
+        );
+      },
     );
   }
 }

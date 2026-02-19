@@ -107,7 +107,7 @@ final class AuthStateRepoProvider
   AuthStateRepo create() => AuthStateRepo();
 }
 
-String _$authStateRepoHash() => r'b0e2e9849c5b447bf3edb8c1a7df02bc8f922341';
+String _$authStateRepoHash() => r'20dd8a7bf0d099d641d9a8e3a5f551492f6f3341';
 
 /// Notifier that owns the reactive [AuthState] for the entire app.
 ///

@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_starter/core/http/dio_api_exception.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/logging/app_logger.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/mappers/{{entity_name.snakeCase()}}_mapper.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/services/{{entity_name.snakeCase()}}_service.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/entities/{{entity_name.snakeCase()}}.dart';
@@ -23,10 +24,11 @@ import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/rep
 /// [DioException] errors are mapped to appropriate failures.
 class {{entity_name.pascalCase()}}Repository implements I{{entity_name.pascalCase()}}Repository {
   /// Create a [{{entity_name.pascalCase()}}Repository] with the given
-  /// [{{entity_name.camelCase()}}Service].
-  const {{entity_name.pascalCase()}}Repository(this._service);
+  /// [{{entity_name.camelCase()}}Service] and [logger].
+  const {{entity_name.pascalCase()}}Repository(this._service, this._logger);
 
   final {{entity_name.pascalCase()}}Service _service;
+  final IAppLogger _logger;
 
   @override
   Future<Result<{{entity_name.pascalCase()}}>> getById(String id) async {
@@ -36,6 +38,12 @@ class {{entity_name.pascalCase()}}Repository implements I{{entity_name.pascalCas
     } on DioException catch (e, st) {
       return Err(_mapDioException(e, st));
     } on Exception catch (e, st) {
+      _logger.error(
+        'Unexpected error in {{entity_name.camelCase()}} repository',
+        error: e,
+        stackTrace: st,
+        tag: '{{feature_name.snakeCase()}}',
+      );
       return Err(UnexpectedFailure(e, st));
     }
   }
@@ -48,6 +56,12 @@ class {{entity_name.pascalCase()}}Repository implements I{{entity_name.pascalCas
     } on DioException catch (e, st) {
       return Err(_mapDioException(e, st));
     } on Exception catch (e, st) {
+      _logger.error(
+        'Unexpected error in {{entity_name.camelCase()}} repository',
+        error: e,
+        stackTrace: st,
+        tag: '{{feature_name.snakeCase()}}',
+      );
       return Err(UnexpectedFailure(e, st));
     }
   }

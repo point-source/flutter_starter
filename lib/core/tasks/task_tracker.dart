@@ -13,6 +13,7 @@ import 'dart:async';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/core/tasks/cancellation_token.dart';
 import 'package:flutter_starter/core/tasks/task_progress.dart';
 import 'package:flutter_starter/core/tasks/tracked_task.dart';
@@ -374,6 +375,18 @@ class TaskTracker extends _$TaskTracker {
   void _onTaskFailed<T>(String id, _TaskEntry<T> entry, Failure failure) {
     final task = state[id];
     if (task == null) return;
+
+    if (failure is UnexpectedFailure) {
+      ref
+          .read(loggerProvider)
+          .error(
+            'Task "$id" failed unexpectedly',
+            error: failure.error,
+            stackTrace: failure.stackTrace,
+            data: {'category': task.category, 'label': task.label},
+            tag: 'tasks',
+          );
+    }
 
     state = state.add(
       id,

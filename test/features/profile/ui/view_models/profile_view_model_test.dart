@@ -10,6 +10,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/profile/data/providers/profile_providers.dart';
 import 'package:flutter_starter/features/profile/domain/failures/profile_failure.dart';
 import 'package:flutter_starter/features/profile/ui/view_models/profile_view_model.dart';
@@ -22,15 +23,18 @@ import '../../../../helpers/test_utils.dart';
 
 void main() {
   late MockProfileRepository mockProfileRepository;
+  late MockAppLogger mockLogger;
 
   setUp(() {
     mockProfileRepository = MockProfileRepository();
+    mockLogger = MockAppLogger();
   });
 
   /// Helper to create a container with the profile repository overridden.
   ProviderContainer createProfileContainer() => createContainer(
     overrides: [
       profileRepositoryProvider.overrideWithValue(mockProfileRepository),
+      loggerProvider.overrideWithValue(mockLogger),
     ],
   );
 

@@ -6,6 +6,7 @@
 library;
 
 {{#dio}}import 'package:flutter_starter/core/http/dio_provider.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/repositories/{{feature_name.snakeCase()}}_repository.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/services/{{feature_name.snakeCase()}}_service.dart';
 {{/dio}}{{^dio}}import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/repositories/mock_{{feature_name.snakeCase()}}_repository.dart';
@@ -26,6 +27,7 @@ part '{{feature_name.snakeCase()}}_providers.g.dart';
 I{{feature_name.pascalCase()}}Repository {{feature_name.camelCase()}}Repository(Ref ref) =>
     {{feature_name.pascalCase()}}Repository(
       ref.read({{feature_name.camelCase()}}ServiceProvider),
+      ref.read(loggerProvider),
     );
 {{/dio}}{{^dio}}/// Provide the [I{{feature_name.pascalCase()}}Repository] implementation.
 ///

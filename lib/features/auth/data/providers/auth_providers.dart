@@ -14,6 +14,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:flutter_starter/features/auth/domain/entities/auth_state.dart';
 import 'package:flutter_starter/features/auth/domain/repositories/i_auth_repository.dart';
@@ -56,16 +57,25 @@ class AuthStateRepo extends _$AuthStateRepo {
   @override
   Future<AuthState> build() async {
     final repository = ref.read(authRepositoryProvider);
+    final logger = ref.read(loggerProvider);
     final result = await repository.getCurrentUser();
 
     return result.when(
       success: (user) {
         if (user != null) {
+          logger.setUser(user.id, user.email);
           return AuthState.authenticated(user);
         }
         return AuthState.unauthenticated();
       },
-      failure: (_) => AuthState.unauthenticated(),
+      failure: (failure) {
+        logger.warning(
+          'Failed to restore session',
+          data: {'failure': failure.toString()},
+          tag: 'auth',
+        );
+        return AuthState.unauthenticated();
+      },
     );
   }
 
@@ -76,11 +86,24 @@ class AuthStateRepo extends _$AuthStateRepo {
   Future<Result<void>> login(String email, String password) async {
     state = const AsyncLoading();
     final repository = ref.read(authRepositoryProvider);
+    final logger = ref.read(loggerProvider);
     final result = await repository.login(email, password);
 
     state = result.when(
-      success: (user) => AsyncData(AuthState.authenticated(user)),
-      failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
+      success: (user) {
+        logger
+          ..info('Login succeeded', data: {'userId': user.id}, tag: 'auth')
+          ..setUser(user.id, user.email);
+        return AsyncData(AuthState.authenticated(user));
+      },
+      failure: (failure) {
+        logger.warning(
+          'Login failed',
+          data: {'failure': failure.toString()},
+          tag: 'auth',
+        );
+        return AsyncError(failure, failure.stackTrace ?? .current);
+      },
     );
 
     // ignore: no-empty-block
@@ -104,9 +127,26 @@ class AuthStateRepo extends _$AuthStateRepo {
       name: name,
     );
 
+    final logger = ref.read(loggerProvider);
     state = result.when(
-      success: (user) => AsyncData(AuthState.authenticated(user)),
-      failure: (failure) => AsyncError(failure, failure.stackTrace ?? .current),
+      success: (user) {
+        logger
+          ..info(
+            'Registration succeeded',
+            data: {'userId': user.id},
+            tag: 'auth',
+          )
+          ..setUser(user.id, user.email);
+        return AsyncData(AuthState.authenticated(user));
+      },
+      failure: (failure) {
+        logger.warning(
+          'Registration failed',
+          data: {'failure': failure.toString()},
+          tag: 'auth',
+        );
+        return AsyncError(failure, failure.stackTrace ?? .current);
+      },
     );
 
     // ignore: no-empty-block
@@ -117,7 +157,11 @@ class AuthStateRepo extends _$AuthStateRepo {
   Future<void> logout() async {
     state = const AsyncLoading();
     final repository = ref.read(authRepositoryProvider);
+    final logger = ref.read(loggerProvider);
     await repository.logout();
+    logger
+      ..info('Logout', tag: 'auth')
+      ..setUser(null, null);
     state = AsyncData(AuthState.unauthenticated());
   }
 }

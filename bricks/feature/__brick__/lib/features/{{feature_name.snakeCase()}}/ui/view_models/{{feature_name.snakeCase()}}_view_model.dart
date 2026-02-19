@@ -13,6 +13,7 @@
 /// directly instead.
 library;
 
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/providers/{{feature_name.snakeCase()}}_providers.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/entities/{{feature_name.snakeCase()}}.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -32,7 +33,14 @@ class {{feature_name.pascalCase()}}ViewModel extends _${{feature_name.pascalCase
 
     return result.when(
       success: (items) => items,
-      failure: (failure) => throw failure,
+      failure: (failure) {
+        ref.read(loggerProvider).warning(
+          'Failed to load {{feature_name.camelCase()}} list',
+          data: {'failure': failure.toString()},
+          tag: '{{feature_name.snakeCase()}}',
+        );
+        throw failure;
+      },
     );
   }
 }

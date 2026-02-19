@@ -134,6 +134,17 @@ from `data/providers/` directly when no transformation is needed.
 - Categories with `maxConcurrent` throttle parallel tasks; excess queue as `pending`
 - See `docs/architecture-rules/13-background-tasks.md` for full patterns
 
+### Logging
+- All operational logging goes through `IAppLogger` via `loggerProvider` — never `print()`
+- Dev → `ConsoleLogger` (dart:developer); staging/prod → `SentryReporter` (breadcrumbs + events)
+- Severity: `debug` (dev diagnostics), `info` (normal events), `warning` (domain failures), `error` (unexpected exceptions), `fatal` (unrecoverable)
+- Always pass `tag` — feature name for features (`'auth'`), specific name for infra (`'http'`)
+- Repositories: log `error` in `on Exception catch` blocks (Dio-backed only, not mocks)
+- Notifiers: log `warning` when mapping a failure to `AsyncError` or `FailureException`
+- Auth: log `info` + call `setUser()` on login/register success; `setUser(null, null)` on logout
+- Access via `ref.read(loggerProvider)` in providers; constructor injection in Dio repositories
+- See `docs/architecture-rules/14-logging.md` for full patterns
+
 ### UI Structure
 - **Pages are layout orchestrators** -- they assemble and arrange widget components,
   not implement fine-grained UI logic inline. Extract meaningful chunks into

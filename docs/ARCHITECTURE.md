@@ -580,3 +580,4 @@ Detailed coding patterns and rules are documented in `docs/architecture-rules/`:
 | [11](architecture-rules/11-security.md) | Security |
 | [12](architecture-rules/12-documentation.md) | Documentation standards |
 | [13](architecture-rules/13-background-tasks.md) | Background task tracking |
+| [14](architecture-rules/14-logging.md) | Logging |

@@ -101,7 +101,7 @@ final class TaskTrackerProvider
   }
 }
 
-String _$taskTrackerHash() => r'8935944c20ffc7f43851c7928c3f21cedc94dd33';
+String _$taskTrackerHash() => r'1c4c51551c2cdae6bbfbd6703708807c0dc7bf07';
 
 /// Track, throttle, cancel, and retry background tasks across all features.
 ///

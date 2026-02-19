@@ -6,12 +6,14 @@ import 'dart:async';
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/core/tasks/task_progress.dart';
 import 'package:flutter_starter/core/tasks/task_tracker.dart';
 import 'package:flutter_starter/core/tasks/tracked_task.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../helpers/mocks.dart';
 import '../../helpers/test_utils.dart';
 
 void main() {
@@ -19,7 +21,9 @@ void main() {
   late TaskTracker tracker;
 
   setUp(() {
-    container = createContainer();
+    container = createContainer(
+      overrides: [loggerProvider.overrideWithValue(MockAppLogger())],
+    );
     tracker = container.read(taskTrackerProvider.notifier);
   });
 

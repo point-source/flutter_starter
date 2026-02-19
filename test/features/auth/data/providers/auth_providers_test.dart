@@ -7,6 +7,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 import 'package:flutter_starter/features/auth/domain/entities/user.dart';
 import 'package:flutter_starter/features/auth/domain/failures/auth_failure.dart';
@@ -19,14 +20,19 @@ import '../../../../helpers/test_utils.dart';
 
 void main() {
   late MockAuthRepository mockAuthRepository;
+  late MockAppLogger mockLogger;
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
+    mockLogger = MockAppLogger();
   });
 
   /// Helper to create a container with the auth repository overridden.
   ProviderContainer createAuthContainer() => createContainer(
-    overrides: [authRepositoryProvider.overrideWithValue(mockAuthRepository)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(mockAuthRepository),
+      loggerProvider.overrideWithValue(mockLogger),
+    ],
   );
 
   /// Tests for the initial [build] method.

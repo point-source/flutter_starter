@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/app.dart';
 import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/error/failures.dart';
+import 'package:flutter_starter/core/logging/app_logger.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,13 +79,21 @@ Future<void> bootstrap() async {
   runApp(app);
 }
 
-/// Report an error to Sentry if reporting is enabled.
+/// Report an error to Sentry, or to the console in development.
 ///
-/// Unwraps [FailureException] to report the original [Failure] with its
-/// captured stack trace for better Sentry grouping. Falls back to reporting
-/// the raw [error] for all other exception types.
+/// When Sentry is disabled (development), logs to the console via
+/// [ConsoleLogger] so unhandled errors are still visible. When enabled,
+/// unwraps [FailureException] to report the original [Failure] with its
+/// captured stack trace for better Sentry grouping.
 void _reportToSentry(Object error, StackTrace? stack) {
   if (!AppEnvironment.current.sentryEnabled) {
+    // Log to console in development so unhandled errors are visible.
+    const ConsoleLogger().fatal(
+      'Unhandled error',
+      error: error,
+      stackTrace: stack,
+      tag: 'bootstrap',
+    );
     return;
   }
   if (error is FailureException) {

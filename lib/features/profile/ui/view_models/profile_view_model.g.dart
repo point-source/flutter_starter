@@ -45,7 +45,7 @@ final class ProfileViewModelProvider
   ProfileViewModel create() => ProfileViewModel();
 }
 
-String _$profileViewModelHash() => r'3114a48153fca119c520e3b6c02c30465962bab0';
+String _$profileViewModelHash() => r'3d6476243669ffa285259f0eee711738e65d0731';
 
 /// Notifier that manages the profile lifecycle.
 ///
