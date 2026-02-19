@@ -1,5 +1,8 @@
 include: package:flutter_lints/flutter.yaml
 
+plugins:
+  import_rules: ^0.0.7
+
 analyzer:
   language:
     strict-casts: true
@@ -114,3 +117,26 @@ linter:
     use_string_in_part_of_directives: true
     use_super_parameters: true
     use_to_and_as_if_applicable: true
+
+# Architecture layer import enforcement (import_rules plugin).
+# UI may import data/providers/ (the public API surface) but not other data sublayers.
+# Domain must not import data or UI. Data must not import UI.
+import_rules:
+  rules:
+    - target: lib/features/*/ui/**
+      disallow:
+        - lib/features/*/data/repositories/**
+        - lib/features/*/data/services/**
+        - lib/features/*/data/models/**
+        - lib/features/*/data/mappers/**
+      reason: "UI layer must not import data layer internals (repositories, services, models, mappers). Use data/providers/ instead."
+
+    - target: lib/features/*/domain/**
+      disallow:
+        - lib/features/*/data/**
+        - lib/features/*/ui/**
+      reason: "Domain layer must not depend on data or UI layers."
+
+    - target: lib/features/*/data/**
+      disallow: lib/features/*/ui/**
+      reason: "Data layer must not depend on the UI layer."

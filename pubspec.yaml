@@ -62,6 +62,7 @@ dev_dependencies:
 
   # Linting
   flutter_lints: ^6.0.0
+  import_rules: ^0.0.7
 
 flutter:
   uses-material-design: true
