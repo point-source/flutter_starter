@@ -66,14 +66,17 @@ git fetch template
 # 3. Provision config files from templates
 ./scripts/setup.sh
 
-# 4. Install dependencies
+# 4. Rename the project (package name, bundle IDs, display name)
+./scripts/rename.sh my_app com.mycompany "My App"
+
+# 5. Install dependencies
 flutter pub get
 
-# 5. Run code generation
+# 6. Run code generation (required after rename)
 dart run build_runner build --delete-conflicting-outputs
 dart run slang
 
-# 6. Launch the app (development)
+# 7. Launch the app (development)
 flutter run --dart-define-from-file=config/development.json
 ```
 
@@ -130,6 +133,7 @@ config/
   *.json                             -- Active configs (gitignored, from setup.sh)
 scripts/
   setup.sh                           -- Provision config files from templates
+  rename.sh                          -- Rename the project after cloning
 test/                                -- Unit and widget tests
 bricks/                              -- Mason bricks (feature, repository, view_model)
 docs/
@@ -192,6 +196,7 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 | Command | Description |
 |---------|-------------|
 | `./scripts/setup.sh` | Provision config files from templates |
+| `./scripts/rename.sh <pkg> <org> <name>` | Rename project (package name, bundle IDs, display name) |
 | `flutter pub get` | Install dependencies |
 | `flutter run --dart-define-from-file=config/development.json` | Run app (development) |
 | `flutter run --dart-define-from-file=config/staging.json` | Run app (staging) |
