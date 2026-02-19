@@ -84,8 +84,7 @@ enum AppEnvironment {
   /// backend.
   static BackendMode get backendMode {
     const raw = String.fromEnvironment('BACKEND');
-    return BackendMode.values.asNameMap()[raw.toLowerCase()] ??
-        BackendMode.mock;
+    return BackendMode.values.asNameMap()[raw.toLowerCase()] ?? .mock;
   }
 
   /// Whether to pre-fill the login form with [devEmail] / [devPassword].

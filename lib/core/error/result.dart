@@ -180,7 +180,8 @@ final class Err<T> extends Result<T> {
   T getOrThrow() => throw FailureException(failure);
 
   @override
-  Failure? get failureOrNull => failure;
+  // ignore: match-getter-setter-field-names
+  Failure get failureOrNull => failure;
 
   @override
   bool operator ==(Object other) =>

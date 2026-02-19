@@ -65,7 +65,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'63f44367d6f0d68567bc2abc5dce1f72a7650822';
+String _$authRepositoryHash() => r'cd76201317fa670695c96b406c24a6c7427509d8';
 
 /// Notifier that owns the reactive [AuthState] for the entire app.
 ///

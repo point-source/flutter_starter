@@ -32,8 +32,8 @@ part 'auth_providers.g.dart';
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
 /// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
 @riverpod
-IAuthRepository authRepository(Ref ref) {
-  if (AppEnvironment.backendMode == BackendMode.mock) {
+IAuthRepository authRepository(Ref _) {
+  if (AppEnvironment.backendMode == .mock) {
     return const MockAuthRepository();
   }
   // TODO: Replace with your backend implementation.

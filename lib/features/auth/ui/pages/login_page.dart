@@ -35,7 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   void initState() {
     super.initState();
-    if (AppEnvironment.backendMode == BackendMode.mock) {
+    if (AppEnvironment.backendMode == .mock) {
       _emailController.text = 'dev@example.com';
       _passwordController.text = 'password';
     } else if (AppEnvironment.devPrefill) {

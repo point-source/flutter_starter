@@ -18,8 +18,8 @@ part 'profile_providers.g.dart';
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
 /// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
 @riverpod
-IProfileRepository profileRepository(Ref ref) {
-  if (AppEnvironment.backendMode == BackendMode.mock) {
+IProfileRepository profileRepository(Ref _) {
+  if (AppEnvironment.backendMode == .mock) {
     return const MockProfileRepository();
   }
   // TODO: Replace with your backend implementation.
