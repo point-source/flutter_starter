@@ -9,7 +9,7 @@ This document explains how to keep projects derived from `flutter_starter` in sy
 ```bash
 # Create new repo from template on GitHub (via "Use this template" button)
 # OR clone and create new repo
-git clone https://github.com/PointSource/flutter_starter.git my-new-app
+git clone https://github.com/point-source/flutter_starter.git my-new-app
 cd my-new-app
 rm -rf .git
 git init
@@ -17,7 +17,7 @@ git add .
 git commit -m "Initial commit from flutter_starter template"
 
 # Add template as a remote
-git remote add template https://github.com/PointSource/flutter_starter.git
+git remote add template https://github.com/point-source/flutter_starter.git
 git fetch template
 
 # Add your project's origin

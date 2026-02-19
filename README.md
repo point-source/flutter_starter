@@ -54,13 +54,13 @@ flutter doctor
 # 1. Create a new repository from this template
 #    Option A: Use GitHub's "Use this template" button
 #    Option B: Clone and create new repo manually
-git clone https://github.com/PointSource/flutter_starter.git my-new-app
+git clone https://github.com/point-source/flutter_starter.git my-new-app
 cd my-new-app
 rm -rf .git
 git init
 
 # 2. Add template as remote for future updates
-git remote add template https://github.com/PointSource/flutter_starter.git
+git remote add template https://github.com/point-source/flutter_starter.git
 git fetch template
 
 # 3. Provision config files from templates
