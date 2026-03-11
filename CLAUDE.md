@@ -249,6 +249,39 @@ optionally add Dio/Retrofit integration later.
 9. Run `dart run build_runner build --delete-conflicting-outputs`
 10. Add tests mirroring the `lib/` structure under `test/`
 
+## Commit Style
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages.
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types:**
+- `fix:` — patches a bug (correlates with PATCH in SemVer)
+- `feat:` — introduces a new feature (correlates with MINOR in SemVer)
+- `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:` — other common types
+- `BREAKING CHANGE:` footer or `!` after type/scope — breaking API change (correlates with MAJOR in SemVer)
+
+**Examples:**
+```
+feat(auth): add biometric login support
+
+fix(routing): resolve redirect loop in AuthGuard
+
+docs: update getting started instructions
+
+refactor(http): extract error interceptor into separate file
+
+feat(profile)!: replace username with email as primary identifier
+
+BREAKING CHANGE: username field removed from UserEntity
+```
+
 ## Detailed Documentation
 
 - **Architecture overview**: `docs/ARCHITECTURE.md`
