@@ -7,6 +7,7 @@ library;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_starter/core/env/app_environment.dart';
@@ -61,7 +62,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
 
     result.when(
-      success: (_) => context.router.replaceAll([const ShellRoute()]),
+      success: (_) {
+        TextInput.finishAutofillContext();
+        context.router.replaceAll([const ShellRoute()]);
+      },
       failure: (failure) => ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(failure.message))),
@@ -78,78 +82,80 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           padding: const .all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: .min,
-                crossAxisAlignment: .stretch,
-                children: [
-                  Text(
-                    t.auth.welcomeBack,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: .center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    t.auth.signInSubtitle,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: .center,
-                  ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: t.auth.email,
-                      prefixIcon: const Icon(Icons.email_outlined),
+            child: AutofillGroup(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: .min,
+                  crossAxisAlignment: .stretch,
+                  children: [
+                    Text(
+                      t.auth.welcomeBack,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: .center,
                     ),
-                    keyboardType: .emailAddress,
-                    textInputAction: .next,
-                    autofillHints: const [AutofillHints.email],
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return t.auth.validation.emailRequired;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: t.auth.password,
-                      prefixIcon: const Icon(Icons.lock_outlined),
+                    const SizedBox(height: 8),
+                    Text(
+                      t.auth.signInSubtitle,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: .center,
                     ),
-                    obscureText: true,
-                    textInputAction: .done,
-                    autofillHints: const [AutofillHints.password],
-                    onFieldSubmitted: (_) => _onLogin(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return t.auth.validation.passwordRequired;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    // ignore: avoid-passing-async-when-sync-expected
-                    onPressed: isLoading ? null : _onLogin,
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(t.auth.login),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: isLoading
-                        ? null
-                        : () => context.router.replace(const RegisterRoute()),
-                    child: Text(t.auth.noAccountRegister),
-                  ),
-                ],
+                    const SizedBox(height: 32),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: t.auth.email,
+                        prefixIcon: const Icon(Icons.email_outlined),
+                      ),
+                      keyboardType: .emailAddress,
+                      textInputAction: .next,
+                      autofillHints: const [AutofillHints.email],
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return t.auth.validation.emailRequired;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: t.auth.password,
+                        prefixIcon: const Icon(Icons.lock_outlined),
+                      ),
+                      obscureText: true,
+                      textInputAction: .done,
+                      autofillHints: const [AutofillHints.password],
+                      onFieldSubmitted: (_) => _onLogin(),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return t.auth.validation.passwordRequired;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      // ignore: avoid-passing-async-when-sync-expected
+                      onPressed: isLoading ? null : _onLogin,
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(t.auth.login),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: isLoading
+                          ? null
+                          : () => context.router.replace(const RegisterRoute()),
+                      child: Text(t.auth.noAccountRegister),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
