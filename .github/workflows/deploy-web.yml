@@ -1,0 +1,61 @@
+name: Deploy Web
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'Hosting provider'
+        required: true
+        type: choice
+        options:
+          - cloudflare-pages
+          # Future providers: vercel, netlify, firebase-hosting
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: deploy-web-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  web:
+    name: Deploy Web (${{ github.event.inputs.provider }} / ${{ github.event.inputs.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Provision config
+        run: ./scripts/setup.sh
+
+      - name: Override config from secrets
+        if: vars.API_URL != ''
+        run: |
+          jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
+            config/${{ github.event.inputs.environment }}.json > tmp.$$.json \
+            && mv tmp.$$.json config/${{ github.event.inputs.environment }}.json
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release --dart-define-from-file=config/${{ github.event.inputs.environment }}.json
+
+      # ── Cloudflare Pages ──────────────────────────────────────────────
+      - name: Deploy to Cloudflare Pages
+        if: github.event.inputs.provider == 'cloudflare-pages'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy build/web --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }}

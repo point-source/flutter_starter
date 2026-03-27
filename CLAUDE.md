@@ -214,6 +214,12 @@ flutter run --dart-define-from-file=config/staging.json
 
 # Release build (production)
 flutter build apk --release --dart-define-from-file=config/production.json
+
+# Build web (development)
+flutter build web --release --dart-define-from-file=config/development.json
+
+# Build web (production)
+flutter build web --release --dart-define-from-file=config/production.json
 ```
 
 ## Error Handling Flow
@@ -288,4 +294,5 @@ BREAKING CHANGE: username field removed from UserEntity
 - **Architecture Decision Records** (template): `docs/adrs/`
 - **Project-specific ADRs** (app-level decisions): `docs/project-decisions/`
 - **Architecture rules and patterns**: `docs/architecture-rules/`
+- **Web deployment (Cloudflare Pages, etc.)**: `docs/WEB_DEPLOYMENT.md`
 - **Template update migration guides**: `docs/migrations/`
