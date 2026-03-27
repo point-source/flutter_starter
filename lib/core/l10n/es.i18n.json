@@ -1,0 +1,82 @@
+{
+  "core": {
+    "appName": "Flutter Starter",
+    "error": {
+      "unexpected": "Ocurrió un error inesperado",
+      "noConnection": "Sin conexión a internet",
+      "timeout": "La solicitud ha expirado",
+      "serverError": "Error del servidor. Inténtelo de nuevo más tarde."
+    },
+    "action": {
+      "retry": "Reintentar",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "ok": "Aceptar"
+    },
+    "nav": {
+      "dashboard": "Panel",
+      "profile": "Perfil",
+      "settings": "Ajustes"
+    }
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "name": "Nombre",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "welcomeBack": "Bienvenido de nuevo",
+    "signInSubtitle": "Inicia sesión en tu cuenta",
+    "createAccount": "Crear cuenta",
+    "signUpSubtitle": "Regístrate para comenzar",
+    "noAccountRegister": "¿No tienes cuenta? Regístrate",
+    "hasAccountLogin": "¿Ya tienes cuenta? Inicia sesión",
+    "error": {
+      "invalidCredentials": "Correo electrónico o contraseña inválidos",
+      "emailTaken": "El correo electrónico ya está en uso",
+      "sessionExpired": "Tu sesión ha expirado. Inicia sesión de nuevo.",
+      "serverError": "Error de autenticación. Inténtelo de nuevo más tarde."
+    },
+    "validation": {
+      "emailRequired": "Ingresa tu correo electrónico",
+      "passwordRequired": "Ingresa tu contraseña",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+      "nameRequired": "Ingresa tu nombre"
+    }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Bienvenido, $name"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar perfil",
+    "form": {
+      "name": "Nombre",
+      "bio": "Biografía",
+      "phone": "Teléfono",
+      "nameRequired": "El nombre es obligatorio"
+    },
+    "error": {
+      "loadFailed": "No se pudo cargar el perfil",
+      "updateFailed": "No se pudo actualizar el perfil"
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "language": "Idioma",
+    "localeSystem": "Sistema",
+    "localeEnglish": "English",
+    "localeSpanish": "Español"
+  }
+}

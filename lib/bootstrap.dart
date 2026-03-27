@@ -20,6 +20,7 @@ import 'package:flutter_starter/core/env/app_environment.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/logging/app_logger.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
+import 'package:flutter_starter/gen/strings.g.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -59,7 +60,7 @@ Future<void> bootstrap() async {
   // Build the app with provider overrides
   final app = ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(sharedPreferences)],
-    child: const App(),
+    child: TranslationProvider(child: const App()),
   );
 
   // Initialize Sentry and run

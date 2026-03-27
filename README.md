@@ -10,7 +10,7 @@ An enterprise-ready Flutter starter template with clean architecture, code gener
 ![Riverpod](https://img.shields.io/badge/Riverpod-3.x-00B4D8)
 ![AutoRoute](https://img.shields.io/badge/AutoRoute-11.x-6C63FF)
 ![Retrofit](https://img.shields.io/badge/Retrofit-4.x-009688)
-![License](https://img.shields.io/badge/License-TBD-lightgrey)
+![License](https://img.shields.io/badge/License-BSD--3--Clause-lightgrey)
 
 ---
 
@@ -97,7 +97,7 @@ lib/
     feature_flags/                   -- Feature flag providers
     l10n/                            -- i18n source strings (*.i18n.json)
     logging/                         -- Logger setup (Sentry integration)
-    network/                         -- Dio provider, interceptors
+    http/                            -- Dio provider, interceptors
     presentation/                    -- Shared widgets (e.g. connectivity banner)
     routing/                         -- AutoRoute router, guards
     storage/                         -- Secure storage, shared prefs, token storage

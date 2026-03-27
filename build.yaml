@@ -21,6 +21,7 @@ targets:
         generate_for:
           include:
             - lib/core/http/**
+            - lib/features/**/data/services/**
             - lib/features/**/services/**
 
       # dart_mappable code generation

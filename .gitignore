@@ -26,6 +26,9 @@ migrate_working_dir/
 # Environment config (generated from .example templates by scripts/setup.sh)
 config/*.json
 
+# Slang output (generated)
+lib/core/l10n/*.g.dart
+
 # Mason brick cache
 .mason/
 mason-lock.json
