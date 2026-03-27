@@ -1,0 +1,166 @@
+# Proposal 001: Ephemeral Preview Environments
+
+**Status:** Draft
+
+## Problem
+
+There is no way to spin up an isolated frontend + backend environment for
+reviewing a pull request or testing the `develop` branch. Reviewers must either
+run the app locally with mock data or trust CI alone. This limits QA/QC
+coverage -- especially for changes that touch backend integration, auth flows,
+or data-dependent UI.
+
+## Vision
+
+A PR (or push to `develop`) triggers an ephemeral environment:
+
+- **Supabase preview branch** -- isolated database, auth, storage, and edge
+  functions with seeded data
+- **Cloudflare Pages preview deployment** -- Flutter web build pointed at the
+  Supabase branch's API URL and anon key
+
+The environment is accessible via a unique URL posted as a PR comment. When the
+PR is merged or closed, both the Supabase branch and the Cloudflare preview are
+cleaned up automatically.
+
+## Research Findings
+
+### Cloudflare Pages Preview Deployments
+
+- The `wrangler pages deploy` command accepts a `--branch` flag. When the
+  branch name does not match the production branch, Cloudflare treats it as a
+  preview deployment with a unique URL (e.g., `<branch>.<project>.pages.dev`).
+- This works with **direct upload** -- no need to connect the Cloudflare GitHub
+  integration. Our existing `deploy-web.yml` workflow can be extended.
+- Preview URLs persist indefinitely (atomic per-commit hashes). Cost is
+  negligible -- Pages is generous on the free tier for static assets.
+- SPA routing requires a `_redirects` file if using path-based URL strategy.
+
+Reference: https://developers.cloudflare.com/pages/configuration/preview-deployments/
+
+### Supabase Branching
+
+- Creates an isolated Supabase instance per branch (database, auth, storage,
+  realtime, edge functions with secrets).
+- **Preview branches** auto-pause after inactivity and auto-delete when the
+  associated PR is merged or closed. This is the primary cost control mechanism.
+- **Persistent branches** are available for long-lived environments (e.g., a
+  permanent staging branch) that should not auto-pause.
+- **Branches start empty** -- no data is cloned from the main project.
+  Seeding must be configured explicitly via `seed.sql` or a seeding tool.
+- Supabase has a GitHub integration that can automate branch creation per PR.
+
+Reference: https://supabase.com/docs/guides/deployment/branching
+
+### Data Seeding
+
+Branches start with an empty database. Options for seeding:
+
+1. **`seed.sql`** -- Supabase runs this automatically when a branch is created
+   (if configured). Good for small, static seed data.
+2. **`@snaplet/seed`** -- generates realistic synthetic data from your schema.
+   Type-safe TypeScript API, deterministic output, handles foreign keys
+   automatically. Does _not_ clone production data -- purely synthetic.
+   Reference: https://github.com/supabase-community/seed
+3. **Sanitized production subset** -- copy production data with PII
+   stripped/anonymized. More realistic but adds complexity and privacy risk.
+
+Recommendation: start with `@snaplet/seed` for synthetic data. It is
+deterministic (reproducible), avoids PII concerns, and integrates into CI. A
+sanitized production subset can be explored later if synthetic data proves
+insufficient.
+
+## Approach
+
+A layered implementation, where each layer is independently useful:
+
+### Layer 1: Manual Web Deployment (Done)
+
+`.github/workflows/deploy-web.yml` -- manually triggered Cloudflare Pages
+deployment for staging/production. Merged in `b6cacad`.
+
+### Layer 2: Frontend Preview Deployments
+
+Extend `deploy-web.yml` to also trigger on `pull_request` events. The web app
+is built with the **staging** config and deployed to Cloudflare with
+`--branch=pr-<number>`. This gives reviewers a live preview URL for
+frontend-only changes, pointed at the shared staging backend.
+
+**What this enables:** visual review of UI changes without running locally.
+**Limitation:** all PRs share the same staging backend -- no data isolation.
+
+### Layer 3: Full Ephemeral Environments
+
+A new workflow (or extension of Layer 2) that orchestrates both services:
+
+1. **On PR open/synchronize:**
+   - Create or reuse a Supabase preview branch (via GitHub integration or API)
+   - Wait for the branch to be ready
+   - Extract the branch's `API_URL` and `ANON_KEY`
+   - Build the Flutter web app with those credentials injected into the config
+   - Deploy to Cloudflare Pages with `--branch=pr-<number>`
+   - Post the preview URL as a PR comment
+
+2. **On PR close/merge:**
+   - Supabase auto-deletes the preview branch (built-in behavior)
+   - Cloudflare preview URL persists but is inert (no cost)
+
+3. **Data seeding:**
+   - Configure `@snaplet/seed` with the project schema
+   - Run the seed script as a step after Supabase branch creation
+   - Or use Supabase's built-in `seed.sql` support
+
+### Orchestration Challenges
+
+The key complexity in Layer 3 is the **compile-time credential injection**.
+Flutter web builds bake environment values into the JS bundle via
+`--dart-define-from-file`. The workflow must:
+
+1. Wait for the Supabase branch to be fully provisioned
+2. Query its API URL and anon key
+3. Write a temporary config JSON with those values
+4. Build the Flutter web app against that config
+
+This creates a serial dependency: Supabase branch ready → extract creds →
+build → deploy. The workflow cannot parallelize the build and branch creation.
+
+## Cost Control
+
+- **Supabase preview branches** auto-pause after inactivity -- this is the
+  primary cost lever. Only active review generates compute cost.
+- **PR label gating** -- only create ephemeral environments for PRs with a
+  specific label (e.g., `preview-env`). This avoids spinning up environments
+  for trivial changes.
+- **Persistent staging branch** -- for the `develop` branch, use a Supabase
+  persistent branch instead of a preview branch, so it remains available for
+  ongoing QA without auto-pausing.
+- **Cloudflare Pages** -- free-tier generous for static assets. Preview
+  deployments have negligible cost.
+
+## Open Questions
+
+1. **Supabase branch creation method** -- use the GitHub integration (automatic
+   per PR) or the Supabase Management API (more control, explicit in workflow)?
+   The GitHub integration is simpler but less flexible.
+
+2. **Credential extraction** -- how to programmatically get the API URL and
+   anon key for a Supabase preview branch? Likely via the Management API.
+
+3. **Seed data scope** -- what data does the app need to be meaningfully
+   testable? Auth users, sample content, feature flags? This determines the
+   seed script complexity.
+
+4. **`develop` branch treatment** -- should `develop` get a persistent Supabase
+   branch (always-on staging) or a preview branch (auto-pauses)? Persistent is
+   better for QA but has ongoing cost.
+
+5. **PR comment bot** -- use `actions/github-script` to post the preview URL,
+   or a dedicated action? Should it update the same comment on subsequent pushes
+   or post new ones?
+
+6. **Edge functions** -- if the project uses Supabase edge functions, do they
+   need to be deployed to the preview branch as part of the workflow?
+
+7. **Multiple providers** -- the `deploy-web.yml` workflow supports a provider
+   choice. Should Layer 2/3 be provider-agnostic, or is Cloudflare the assumed
+   target for preview deployments?

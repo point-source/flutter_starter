@@ -295,4 +295,6 @@ BREAKING CHANGE: username field removed from UserEntity
 - **Project-specific ADRs** (app-level decisions): `docs/project-decisions/`
 - **Architecture rules and patterns**: `docs/architecture-rules/`
 - **Web deployment (Cloudflare Pages, etc.)**: `docs/WEB_DEPLOYMENT.md`
+- **Roadmap and future work**: `docs/ROADMAP.md`
+- **Design proposals**: `docs/proposals/`
 - **Template update migration guides**: `docs/migrations/`

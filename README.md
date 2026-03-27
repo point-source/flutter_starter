@@ -320,6 +320,11 @@ Generated files are committed to the repository. The CI pipeline includes a `cod
 - **Project Decisions** -- [docs/project-decisions/](docs/project-decisions/) for your app-specific ADRs
 - **Migration Guides** -- [docs/migrations/](docs/migrations/) for template update instructions
 
+### Planning
+
+- **Roadmap** -- [docs/ROADMAP.md](docs/ROADMAP.md) for planned improvements and future work
+- **Design Proposals** -- [docs/proposals/](docs/proposals/) for detailed designs of upcoming features
+
 ---
 
 ## License
