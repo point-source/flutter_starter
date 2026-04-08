@@ -73,17 +73,204 @@ need to serve from a subpath, pass `--base-href`:
 flutter build web --release --base-href=/my-app/ --dart-define-from-file=config/production.json
 ```
 
-## Running a Deployment
+## Running a Manual Deployment
 
 1. Go to your repository's **Actions** tab on GitHub
 2. Select the **Deploy Web** workflow in the sidebar
 3. Click **Run workflow**
 4. Choose your **hosting provider** and **target environment**
-5. Click **Run workflow** to start
+5. Optionally set **Git ref** to build from a specific branch, tag, or commit SHA
+   (leave empty to use the branch selected in the dropdown above)
+6. Optionally set **Cloudflare Pages branch name** to create a preview deployment
+   (leave empty for a production deployment)
+7. Click **Run workflow** to start
 
 The workflow provisions the environment config from templates, applies any
 secret overrides (e.g., `API_URL`), builds the Flutter web app, and deploys to
 your chosen provider.
+
+### Workflow Inputs
+
+| Input | Required | Default | Description |
+|---|---|---|---|
+| `provider` | Yes | -- | Hosting provider (`cloudflare-pages`) |
+| `environment` | Yes | -- | Config to build with (`staging` or `production`) |
+| `ref` | No | current branch | Git ref to checkout (branch, tag, SHA) |
+| `cloudflare_branch` | No | _(empty)_ | Cloudflare Pages branch name. Empty = production deploy. Any value = preview deploy at `<value>.<project>.pages.dev` |
+
+### Workflow Outputs
+
+| Output | Description |
+|---|---|
+| `deployment_url` | URL of the deployed site (from the Cloudflare wrangler action) |
+
+---
+
+## Automated Deployments
+
+The Deploy Web workflow supports
+[`workflow_call`](https://docs.github.com/en/actions/sharing-automations/reusing-workflows),
+meaning other workflows can call it as a reusable building block. This enables
+fully automated deployment pipelines without duplicating the build logic.
+
+The sections below provide complete, copy-paste workflow files for three common
+patterns. Create each file in `.github/workflows/` in your repository.
+
+### Prerequisites
+
+All automated workflows require the same Cloudflare secrets and variables
+described in the [Cloudflare Pages](#cloudflare-pages) section below. Make sure
+those are configured before enabling any of the workflows below.
+
+### Deploy on Push to Production
+
+Automatically deploys to Cloudflare Pages production when a commit lands on
+`main` (e.g., via a merged PR).
+
+Create `.github/workflows/deploy-web-production.yml`:
+
+```yaml
+name: Deploy Web (Production)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      provider: cloudflare-pages
+      environment: production
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+```
+
+`cloudflare_branch` is omitted (empty), so Cloudflare treats this as a
+production deployment.
+
+### Deploy on Push to Staging
+
+Automatically deploys to a Cloudflare Pages preview URL when a commit lands on
+`develop` or `staging`.
+
+Create `.github/workflows/deploy-web-staging.yml`:
+
+```yaml
+name: Deploy Web (Staging)
+
+on:
+  push:
+    branches: [develop, staging]
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      provider: cloudflare-pages
+      environment: staging
+      cloudflare_branch: staging
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+```
+
+`cloudflare_branch: staging` causes the deployment to appear at
+`staging.<project>.pages.dev` rather than the production URL.
+
+### PR Preview Deployments
+
+Automatically builds and deploys a preview for every pull request opened
+against `main` or `staging`. Posts the preview URL as a PR comment and updates
+it on each push. The preview is a Cloudflare Pages preview deployment at
+`pr-<number>.<project>.pages.dev`.
+
+Create `.github/workflows/deploy-web-preview.yml`:
+
+```yaml
+name: Deploy Web (PR Preview)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, staging]
+
+concurrency:
+  group: deploy-web-preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      provider: cloudflare-pages
+      environment: staging
+      ref: ${{ github.event.pull_request.head.sha }}
+      cloudflare_branch: pr-${{ github.event.pull_request.number }}
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  comment:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- deploy-web-preview -->'
+
+      - name: Post or update preview URL
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            <!-- deploy-web-preview -->
+            ### Web Preview
+
+            | | |
+            |---|---|
+            | **URL** | ${{ needs.deploy.outputs.deployment_url }} |
+            | **Commit** | ${{ github.event.pull_request.head.sha }} |
+            | **Environment** | staging |
+```
+
+**How it works:**
+
+- `ref` checks out the PR's head commit (not the merge commit)
+- `cloudflare_branch: pr-<number>` creates a unique preview URL per PR
+- The `comment` job reads `deployment_url` from the reusable workflow's output
+- `peter-evans/find-comment` + `create-or-update-comment` keep a single,
+  updated comment (no spam on force-pushes)
+- The `concurrency` group cancels in-progress builds when new commits are
+  pushed to the PR, so only the latest commit is deployed
+
+**Cloudflare preview cleanup:** Cloudflare Pages preview deployments persist
+but cost nothing (they are static assets on the free tier). No explicit
+teardown is required. If you want to actively delete previews on PR close, you
+can add a separate job triggered by `pull_request: [closed]` that calls the
+Cloudflare API.
+
+### Combining Workflows
+
+You can enable any combination of the above. They do not conflict:
+
+- **Production + Staging** -- merge to `main` deploys to production; merge to
+  `develop` deploys to staging
+- **Production + PR Preview** -- PRs get a preview URL; merging to `main`
+  deploys to production
+- **All three** -- full pipeline: PR preview → merge to `develop` for staging →
+  merge to `main` for production
+
+The reusable workflow's concurrency group (`deploy-web-<environment>`) prevents
+overlapping deploys to the same environment. The PR preview workflow uses its
+own concurrency group (`deploy-web-preview-pr-<number>`) so previews and
+production deploys never block each other.
 
 ---
 
@@ -165,17 +352,16 @@ Hosting):
 
 In `.github/workflows/deploy-web.yml`:
 
-**Add the provider to the choice list:**
+**Add the provider to both choice lists** (`workflow_dispatch` and
+`workflow_call`):
 
 ```yaml
-inputs:
-  provider:
-    description: 'Hosting provider'
-    required: true
-    type: choice
-    options:
-      - cloudflare-pages
-      - your-new-provider    # ← add here
+# In workflow_dispatch.inputs.provider.options:
+options:
+  - cloudflare-pages
+  - your-new-provider    # ← add here
+
+# In workflow_call.inputs.provider (string type -- document valid values)
 ```
 
 **Add a conditional deployment step** after the existing provider blocks:
@@ -183,10 +369,16 @@ inputs:
 ```yaml
 # ── Your New Provider ─────────────────────────────────────────────
 - name: Deploy to Your New Provider
-  if: github.event.inputs.provider == 'your-new-provider'
+  id: deploy-your-provider
+  if: inputs.provider == 'your-new-provider'
   # ... provider-specific action or CLI command
   # The built web app is in build/web/
 ```
+
+> **Note:** Use `inputs.provider` (not `github.event.inputs.provider`) so the
+> condition works for both manual and reusable workflow invocations. If your
+> provider's action exposes a deployment URL output, wire it through the job
+> outputs so callers can use it.
 
 ### 2. Document the Required Secrets
 

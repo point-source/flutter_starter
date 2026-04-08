@@ -17,18 +17,61 @@ on:
         options:
           - staging
           - production
+      ref:
+        description: 'Git ref to checkout (branch, tag, SHA). Leave empty for current branch.'
+        required: false
+        type: string
+        default: ''
+      cloudflare_branch:
+        description: 'Cloudflare Pages branch name (empty = production deploy)'
+        required: false
+        type: string
+        default: ''
+
+  workflow_call:
+    inputs:
+      provider:
+        description: 'Hosting provider'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment (staging or production)'
+        required: true
+        type: string
+      ref:
+        description: 'Git ref to checkout (branch, tag, SHA). Leave empty for current ref.'
+        required: false
+        type: string
+        default: ''
+      cloudflare_branch:
+        description: 'Cloudflare Pages branch name (empty = production deploy)'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        description: 'Cloudflare API token for Pages deployment'
+        required: true
+    outputs:
+      deployment_url:
+        description: 'URL of the deployed site'
+        value: ${{ jobs.web.outputs.deployment_url }}
 
 concurrency:
-  group: deploy-web-${{ github.event.inputs.environment }}
+  group: deploy-web-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:
   web:
-    name: Deploy Web (${{ github.event.inputs.provider }} / ${{ github.event.inputs.environment }})
+    name: Deploy Web (${{ inputs.provider }} / ${{ inputs.environment }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment-url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
 
       - uses: subosito/flutter-action@v2
         with:
@@ -42,20 +85,24 @@ jobs:
         if: vars.API_URL != ''
         run: |
           jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
-            config/${{ github.event.inputs.environment }}.json > tmp.$$.json \
-            && mv tmp.$$.json config/${{ github.event.inputs.environment }}.json
+            config/${{ inputs.environment }}.json > tmp.$$.json \
+            && mv tmp.$$.json config/${{ inputs.environment }}.json
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release --dart-define-from-file=config/${{ github.event.inputs.environment }}.json
+        run: flutter build web --release --dart-define-from-file=config/${{ inputs.environment }}.json
 
       # ── Cloudflare Pages ──────────────────────────────────────────────
       - name: Deploy to Cloudflare Pages
-        if: github.event.inputs.provider == 'cloudflare-pages'
+        id: deploy
+        if: inputs.provider == 'cloudflare-pages'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy build/web --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }}
+          command: >-
+            pages deploy build/web
+            --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }}
+            ${{ inputs.cloudflare_branch != '' && format('--branch={0}', inputs.cloudflare_branch) || '' }}

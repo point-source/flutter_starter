@@ -74,16 +74,26 @@ insufficient.
 
 A layered implementation, where each layer is independently useful:
 
-### Layer 1: Manual Web Deployment (Done)
+### Layer 1: Manual Web Deployment + Reusable Workflow (Done)
 
 `.github/workflows/deploy-web.yml` -- manually triggered Cloudflare Pages
-deployment for staging/production. Merged in `b6cacad`.
+deployment for staging/production. Merged in `b6cacad`. Extended to support
+`workflow_call` with `ref`, `cloudflare_branch`, and `deployment_url` output,
+making it a reusable building block for automated deployments.
 
-### Layer 2: Frontend Preview Deployments
+### Layer 2: Frontend Preview Deployments (Ready to implement)
 
-Extend `deploy-web.yml` to also trigger on `pull_request` events. The web app
-is built with the **staging** config and deployed to Cloudflare with
-`--branch=pr-<number>`. This gives reviewers a live preview URL for
+The reusable workflow interface is in place. Implementing Layer 2 requires
+creating caller workflows that invoke `deploy-web.yml` via `workflow_call`.
+See `docs/WEB_DEPLOYMENT.md` > [Automated Deployments](../WEB_DEPLOYMENT.md#automated-deployments)
+for copy-paste workflow files covering:
+
+- **Push to production** -- deploy on merge to `main`
+- **Push to staging** -- deploy on merge to `develop`/`staging`
+- **PR preview** -- deploy a preview URL per PR, post it as a comment
+
+The web app is built with the **staging** config and deployed to Cloudflare
+with `--branch=pr-<number>`. This gives reviewers a live preview URL for
 frontend-only changes, pointed at the shared staging backend.
 
 **What this enables:** visual review of UI changes without running locally.
