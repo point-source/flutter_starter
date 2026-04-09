@@ -19,7 +19,7 @@ on:
           - staging
           - production
       lane:
-        description: 'Fastlane lane (beta = internal testing, release = store)'
+        description: 'Fastlane lane (beta = internal testing, release = store; release requires environment=production)'
         required: true
         type: choice
         options:
@@ -37,7 +37,7 @@ on:
         required: true
         type: string
       lane:
-        description: 'Fastlane lane (beta = internal testing, release = store)'
+        description: 'Fastlane lane (beta = internal testing, release = store; release requires environment=production)'
         required: true
         type: string
     secrets:
@@ -83,7 +83,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    name: Validate inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject invalid lane × environment combinations
+        env:
+          LANE: ${{ inputs.lane }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          if [ "$LANE" = "release" ] && [ "$ENVIRONMENT" != "production" ]; then
+            echo "::error::lane=release only supports environment=production (release lanes always build the production config and upload to the store production track). For TestFlight / Play internal testing of the staging config, use lane=beta + environment=staging."
+            exit 1
+          fi
+
   ios:
+    needs: validate
     name: Deploy iOS (${{ inputs.lane }})
     if: inputs.platform == 'ios' || inputs.platform == 'both'
     runs-on: macos-latest
@@ -163,6 +178,7 @@ jobs:
             build_number:${{ github.run_number }}
 
   android:
+    needs: validate
     name: Deploy Android (${{ inputs.lane }})
     if: inputs.platform == 'android' || inputs.platform == 'both'
     runs-on: ubuntu-latest

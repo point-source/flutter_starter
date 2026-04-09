@@ -100,7 +100,7 @@ platform :android do
     end
   end
 
-  desc 'Build and upload to Play Store internal testing'
+  desc 'Build and upload to Play Store internal testing (beta lane — accepts environment:staging|production)'
   lane :beta do |options|
     environment = options[:environment] || 'staging'
     build_number = options[:build_number]
@@ -119,12 +119,18 @@ platform :android do
     )
   end
 
-  desc 'Build and upload to Play Store production'
+  desc 'Build and upload to Play Store production (release lane — production environment only)'
   lane :release do |options|
+    environment = options[:environment] || 'production'
+    unless environment == 'production'
+      UI.user_error!('release lane only supports environment:production ' \
+                     '(it always uploads to the Play Store production track). ' \
+                     'For pre-release distribution use the beta lane.')
+    end
     build_number = options[:build_number]
 
     Dir.chdir('..') do
-      sh(flutter_build_cmd('appbundle', 'production', build_number))
+      sh(flutter_build_cmd('appbundle', environment, build_number))
     end
 
     upload_to_play_store(

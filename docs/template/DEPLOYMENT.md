@@ -15,11 +15,84 @@ on top without forking the workflows themselves.
 
 **Contents**
 
+- [Terminology](#terminology)
 - [Overview](#overview)
 - [App Configuration Secrets (shared)](#app-configuration-secrets-shared)
 - [iOS and Android (mobile)](#ios-and-android-mobile)
 - [Web](#web)
 - [Adding a new web hosting provider](#adding-a-new-web-hosting-provider)
+
+---
+
+## Terminology
+
+Several terms in this guide look interchangeable but live on **three
+orthogonal dimensions** — environment, lane, and branch. Mixing them up is the
+most common source of "wait, did that just ship to production?" confusion.
+
+### Environments
+
+The **environment** is the config bundle baked into a Flutter build via
+`--dart-define-from-file=config/<env>.json`. It controls *which API URL,
+Sentry DSN, backend mode, and feature flags* the running app sees.
+
+| Value | File | Typical use |
+|---|---|---|
+| `development` | `config/development.json` | Local `flutter run`, CI smoke builds. Rarely deployed. |
+| `staging` | `config/staging.json` | Pre-release builds against the staging backend. |
+| `production` | `config/production.json` | Builds against the live production backend. |
+
+The canonical source is the `AppEnvironment` enum in
+`lib/core/env/app_environment.dart`. Matching CI secrets are
+`CONFIG_DEVELOPMENT` / `CONFIG_STAGING` / `CONFIG_PRODUCTION` — see
+[App Configuration Secrets](#app-configuration-secrets-shared).
+
+### Lanes
+
+The **lane** is the [Fastlane](https://fastlane.tools/) lane that runs the
+build, i.e. *which store track the binary gets uploaded to*. Lanes only exist
+for mobile — the web workflow has no lane concept.
+
+| Value | iOS destination | Android destination |
+|---|---|---|
+| `beta` | TestFlight | Google Play internal testing |
+| `release` | App Store production | Google Play production |
+
+Lane and environment are **independent**. The `beta` lane accepts
+`environment:staging` (the default) or `environment:production`, so you can
+ship either config to TestFlight / Play internal — useful for a final
+pre-store smoke test against the production backend. The `release` lane only
+accepts `environment:production`; both `deploy.yml` and the Fastfile reject
+any other combination.
+
+| Lane | Environment | Meaning |
+|---|---|---|
+| `beta` | `staging` | **Default beta build.** Staging-config build → TestFlight / Play internal for QA. |
+| `beta` | `production` | **Pre-store smoke test.** Production-config build → TestFlight / Play internal for final verification. |
+| `release` | `production` | **Public release.** Production-config build → App Store / Play production. |
+| `release` | `staging` | **Rejected.** Release lanes always upload to the production track; this combination would silently mislabel a staging build as a real release. |
+
+### Branches
+
+The **branch** is your git workflow convention — *which long-lived branch
+triggers which deploy*. The template **does not enforce** any branch model:
+both `deploy.yml` and `deploy-web.yml` are `workflow_dispatch` (manual) by
+default.
+
+The recommended convention this template's example reusable-workflow snippets
+assume is:
+
+| Branch | Deploys to |
+|---|---|
+| `develop` | `staging` |
+| `main` | `production` |
+| Pull requests against `main` | Cloudflare Pages preview at `pr-<number>.<project>.pages.dev` |
+
+To wire this up, copy the example workflows from
+[Calling `deploy.yml` from another workflow](#calling-deployyml-from-another-workflow)
+and [Calling `deploy-web.yml` from another workflow](#calling-deploy-webyml-from-another-workflow)
+into your derived project's `.github/workflows/`. They are already keyed to
+`develop` / `main` — adjust if your team uses different branch names.
 
 ---
 
@@ -259,7 +332,7 @@ bundle exec fastlane beta
 # Build and upload to TestFlight (production)
 bundle exec fastlane beta environment:production
 
-# Build and upload to App Store
+# Build and upload to App Store (always builds the production environment)
 bundle exec fastlane release
 ```
 
@@ -274,17 +347,15 @@ bundle exec fastlane beta
 # Build and upload to Play Store internal testing (production)
 bundle exec fastlane beta environment:production
 
-# Build and upload to Play Store production
+# Build and upload to Play Store production (always builds the production environment)
 bundle exec fastlane release
 ```
 
 #### Lane options
 
-All lanes accept these optional parameters:
-
 | Parameter | Description | Example |
 |---|---|---|
-| `environment` | Config environment (`staging` or `production`) | `environment:staging` |
+| `environment` | Config environment to build with. `beta` accepts `staging` (default) or `production`; `release` only accepts `production` (and errors out otherwise). See [Terminology → Lanes](#lanes) for the full matrix. | `environment:production` |
 | `build_number` | Override build number | `build_number:42` |
 
 ### Required GitHub secrets (mobile)
@@ -602,8 +673,11 @@ builds the Flutter web app, and deploys to your chosen provider.
 
 `deploy-web.yml` is a reusable workflow (`workflow_call`), so other workflows
 can call it as a building block. The sections below provide complete,
-copy-paste workflow files for three common patterns. Create each file in
-`.github/workflows/` in your repository.
+copy-paste workflow files implementing the **recommended branch convention**
+(see [Terminology → Branches](#branches)): `develop` deploys to staging,
+`main` deploys to production, and pull requests against `main` get a preview
+URL. Create each file in `.github/workflows/` in your repository, and adjust
+the branch names if your team uses a different model.
 
 #### Deploy on push to production
 
