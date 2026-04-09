@@ -30,8 +30,8 @@ TEMPLATE_PATTERNS=(
   '^CLAUDE\.md$'
   '^pubspec\.yaml$'
   '^analysis_options\.yaml$'
-  '^docs/adrs/'
-  '^docs/architecture-rules/'
+  '^docs/template/adrs/'
+  '^docs/template/architecture-rules/'
   '^lib/core/'
   '^lib/features/auth/'
 )
@@ -60,12 +60,12 @@ if [ "$HAS_TEMPLATE_CHANGE" = false ]; then
 fi
 
 # Check if a migration doc is already in the changeset.
-if echo "$ALL_CHANGED" | grep -qE '^docs/migrations/[0-9]'; then
+if echo "$ALL_CHANGED" | grep -qE '^docs/template/migrations/[0-9]'; then
   exit 0
 fi
 
 # Also check if one was already created but is untracked.
-UNTRACKED_MIGRATIONS=$(git ls-files --others --exclude-standard -- 'docs/migrations/[0-9]*' 2>/dev/null || true)
+UNTRACKED_MIGRATIONS=$(git ls-files --others --exclude-standard -- 'docs/template/migrations/[0-9]*' 2>/dev/null || true)
 if [ -n "$UNTRACKED_MIGRATIONS" ]; then
   exit 0
 fi
@@ -74,6 +74,6 @@ fi
 cat <<'EOF'
 {
   "decision": "block",
-  "reason": "Template-significant files were modified without a migration doc. Before finishing, create a migration doc at docs/migrations/NNN-short-description.md following the template in docs/migrations/_TEMPLATE.md. See docs/migrations/README.md for details on what to include."
+  "reason": "Template-significant files were modified without a migration doc. Before finishing, create a migration doc at docs/template/migrations/NNN-short-description.md following the template in docs/template/migrations/_TEMPLATE.md. See docs/template/migrations/README.md for details on what to include."
 }
 EOF

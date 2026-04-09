@@ -1,5 +1,5 @@
 <!-- TEMPLATE README — Replace this file with your project's README.
-     See docs/TEMPLATE_SYNC.md for template sync guidance. -->
+     See docs/template/TEMPLATE_SYNC.md for template sync guidance. -->
 
 # Flutter Starter
 
@@ -27,7 +27,7 @@ feature/
 
 Shared infrastructure lives in `lib/core/`. State management uses Riverpod with code-generated providers. Navigation uses AutoRoute with typed route guards. Networking uses Dio + Retrofit for type-safe API clients.
 
-For a full breakdown, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (if available) and the ADRs in `docs/adrs/`.
+For a full breakdown, see [docs/template/ARCHITECTURE.md](docs/template/ARCHITECTURE.md) and the ADRs in `docs/template/adrs/`.
 
 ---
 
@@ -80,7 +80,7 @@ dart run slang
 flutter run --dart-define-from-file=config/development.json
 ```
 
-**📖 For keeping your project in sync with template updates, see [docs/TEMPLATE_SYNC.md](docs/TEMPLATE_SYNC.md)**
+**📖 For keeping your project in sync with template updates, see [docs/template/TEMPLATE_SYNC.md](docs/template/TEMPLATE_SYNC.md)**
 
 ---
 
@@ -137,8 +137,13 @@ scripts/
 test/                                -- Unit and widget tests
 bricks/                              -- Mason bricks (feature, repository, view_model)
 docs/
-  adrs/                              -- Architecture Decision Records
-  architecture-rules/                -- Enforced architecture constraints
+  template/                          -- Template-maintained documentation
+    adrs/                            -- Architecture Decision Records
+    architecture-rules/              -- Enforced architecture constraints
+    migrations/                      -- Template update guides
+    proposals/                       -- Template design proposals
+  project/                           -- Your project's documentation
+    decisions/                       -- Project-specific ADRs
 ```
 
 ---
@@ -309,21 +314,25 @@ Generated files are committed to the repository. The CI pipeline includes a `cod
 
 ## Documentation
 
-- **Architecture Overview** -- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- **Architecture Decision Records** -- [docs/adrs/](docs/adrs/)
-- **Architecture Rules** -- [docs/architecture-rules/](docs/architecture-rules/)
-- **Template Synchronization** -- [docs/TEMPLATE_SYNC.md](docs/TEMPLATE_SYNC.md)
+All template-maintained documentation lives in `docs/template/`. Project-specific
+documentation belongs in `docs/project/`.
+
+- **Architecture Overview** -- [docs/template/ARCHITECTURE.md](docs/template/ARCHITECTURE.md)
+- **Architecture Decision Records** -- [docs/template/adrs/](docs/template/adrs/)
+- **Architecture Rules** -- [docs/template/architecture-rules/](docs/template/architecture-rules/)
+- **Template Synchronization** -- [docs/template/TEMPLATE_SYNC.md](docs/template/TEMPLATE_SYNC.md)
 - **Mason Bricks** -- [bricks/](bricks/) (feature, repository, view_model scaffolding)
 
 ### For Derived Projects
 
-- **Project Decisions** -- [docs/project-decisions/](docs/project-decisions/) for your app-specific ADRs
-- **Migration Guides** -- [docs/migrations/](docs/migrations/) for template update instructions
+- **Project Docs** -- [docs/project/](docs/project/) for your app-specific decisions and planning
+- **Project Decisions** -- [docs/project/decisions/](docs/project/decisions/) for your app-specific ADRs
+- **Migration Guides** -- [docs/template/migrations/](docs/template/migrations/) for template update instructions
 
-### Planning
+### Template Planning
 
-- **Roadmap** -- [docs/ROADMAP.md](docs/ROADMAP.md) for planned improvements and future work
-- **Design Proposals** -- [docs/proposals/](docs/proposals/) for detailed designs of upcoming features
+- **Template Roadmap** -- [docs/template/ROADMAP.md](docs/template/ROADMAP.md) for planned template improvements
+- **Template Design Proposals** -- [docs/template/proposals/](docs/template/proposals/) for detailed designs of upcoming template features
 
 ---
 

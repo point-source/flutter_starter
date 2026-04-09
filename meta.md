@@ -224,31 +224,34 @@ config/
 └── production.json
 
 docs/
-├── adrs/                              # Architecture Decision Records
-│   ├── 001-riverpod-for-state-and-di.md
-│   ├── 002-auto-route-for-navigation.md
-│   ├── 003-dio-retrofit-for-networking.md
-│   ├── 004-dart-mappable-for-models.md
-│   ├── 005-sealed-result-for-errors.md
-│   ├── 006-slang-for-i18n.md
-│   ├── 007-feature-first-architecture.md
-│   ├── 008-mvvm-with-clean-architecture.md
-│   ├── 009-environment-configuration.md
-│   └── 010-logging-and-monitoring.md
-├── architecture-rules/                # AI-ready rules
-│   ├── 01-project-structure.md
-│   ├── 02-layer-responsibilities.md
-│   ├── 03-riverpod-patterns.md
-│   ├── 04-navigation-rules.md
-│   ├── 05-error-handling.md
-│   ├── 06-data-modeling.md
-│   ├── 07-testing-standards.md
-│   ├── 08-api-integration.md
-│   ├── 09-theming.md
-│   ├── 10-i18n.md
-│   ├── 11-security.md
-│   └── 12-documentation.md
-└── ARCHITECTURE.md                    # High-level overview
+├── template/                          # Template-maintained documentation
+│   ├── adrs/                          # Architecture Decision Records
+│   │   ├── 001-riverpod-for-state-and-di.md
+│   │   ├── 002-auto-route-for-navigation.md
+│   │   ├── 003-dio-retrofit-for-networking.md
+│   │   ├── 004-dart-mappable-for-models.md
+│   │   ├── 005-sealed-result-for-errors.md
+│   │   ├── 006-slang-for-i18n.md
+│   │   ├── 007-feature-first-architecture.md
+│   │   ├── 008-mvvm-with-clean-architecture.md
+│   │   ├── 009-environment-configuration.md
+│   │   └── 010-logging-and-monitoring.md
+│   ├── architecture-rules/            # AI-ready rules
+│   │   ├── 01-project-structure.md
+│   │   ├── 02-layer-responsibilities.md
+│   │   ├── 03-riverpod-patterns.md
+│   │   ├── 04-navigation-rules.md
+│   │   ├── 05-error-handling.md
+│   │   ├── 06-data-modeling.md
+│   │   ├── 07-testing-standards.md
+│   │   ├── 08-api-integration.md
+│   │   ├── 09-theming.md
+│   │   ├── 10-i18n.md
+│   │   ├── 11-security.md
+│   │   └── 12-documentation.md
+│   └── ARCHITECTURE.md                # High-level overview
+└── project/                           # Project-specific documentation
+    └── decisions/                     # Project ADRs (numbered 100+)
 
 bricks/
 ├── feature/                           # Mason brick: full feature scaffold
@@ -550,7 +553,7 @@ This is the **canonical example** that all other features follow.
 #### 5.1 CLAUDE.md (AI agent context file)
 Root-level file that AI coding agents (Claude Code, Cursor, Copilot, etc.) read automatically. Contains:
 - Project overview and architecture summary
-- Pointers to `docs/architecture-rules/` for detailed patterns
+- Pointers to `docs/template/architecture-rules/` for detailed patterns
 - Coding conventions: naming, file organization, import ordering
 - Documentation standards (see 5.5 below)
 - Common commands: build, test, code gen, lint
@@ -589,7 +592,7 @@ Each rule file describes the pattern, provides examples, and lists dos/don'ts. D
 High-level overview with diagrams, layer descriptions, data flow, and links to ADRs.
 
 #### 5.5 In-code documentation standards
-Documented in `docs/architecture-rules/12-documentation.md` and enforced by convention:
+Documented in `docs/template/architecture-rules/12-documentation.md` and enforced by convention:
 
 **Docstrings (required on all public APIs):**
 - Every public class, method, property, and top-level function gets a `///` doc comment

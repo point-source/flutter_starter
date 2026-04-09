@@ -62,8 +62,11 @@ config/                        # Environment config JSON files
   production.json
 
 docs/
-  adrs/                        # Architecture Decision Records
-  architecture-rules/          # This directory
+  template/                    # Template-maintained documentation
+    adrs/                      # Architecture Decision Records
+    architecture-rules/        # This directory
+  project/                     # Project-specific documentation
+    decisions/                 # Project ADRs (numbered 100+)
 ```
 
 ## Rules

@@ -40,7 +40,7 @@ which violates the project's `no_runtimetype_tostring` lint rule.
 - Replace `$runtimeType` in `toString()` with a switch expression or
   hardcoded type name.
 - Add explicit equality tests in `test/core/error/result_test.dart`.
-- Document the equality contract in `docs/architecture-rules/05-error-handling.md`.
+- Document the equality contract in `docs/template/architecture-rules/05-error-handling.md`.
 
 ---
 
@@ -53,7 +53,7 @@ which violates the project's `no_runtimetype_tostring` lint rule.
 - `lib/features/auth/ui/pages/login_page.dart` (8+ instances)
 - `lib/core/l10n/en.i18n.json` (missing keys)
 
-The architecture rules (`docs/architecture-rules/10-i18n.md`) state: "Provide
+The architecture rules (`docs/template/architecture-rules/10-i18n.md`) state: "Provide
 translations for all user-facing strings -- no hardcoded strings in widgets."
 Multiple UI files violate this:
 

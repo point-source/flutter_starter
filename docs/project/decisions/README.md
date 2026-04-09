@@ -2,7 +2,10 @@
 
 This directory is for **your project's** Architecture Decision Records (ADRs) -- decisions about the app you're building on top of `flutter_starter`, not decisions about the template itself.
 
-Template-level ADRs (tech stack, architecture patterns, infrastructure choices) live in [`docs/adrs/`](../adrs/) and are maintained by the template.
+Template-level ADRs (tech stack, architecture patterns, infrastructure choices) live in [`docs/template/adrs/`](../../template/adrs/) and are maintained by the template.
+
+For other project-specific documentation (roadmaps, planning, notes), see the
+parent [`docs/project/`](../) directory.
 
 ## When to Write a Project ADR
 

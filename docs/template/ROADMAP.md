@@ -1,12 +1,16 @@
 # Roadmap
 
+> **Template document.** This roadmap describes planned improvements to the
+> `flutter_starter` template itself, not your derived project. For your
+> project's planning, use `docs/project/`.
+
 Future work items and planned improvements for the Flutter Starter template.
 Items with significant complexity have detailed design proposals in
-[`docs/proposals/`](proposals/).
+[`docs/template/proposals/`](proposals/).
 
 To add an item, place it under the appropriate category with a short
 description. If it needs deeper design work, create a proposal in
-`docs/proposals/` and link it here.
+`docs/template/proposals/` and link it here.
 
 ---
 

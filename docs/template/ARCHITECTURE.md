@@ -557,13 +557,13 @@ Rationale for major architectural choices is documented in ADRs:
 
 | Directory | Purpose |
 |---|---|
-| [`project-decisions/`](project-decisions/) | Project-specific ADRs (app-level decisions, not template) |
+| [`project/decisions/`](../project/decisions/) | Project-specific ADRs (app-level decisions, not template) |
 | [`migrations/`](migrations/) | Template update migration guides for downstream projects |
 | [`TEMPLATE_SYNC.md`](TEMPLATE_SYNC.md) | How to keep derived projects in sync with template updates |
 
 ## Architecture Rules
 
-Detailed coding patterns and rules are documented in `docs/architecture-rules/`:
+Detailed coding patterns and rules are documented in `docs/template/architecture-rules/`:
 
 | Rule | Topic |
 |---|---|

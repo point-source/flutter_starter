@@ -58,7 +58,7 @@ git diff HEAD..template/main
 
 ### 2. Review the Migration Guide
 
-Check `docs/migrations/` in the template repo for migration files covering the versions you're jumping between. Each migration file describes:
+Check `docs/template/migrations/` in the template repo for migration files covering the versions you're jumping between. Each migration file describes:
 - Breaking changes and required code modifications
 - New and modified files
 - Step-by-step migration instructions
@@ -126,12 +126,14 @@ lib/core/                          # Shared infrastructure
 
 lib/bootstrap.dart                 # App initialization (merge carefully)
 
-docs/                              # Architecture documentation
+docs/template/                     # Template documentation
   ├── ARCHITECTURE.md
   ├── TEMPLATE_SYNC.md
+  ├── ROADMAP.md
   ├── adrs/
   ├── architecture-rules/
-  └── migrations/
+  ├── migrations/
+  └── proposals/
 
 analysis_options.yaml              # Linting rules
 CLAUDE.md                          # AI agent context (merge tech stack updates)
@@ -156,7 +158,7 @@ config/                            # Your environment configs
 pubspec.yaml                       # Your dependencies (merge carefully)
 pubspec.lock                       # Generated from your dependencies
 
-docs/project-decisions/            # Your app-specific ADRs
+docs/project/                      # Your project docs, decisions, and planning
 
 README.md                          # Your project README (replace template's)
 
@@ -176,7 +178,7 @@ When syncing template updates, follow this checklist:
 
 - [ ] **Backup**: Create a branch: `git checkout -b template-update-$(date +%Y%m%d)`
 - [ ] **Fetch**: `git fetch template`
-- [ ] **Review**: Read `docs/migrations/` guides covering your version range
+- [ ] **Review**: Read `docs/template/migrations/` guides covering your version range
 - [ ] **Merge**: `git merge template/main` (or cherry-pick specific commits)
 - [ ] **Resolve**: Fix merge conflicts, preferring template for core/, your code for features/
 - [ ] **Dependencies**: `flutter pub get`
@@ -191,7 +193,7 @@ When syncing template updates, follow this checklist:
 1. **Sync regularly**: Pull template updates monthly or quarterly, not annually
 2. **Don't modify template-owned files**: Extend instead (e.g., add interceptors, don't rewrite the Dio provider)
 3. **Follow template patterns**: When adding features, follow `lib/features/auth/` structure
-4. **Use `docs/project-decisions/`** for app-specific ADRs instead of adding to `docs/adrs/` (which is template-owned)
+4. **Use `docs/project/decisions/`** for app-specific ADRs instead of adding to `docs/template/adrs/` (which is template-owned)
 5. **Document deviations**: If you must deviate from the template, record a project ADR explaining why
 6. **Contribute back**: If you fix bugs or improve core infrastructure, consider PRing back to the template
 

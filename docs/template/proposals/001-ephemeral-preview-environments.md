@@ -85,7 +85,7 @@ making it a reusable building block for automated deployments.
 
 The reusable workflow interface is in place. Implementing Layer 2 requires
 creating caller workflows that invoke `deploy-web.yml` via `workflow_call`.
-See `docs/WEB_DEPLOYMENT.md` > [Automated Deployments](../WEB_DEPLOYMENT.md#automated-deployments)
+See `docs/template/WEB_DEPLOYMENT.md` > [Automated Deployments](../WEB_DEPLOYMENT.md#automated-deployments)
 for copy-paste workflow files covering:
 
 - **Push to production** -- deploy on merge to `main`

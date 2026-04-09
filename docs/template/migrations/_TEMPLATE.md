@@ -19,8 +19,8 @@ New files introduced in this release. These can generally be accepted as-is.
 ```
 lib/core/tasks/task_channel.dart
 lib/core/tasks/task_progress.dart
-docs/architecture-rules/13-background-tasks.md
-docs/adrs/011-mock-first-features.md
+docs/template/architecture-rules/13-background-tasks.md
+docs/template/adrs/011-mock-first-features.md
 ```
 
 ## Files Modified

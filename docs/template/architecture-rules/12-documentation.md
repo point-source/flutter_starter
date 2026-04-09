@@ -113,7 +113,7 @@ Use the `library;` directive to attach the file-level doc comment to the library
 
 ### Template ADRs
 
-Location: `docs/adrs/`
+Location: `docs/template/adrs/`
 
 Template ADRs record decisions about the template itself: tech stack choices, architecture patterns, and infrastructure conventions (e.g., "Use Riverpod for state management", "Sealed Result type for error handling").
 
@@ -130,15 +130,15 @@ Update ADRs when:
 
 ### Project Decisions
 
-Location: `docs/project-decisions/`
+Location: `docs/project/decisions/`
 
 Project decisions record ADRs specific to the app being built on top of the template: backend choice, business domain modeling, deployment strategy, third-party service integrations.
 
-Same format as template ADRs. Numbering starts at 100 for visual separation. See the [project-decisions README](../project-decisions/README.md) for details.
+Same format as template ADRs. Numbering starts at 100 for visual separation. See the [project decisions README](../../project/decisions/README.md) for details.
 
 ## Migrations
 
-Location: `docs/migrations/`
+Location: `docs/template/migrations/`
 
 Migration files are written by template maintainers at each tagged release. They provide structured guidance for downstream projects merging template updates: what changed, what might break, and step-by-step migration instructions.
 
@@ -146,7 +146,7 @@ See the [migrations README](../migrations/README.md) for the file format and [`_
 
 ## Architecture Rules
 
-Location: `docs/architecture-rules/`
+Location: `docs/template/architecture-rules/`
 
 Format:
 1. **Overview**: One-paragraph summary of the rule.
@@ -161,7 +161,7 @@ Update architecture rules when:
 
 The root-level `CLAUDE.md` file provides AI coding agents with:
 - Project overview and architecture summary.
-- Pointers to `docs/architecture-rules/` for detailed patterns.
+- Pointers to `docs/template/architecture-rules/` for detailed patterns.
 - Coding conventions (naming, imports, file organization).
 - Common commands (build, test, code gen, lint).
 - Reference to the auth feature as the canonical implementation.

@@ -96,7 +96,7 @@ platform :android do
     if all_ok
       UI.success("\nAll Android preflight checks passed!")
     else
-      UI.user_error!("\nSome Android preflight checks failed. See docs/FASTLANE.md for setup instructions.")
+      UI.user_error!("\nSome Android preflight checks failed. See docs/template/FASTLANE.md for setup instructions.")
     end
   end
 

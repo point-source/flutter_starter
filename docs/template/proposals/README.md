@@ -1,5 +1,9 @@
 # Design Proposals
 
+> **Template proposals.** This directory contains design proposals for the
+> `flutter_starter` template, not your derived project. For your project's
+> proposals, use `docs/project/`.
+
 This directory contains design proposals for significant future work items.
 Proposals capture the problem, research findings, trade-offs, and a rough
 implementation plan before the work begins.

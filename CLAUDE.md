@@ -132,7 +132,7 @@ from `data/providers/` directly when no transformation is needed.
 - Work functions receive `CancellationToken` + `void Function(TaskProgress)` callback
 - Progress types: `indeterminate`, `determinate(fraction)`, `phased(label, [fraction])`
 - Categories with `maxConcurrent` throttle parallel tasks; excess queue as `pending`
-- See `docs/architecture-rules/13-background-tasks.md` for full patterns
+- See `docs/template/architecture-rules/13-background-tasks.md` for full patterns
 
 ### Logging
 - All operational logging goes through `IAppLogger` via `loggerProvider` — never `print()`
@@ -143,7 +143,7 @@ from `data/providers/` directly when no transformation is needed.
 - Notifiers: log `warning` when mapping a failure to `AsyncError` or `FailureException`
 - Auth: log `info` + call `setUser()` on login/register success; `setUser(null, null)` on logout
 - Access via `ref.read(loggerProvider)` in providers; constructor injection in Dio repositories
-- See `docs/architecture-rules/14-logging.md` for full patterns
+- See `docs/template/architecture-rules/14-logging.md` for full patterns
 
 ### UI Structure
 - **Pages are layout orchestrators** -- they assemble and arrange widget components,
@@ -290,11 +290,15 @@ BREAKING CHANGE: username field removed from UserEntity
 
 ## Detailed Documentation
 
-- **Architecture overview**: `docs/ARCHITECTURE.md`
-- **Architecture Decision Records** (template): `docs/adrs/`
-- **Project-specific ADRs** (app-level decisions): `docs/project-decisions/`
-- **Architecture rules and patterns**: `docs/architecture-rules/`
-- **Web deployment (Cloudflare Pages, etc.)**: `docs/WEB_DEPLOYMENT.md`
-- **Roadmap and future work**: `docs/ROADMAP.md`
-- **Design proposals**: `docs/proposals/`
-- **Template update migration guides**: `docs/migrations/`
+All template-maintained documentation lives under `docs/template/`.
+Project-specific documentation belongs in `docs/project/`.
+
+- **Architecture overview**: `docs/template/ARCHITECTURE.md`
+- **Architecture Decision Records** (template): `docs/template/adrs/`
+- **Architecture rules and patterns**: `docs/template/architecture-rules/`
+- **Web deployment (Cloudflare Pages, etc.)**: `docs/template/WEB_DEPLOYMENT.md`
+- **Template roadmap and future work**: `docs/template/ROADMAP.md`
+- **Template design proposals**: `docs/template/proposals/`
+- **Template update migration guides**: `docs/template/migrations/`
+- **Project-specific ADRs** (app-level decisions): `docs/project/decisions/`
+- **Project documentation guide**: `docs/project/README.md`
