@@ -52,6 +52,16 @@ on:
       CLOUDFLARE_API_TOKEN:
         description: 'Cloudflare API token for Pages deployment'
         required: true
+      # App configuration (whole-file JSON injection — see docs/template/DEPLOYMENT.md)
+      CONFIG_DEVELOPMENT:
+        description: 'Full JSON body of config/development.json'
+        required: false
+      CONFIG_STAGING:
+        description: 'Full JSON body of config/staging.json'
+        required: false
+      CONFIG_PRODUCTION:
+        description: 'Full JSON body of config/production.json'
+        required: false
     outputs:
       deployment_url:
         description: 'URL of the deployed site'
@@ -81,12 +91,25 @@ jobs:
       - name: Provision config
         run: ./scripts/setup.sh
 
-      - name: Override config from secrets
-        if: vars.API_URL != ''
+      - name: Apply config from secret
+        env:
+          CONFIG_DEVELOPMENT: ${{ secrets.CONFIG_DEVELOPMENT }}
+          CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
+          CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
+          ENV_NAME: ${{ inputs.environment }}
         run: |
-          jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
-            config/${{ inputs.environment }}.json > tmp.$$.json \
-            && mv tmp.$$.json config/${{ inputs.environment }}.json
+          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+          config_json="${!var:-}"
+          if [ -z "$config_json" ]; then
+            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+            exit 0
+          fi
+          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
+            echo "::error::$var secret is not valid JSON"
+            exit 1
+          fi
+          printf '%s' "$config_json" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from $var secret"
 
       - name: Install dependencies
         run: flutter pub get

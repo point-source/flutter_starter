@@ -25,8 +25,8 @@ on merge.
 **Proposal:** [001-ephemeral-preview-environments](proposals/001-ephemeral-preview-environments.md)
 **Status:** Draft -- Layer 1 (manual web deploy + reusable workflow) is
 complete. Layer 2 (automated frontend previews) is ready to implement -- see
-[Automated Deployments](WEB_DEPLOYMENT.md#automated-deployments) for
-copy-paste caller workflows.
+[Calling deploy-web.yml from another workflow](DEPLOYMENT.md#calling-deploy-webyml-from-another-workflow)
+for copy-paste caller workflows.
 
 ---
 

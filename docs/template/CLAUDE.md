@@ -297,7 +297,7 @@ Project-specific documentation belongs in `docs/project/`.
 - **Architecture overview**: `docs/template/ARCHITECTURE.md`
 - **Architecture Decision Records** (template): `docs/template/adrs/`
 - **Architecture rules and patterns**: `docs/template/architecture-rules/`
-- **Web deployment (Cloudflare Pages, etc.)**: `docs/template/WEB_DEPLOYMENT.md`
+- **Deployment (iOS, Android, Web)**: `docs/template/DEPLOYMENT.md`
 - **Template roadmap and future work**: `docs/template/ROADMAP.md`
 - **Template design proposals**: `docs/template/proposals/`
 - **Template update migration guides**: `docs/template/migrations/`

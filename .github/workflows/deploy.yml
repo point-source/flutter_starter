@@ -26,14 +26,66 @@ on:
           - beta
           - release
 
+  workflow_call:
+    inputs:
+      platform:
+        description: 'Platform to deploy (ios, android, or both)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment (staging or production)'
+        required: true
+        type: string
+      lane:
+        description: 'Fastlane lane (beta = internal testing, release = store)'
+        required: true
+        type: string
+    secrets:
+      # App configuration (whole-file JSON injection — see docs/template/DEPLOYMENT.md)
+      CONFIG_STAGING:
+        description: 'Full JSON body of config/staging.json'
+        required: false
+      CONFIG_PRODUCTION:
+        description: 'Full JSON body of config/production.json'
+        required: false
+      # iOS code signing and store credentials
+      MATCH_PASSWORD:
+        description: 'Encryption password for the match certificates repo'
+        required: false
+      MATCH_GIT_PRIVATE_KEY:
+        description: 'SSH private key with read access to the match certificates repo'
+        required: false
+      MATCH_GIT_URL:
+        description: 'Git URL of the match certificates repo'
+        required: false
+      APP_STORE_CONNECT_API_KEY_ID:
+        description: 'App Store Connect API key ID'
+        required: false
+      APP_STORE_CONNECT_API_ISSUER_ID:
+        description: 'App Store Connect API issuer ID'
+        required: false
+      APP_STORE_CONNECT_API_KEY:
+        description: 'App Store Connect API private key (.p8 contents)'
+        required: false
+      # Android signing and store credentials
+      ANDROID_KEYSTORE:
+        description: 'Base64-encoded Android upload keystore'
+        required: false
+      ANDROID_KEY_PROPERTIES:
+        description: 'Contents of android/key.properties'
+        required: false
+      GOOGLE_PLAY_JSON_KEY:
+        description: 'Google Play service account JSON key contents'
+        required: false
+
 concurrency:
-  group: deploy-${{ github.event.inputs.platform }}-${{ github.event.inputs.environment }}
+  group: deploy-${{ inputs.platform }}-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:
   ios:
-    name: Deploy iOS (${{ github.event.inputs.lane }})
-    if: github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both'
+    name: Deploy iOS (${{ inputs.lane }})
+    if: inputs.platform == 'ios' || inputs.platform == 'both'
     runs-on: macos-latest
     timeout-minutes: 60
     defaults:
@@ -57,13 +109,25 @@ jobs:
         working-directory: .
         run: ./scripts/setup.sh
 
-      - name: Override config from secrets
-        if: vars.API_URL != ''
+      - name: Apply config from secret
         working-directory: .
+        env:
+          CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
+          CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
+          ENV_NAME: ${{ inputs.environment }}
         run: |
-          jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
-            config/${{ github.event.inputs.environment }}.json > tmp.$$.json \
-            && mv tmp.$$.json config/${{ github.event.inputs.environment }}.json
+          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+          config_json="${!var:-}"
+          if [ -z "$config_json" ]; then
+            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+            exit 0
+          fi
+          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
+            echo "::error::$var secret is not valid JSON"
+            exit 1
+          fi
+          printf '%s' "$config_json" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from $var secret"
 
       - name: Install Flutter dependencies
         working-directory: .
@@ -76,9 +140,9 @@ jobs:
           TEAM_ID: ${{ vars.TEAM_ID }}
           ITC_TEAM_ID: ${{ vars.ITC_TEAM_ID }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-        run: bundle exec fastlane preflight environment:${{ github.event.inputs.environment }}
+        run: bundle exec fastlane preflight environment:${{ inputs.environment }}
 
-      - name: Deploy to ${{ github.event.inputs.environment }}
+      - name: Deploy to ${{ inputs.environment }}
         env:
           # match
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
@@ -94,13 +158,13 @@ jobs:
           TEAM_ID: ${{ vars.TEAM_ID }}
           ITC_TEAM_ID: ${{ vars.ITC_TEAM_ID }}
         run: |
-          bundle exec fastlane ${{ github.event.inputs.lane }} \
-            environment:${{ github.event.inputs.environment }} \
+          bundle exec fastlane ${{ inputs.lane }} \
+            environment:${{ inputs.environment }} \
             build_number:${{ github.run_number }}
 
   android:
-    name: Deploy Android (${{ github.event.inputs.lane }})
-    if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both'
+    name: Deploy Android (${{ inputs.lane }})
+    if: inputs.platform == 'android' || inputs.platform == 'both'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -129,13 +193,25 @@ jobs:
         working-directory: .
         run: ./scripts/setup.sh
 
-      - name: Override config from secrets
-        if: vars.API_URL != ''
+      - name: Apply config from secret
         working-directory: .
+        env:
+          CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
+          CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
+          ENV_NAME: ${{ inputs.environment }}
         run: |
-          jq --arg url "${{ vars.API_URL }}" '.API_URL = $url' \
-            config/${{ github.event.inputs.environment }}.json > tmp.$$.json \
-            && mv tmp.$$.json config/${{ github.event.inputs.environment }}.json
+          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+          config_json="${!var:-}"
+          if [ -z "$config_json" ]; then
+            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+            exit 0
+          fi
+          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
+            echo "::error::$var secret is not valid JSON"
+            exit 1
+          fi
+          printf '%s' "$config_json" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from $var secret"
 
       - name: Decode Android keystore
         run: |
@@ -162,13 +238,13 @@ jobs:
         env:
           PACKAGE_NAME: ${{ vars.PACKAGE_NAME }}
           GOOGLE_PLAY_JSON_KEY: ./fastlane/google-play-key.json
-        run: bundle exec fastlane preflight environment:${{ github.event.inputs.environment }}
+        run: bundle exec fastlane preflight environment:${{ inputs.environment }}
 
-      - name: Deploy to ${{ github.event.inputs.environment }}
+      - name: Deploy to ${{ inputs.environment }}
         env:
           PACKAGE_NAME: ${{ vars.PACKAGE_NAME }}
           GOOGLE_PLAY_JSON_KEY: ./fastlane/google-play-key.json
         run: |
-          bundle exec fastlane ${{ github.event.inputs.lane }} \
-            environment:${{ github.event.inputs.environment }} \
+          bundle exec fastlane ${{ inputs.lane }} \
+            environment:${{ inputs.environment }} \
             build_number:${{ github.run_number }}

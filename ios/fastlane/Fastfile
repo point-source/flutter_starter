@@ -72,7 +72,7 @@ platform :ios do
     if all_ok
       UI.success("\nAll iOS preflight checks passed!")
     else
-      UI.user_error!("\nSome iOS preflight checks failed. See docs/template/FASTLANE.md for setup instructions.")
+      UI.user_error!("\nSome iOS preflight checks failed. See docs/template/DEPLOYMENT.md for setup instructions.")
     end
   end
 

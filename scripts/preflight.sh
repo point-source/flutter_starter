@@ -247,7 +247,7 @@ esac
 
 echo ""
 if [[ $FAILURES -gt 0 ]]; then
-  printf "${RED}${BOLD}%d check(s) failed.${RESET} See docs/template/FASTLANE.md for setup instructions.\n" "$FAILURES"
+  printf "${RED}${BOLD}%d check(s) failed.${RESET} See docs/template/DEPLOYMENT.md for setup instructions.\n" "$FAILURES"
   exit 1
 else
   printf "${GREEN}${BOLD}All preflight checks passed!${RESET}\n"
