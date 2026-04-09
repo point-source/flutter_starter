@@ -49,8 +49,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-report
+          # archive: false uploads the file directly (no zip wrap).
+          # The artifact name is taken from the file basename, so the
+          # `name` input is intentionally omitted (it would be ignored).
           path: coverage/lcov.info
+          archive: false
           retention-days: 14
 
   build:
