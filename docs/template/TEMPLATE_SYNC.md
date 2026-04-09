@@ -128,6 +128,7 @@ lib/bootstrap.dart                 # App initialization (merge carefully)
 
 docs/template/                     # Template documentation
   ├── ARCHITECTURE.md
+  ├── CLAUDE.md                    # Template block imported by root CLAUDE.md
   ├── TEMPLATE_SYNC.md
   ├── ROADMAP.md
   ├── adrs/
@@ -136,7 +137,6 @@ docs/template/                     # Template documentation
   └── proposals/
 
 analysis_options.yaml              # Linting rules
-CLAUDE.md                          # AI agent context (merge tech stack updates)
 ```
 
 ### Project-Owned (Never Auto-Sync)
@@ -159,6 +159,7 @@ pubspec.yaml                       # Your dependencies (merge carefully)
 pubspec.lock                       # Generated from your dependencies
 
 docs/project/                      # Your project docs, decisions, and planning
+  └── CLAUDE.md                    # Project block imported by root CLAUDE.md
 
 README.md                          # Your project README (replace template's)
 
@@ -170,7 +171,30 @@ test/                              # Your tests
 ```
 lib/core/routing/app_router.dart   # Template patterns + your routes
 lib/core/l10n/                     # Core strings, but you may add your own
+CLAUDE.md                          # Thin shell: project overview + @imports
 ```
+
+## CLAUDE.md and AI Agent Context
+
+The root `CLAUDE.md` is a thin shell that imports two files:
+
+1. **`docs/template/CLAUDE.md`** (template-owned) -- tech stack, architecture
+   patterns, code-gen rules, and commands. Synced from the template; never
+   edit this file directly in a derived project.
+
+2. **`docs/project/CLAUDE.md`** (project-owned) -- your business-domain
+   conventions, backend-specific guidance, custom commands, and team
+   preferences. The template never touches this file.
+
+The root `CLAUDE.md` itself is mostly stable (project overview + import
+directives). Customize its Project Overview section to describe your app;
+add all other project conventions to `docs/project/CLAUDE.md` so they
+survive template syncs without conflicts.
+
+> Claude Code expands `@path/to/file` imports when reading `CLAUDE.md`.
+> Other AI agents that read `CLAUDE.md` directly may not support imports --
+> if you use multiple agents, verify compatibility or duplicate critical
+> context into the root file.
 
 ## Update Checklist
 

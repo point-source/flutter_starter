@@ -159,17 +159,29 @@ Update architecture rules when:
 
 ## CLAUDE.md
 
-The root-level `CLAUDE.md` file provides AI coding agents with:
-- Project overview and architecture summary.
-- Pointers to `docs/template/architecture-rules/` for detailed patterns.
-- Coding conventions (naming, imports, file organization).
-- Common commands (build, test, code gen, lint).
-- Reference to the auth feature as the canonical implementation.
+AI agent context is split across three files using Claude Code's `@import`
+syntax so template-maintained and project-maintained content never collide:
 
-Update `CLAUDE.md` when:
-- New conventions are established.
-- New commands or workflows are added.
-- The project structure changes.
+| File | Ownership | Contents |
+|---|---|---|
+| `CLAUDE.md` (root) | Project -- thin shell | Project overview + `@import` directives |
+| `docs/template/CLAUDE.md` | Template | Tech stack, architecture, conventions, commands |
+| `docs/project/CLAUDE.md` | Project | Business-domain rules, backend guidance, team preferences |
+
+The root `CLAUDE.md` inlines both imported files when an agent reads it, so
+agents see a single coherent document. Projects customize the root's Project
+Overview section and add conventions to `docs/project/CLAUDE.md`; the template
+updates `docs/template/CLAUDE.md`.
+
+Update `docs/template/CLAUDE.md` (in the template) when:
+- New template conventions are established.
+- New template commands or workflows are added.
+- The template's project structure changes.
+
+Update `docs/project/CLAUDE.md` (in a derived project) when:
+- You add business-domain conventions or terminology.
+- You wire up backend-specific guidance or custom commands.
+- You establish team preferences beyond what the template provides.
 
 ## DO
 
