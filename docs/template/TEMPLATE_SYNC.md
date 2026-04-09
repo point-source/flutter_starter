@@ -162,9 +162,16 @@ docs/project/                      # Your project docs, decisions, and planning
   └── CLAUDE.md                    # Project block imported by root CLAUDE.md
 
 README.md                          # Your project README (replace template's)
+LICENSE.md                         # Your project license (replace template's)
 
 test/                              # Your tests
 ```
+
+> **LICENSE.md must be replaced.** The template ships with BSD-3-Clause
+> attributing the template's copyright holder. Derived projects should
+> replace `LICENSE.md` with their own license (or delete it) before
+> publishing. `./scripts/rename.sh` prompts you to handle this during
+> initial setup.
 
 ### Merge Carefully (Project-Specific Customizations)
 

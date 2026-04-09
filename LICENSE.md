@@ -1,3 +1,5 @@
+<!-- TEMPLATE LICENSE FILE - flutter_starter — derived projects should replace this file with their own license, or remove this comment line to acknowledge keeping the template's BSD-3-Clause terms. ./scripts/rename.sh detects this comment and prompts during setup. -->
+
 Copyright 2026 point-source
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

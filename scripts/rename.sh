@@ -390,6 +390,70 @@ rename_docs() {
     "package:${PKG_NAME}/"
 }
 
+# ── License File ──────────────────────────────────────────────────────────────
+
+# Detect the unmodified template LICENSE.md and prompt the user to handle it.
+# Derived projects should replace or remove the template's license rather than
+# silently inheriting attribution to the template's copyright holder.
+handle_template_license() {
+  step "LICENSE.md"
+
+  local license_file="$REPO_ROOT/LICENSE.md"
+
+  if [[ ! -f "$license_file" ]]; then
+    info "No LICENSE.md found — skipping"
+    return 0
+  fi
+
+  # Fingerprint the unacknowledged template license by an HTML comment
+  # sentinel embedded in LICENSE.md. The sentinel is invisible in rendered
+  # markdown and is stripped on "keep", so the user is never re-prompted
+  # after they've made an intentional choice. This works correctly even when
+  # the template author re-uses the template and keeps BSD-3-Clause as-is.
+  local sentinel="TEMPLATE LICENSE FILE - flutter_starter"
+  if ! grep -qF "$sentinel" "$license_file" 2>/dev/null; then
+    pass "LICENSE.md has no template sentinel — already acknowledged"
+    return 0
+  fi
+
+  warn "The template's LICENSE.md (BSD-3-Clause, copyright point-source) is still in place."
+  echo ""
+  echo "  Derived projects should replace this with their own license to avoid"
+  echo "  inheriting attribution to the template's copyright holder."
+  echo ""
+
+  if [[ "$DRY_RUN" == true ]]; then
+    info "[dry-run] would prompt to (d)elete / (k)eep / (s)kip"
+    CHANGE_COUNT=$((CHANGE_COUNT + 1))
+    return 0
+  fi
+
+  echo "  Options:"
+  echo "    d) Delete LICENSE.md now (add your own license file later)"
+  echo "    k) Keep the template license (BSD-3-Clause; you must comply with its terms)"
+  echo "    s) Skip — decide later (you'll be re-prompted on next rename.sh run)"
+  echo ""
+  read -r -p "  Choice [d/k/s]: " license_choice
+
+  case "$license_choice" in
+    d|D)
+      rm -f "$license_file"
+      pass "Deleted LICENSE.md — remember to add your project's license"
+      CHANGE_COUNT=$((CHANGE_COUNT + 1))
+      ;;
+    k|K)
+      # Strip the sentinel line so future runs treat the file as acknowledged.
+      # The actual license text is left untouched.
+      sed_i "/${sentinel}/d" "$license_file"
+      pass "Kept template LICENSE.md (BSD-3-Clause); sentinel removed"
+      CHANGE_COUNT=$((CHANGE_COUNT + 1))
+      ;;
+    *)
+      warn "LICENSE.md left unchanged — review before publishing your project"
+      ;;
+  esac
+}
+
 # ── Post-Rename Cleanup ───────────────────────────────────────────────────────
 
 cleanup_generated() {
@@ -493,6 +557,7 @@ main() {
   rename_macos
   rename_web
   rename_docs
+  handle_template_license
 
   [[ "$DRY_RUN" == false ]] && cleanup_generated
 

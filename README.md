@@ -338,4 +338,9 @@ documentation belongs in `docs/project/`.
 
 ## License
 
-TBD
+> **The `LICENSE.md` in this repo is the template's license, not your
+> project's.** The template ships with BSD-3-Clause attributing the
+> template's copyright holder. Replace `LICENSE.md` (and this section)
+> with your project's license before publishing. Running
+> `./scripts/rename.sh` prompts you to delete or keep the template
+> license at setup time.
