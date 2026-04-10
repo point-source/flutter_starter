@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options:
-          - cloudflare-pages
+          - cloudflare-workers
           # Future providers: vercel, netlify, firebase-hosting
       environment:
         description: 'Target environment'
@@ -22,11 +22,11 @@ on:
         required: false
         type: string
         default: ''
-      cloudflare_branch:
-        description: 'Cloudflare Pages branch name (empty = production deploy)'
+      preview:
+        description: 'Preview deploy (versioned upload, does not roll production forward)'
         required: false
-        type: string
-        default: ''
+        type: boolean
+        default: false
 
   workflow_call:
     inputs:
@@ -43,14 +43,14 @@ on:
         required: false
         type: string
         default: ''
-      cloudflare_branch:
-        description: 'Cloudflare Pages branch name (empty = production deploy)'
+      preview:
+        description: 'Preview deploy (versioned upload, does not roll production forward)'
         required: false
-        type: string
-        default: ''
+        type: boolean
+        default: false
     secrets:
       CLOUDFLARE_API_TOKEN:
-        description: 'Cloudflare API token for Pages deployment'
+        description: 'Cloudflare API token with Workers Scripts: Edit permission'
         required: true
       # App configuration (whole-file JSON injection — see docs/template/DEPLOYMENT.md)
       CONFIG_DEVELOPMENT:
@@ -123,15 +123,19 @@ jobs:
       - name: Build web
         run: flutter build web --release --dart-define-from-file=config/${{ inputs.environment }}.json
 
-      # ── Cloudflare Pages ──────────────────────────────────────────────
-      - name: Deploy to Cloudflare Pages
+      # ── Cloudflare Workers (static assets) ────────────────────────────
+      # Production deploys roll the live version (`wrangler deploy`).
+      # Preview deploys upload a draft version that gets a unique
+      # `<version>-<worker>.<subdomain>.workers.dev` URL without affecting
+      # production (`wrangler versions upload`). The wrangler action
+      # exposes both URLs as `deployment-url`.
+      - name: Deploy to Cloudflare Workers
         id: deploy
-        if: inputs.provider == 'cloudflare-pages'
+        if: inputs.provider == 'cloudflare-workers'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           command: >-
-            pages deploy build/web
-            --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }}
-            ${{ inputs.cloudflare_branch != '' && format('--branch={0}', inputs.cloudflare_branch) || '' }}
+            ${{ inputs.preview && 'versions upload' || 'deploy' }}
+            --name=${{ vars.CLOUDFLARE_WORKER_NAME }}

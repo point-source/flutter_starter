@@ -1,0 +1,17 @@
+# Cloudflare Workers static-assets config for the Flutter web build.
+#
+# This config makes `wrangler deploy` (and `wrangler dev`) serve the
+# `flutter build web` output directly as a static-assets Worker -- no
+# Worker script, no bindings, just static files with SPA fallback.
+#
+# The Worker name is overridden per environment from the GitHub Actions
+# workflow via `wrangler deploy --name $CLOUDFLARE_WORKER_NAME`, so the
+# value below is only a fallback for local `wrangler deploy` testing.
+# See docs/template/DEPLOYMENT.md > Web > Cloudflare Workers setup.
+name = "flutter-starter-web"
+compatibility_date = "2026-04-09"
+workers_dev = true
+
+[assets]
+directory = "./build/web/"
+not_found_handling = "single-page-application"

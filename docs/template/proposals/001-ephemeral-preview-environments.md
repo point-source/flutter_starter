@@ -16,27 +16,32 @@ A PR (or push to `develop`) triggers an ephemeral environment:
 
 - **Supabase preview branch** -- isolated database, auth, storage, and edge
   functions with seeded data
-- **Cloudflare Pages preview deployment** -- Flutter web build pointed at the
-  Supabase branch's API URL and anon key
+- **Cloudflare Workers static-assets preview deployment** -- Flutter web
+  build pointed at the Supabase branch's API URL and anon key
 
 The environment is accessible via a unique URL posted as a PR comment. When the
-PR is merged or closed, both the Supabase branch and the Cloudflare preview are
-cleaned up automatically.
+PR is merged or closed, the Supabase branch is cleaned up automatically;
+Cloudflare ages out old Worker versions on its own.
 
 ## Research Findings
 
-### Cloudflare Pages Preview Deployments
+### Cloudflare Workers Preview Deployments
 
-- The `wrangler pages deploy` command accepts a `--branch` flag. When the
-  branch name does not match the production branch, Cloudflare treats it as a
-  preview deployment with a unique URL (e.g., `<branch>.<project>.pages.dev`).
-- This works with **direct upload** -- no need to connect the Cloudflare GitHub
-  integration. Our existing `deploy-web.yml` workflow can be extended.
-- Preview URLs persist indefinitely (atomic per-commit hashes). Cost is
-  negligible -- Pages is generous on the free tier for static assets.
-- SPA routing requires a `_redirects` file if using path-based URL strategy.
+- The `wrangler versions upload` command uploads a draft version of a
+  Worker without rolling production forward. Each upload returns a unique
+  preview URL (`<version>-<worker>.<subdomain>.workers.dev`) that stays
+  reachable until Cloudflare ages it out.
+- This works with **direct upload** -- no need to connect the Cloudflare
+  GitHub integration. Our existing `deploy-web.yml` workflow already wires
+  this up via the `preview: true` input.
+- Worker versions are retained subject to account limits; cost is
+  negligible on the free tier for static assets.
+- SPA routing is handled in `wrangler.toml` via
+  `not_found_handling = "single-page-application"` -- no `_redirects`
+  file needed.
 
-Reference: https://developers.cloudflare.com/pages/configuration/preview-deployments/
+Reference: https://developers.cloudflare.com/workers/static-assets/ and
+https://developers.cloudflare.com/workers/configuration/versions-and-deployments/
 
 ### Supabase Branching
 
@@ -76,10 +81,11 @@ A layered implementation, where each layer is independently useful:
 
 ### Layer 1: Manual Web Deployment + Reusable Workflow (Done)
 
-`.github/workflows/deploy-web.yml` -- manually triggered Cloudflare Pages
-deployment for staging/production. Merged in `b6cacad`. Extended to support
-`workflow_call` with `ref`, `cloudflare_branch`, and `deployment_url` output,
-making it a reusable building block for automated deployments.
+`.github/workflows/deploy-web.yml` -- manually triggered Cloudflare Workers
+static-assets deployment for staging/production. Originally wired to
+Cloudflare Pages and migrated to Workers in migration 009. Supports
+`workflow_call` with `ref`, `preview`, and `deployment_url` output, making
+it a reusable building block for automated deployments.
 
 ### Layer 2: Frontend Preview Deployments (Ready to implement)
 
@@ -94,8 +100,10 @@ for copy-paste workflow files covering:
 - **PR preview** -- deploy a preview URL per PR, post it as a comment
 
 The web app is built with the **staging** config and deployed to Cloudflare
-with `--branch=pr-<number>`. This gives reviewers a live preview URL for
-frontend-only changes, pointed at the shared staging backend.
+via `wrangler versions upload` (i.e. `preview: true`), which returns a
+unique versioned preview URL per upload. This gives reviewers a live
+preview URL for frontend-only changes, pointed at the shared staging
+backend, without rolling the live staging Worker.
 
 **What this enables:** visual review of UI changes without running locally.
 **Limitation:** all PRs share the same staging backend -- no data isolation.
@@ -109,12 +117,13 @@ A new workflow (or extension of Layer 2) that orchestrates both services:
    - Wait for the branch to be ready
    - Extract the branch's `API_URL` and `ANON_KEY`
    - Build the Flutter web app with those credentials injected into the config
-   - Deploy to Cloudflare Pages with `--branch=pr-<number>`
-   - Post the preview URL as a PR comment
+   - Deploy to Cloudflare Workers via `wrangler versions upload` (i.e.
+     `preview: true` on the reusable workflow)
+   - Post the versioned preview URL as a PR comment
 
 2. **On PR close/merge:**
    - Supabase auto-deletes the preview branch (built-in behavior)
-   - Cloudflare preview URL persists but is inert (no cost)
+   - Cloudflare ages out old Worker versions on its own (no cost)
 
 3. **Data seeding:**
    - Configure `@snaplet/seed` with the project schema
@@ -145,8 +154,9 @@ build → deploy. The workflow cannot parallelize the build and branch creation.
 - **Persistent staging branch** -- for the `develop` branch, use a Supabase
   persistent branch instead of a preview branch, so it remains available for
   ongoing QA without auto-pausing.
-- **Cloudflare Pages** -- free-tier generous for static assets. Preview
-  deployments have negligible cost.
+- **Cloudflare Workers static assets** -- free-tier generous for static
+  assets. Versioned preview uploads have negligible cost; Cloudflare ages
+  out old versions automatically.
 
 ## Open Questions
 

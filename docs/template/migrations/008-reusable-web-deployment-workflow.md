@@ -1,5 +1,13 @@
 # Migration: 008 -- Reusable web deployment workflow
 
+> **Partially superseded by migration 009.** The `cloudflare_branch` input
+> introduced here was renamed to `preview` (boolean) when the workflow
+> migrated from Cloudflare Pages to Cloudflare Workers static assets. See
+> [009-cloudflare-workers-migration.md](009-cloudflare-workers-migration.md)
+> for the rename details. Everything else in this note (the
+> `workflow_call` shape, `ref` input, `deployment_url` output) is still
+> current.
+
 ## Summary
 
 Makes the `deploy-web.yml` workflow reusable via `workflow_call` so other

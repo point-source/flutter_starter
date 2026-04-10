@@ -7,7 +7,7 @@ template:
 |---|---|---|
 | iOS (TestFlight / App Store) | `.github/workflows/deploy.yml` | [Fastlane](https://fastlane.tools/) |
 | Android (Google Play) | `.github/workflows/deploy.yml` | [Fastlane](https://fastlane.tools/) |
-| Web (Cloudflare Pages, Netlify, etc.) | `.github/workflows/deploy-web.yml` | Provider-specific (Wrangler for Cloudflare) |
+| Web (Cloudflare Workers, Netlify, etc.) | `.github/workflows/deploy-web.yml` | Provider-specific (Wrangler for Cloudflare) |
 
 All three workflows are **manually triggered** by default (`workflow_dispatch`)
 and **reusable** via `workflow_call`, so derived projects can wire automation
@@ -94,7 +94,7 @@ assume is:
 |---|---|
 | `develop` | `staging` |
 | `main` | `production` |
-| Pull requests against `main` | Cloudflare Pages preview at `pr-<number>.<project>.pages.dev` |
+| Pull requests against `main` | Cloudflare Workers versioned preview URL (one per upload) |
 
 To wire this up, copy the example workflows from
 [Calling `deploy.yml` from another workflow](#calling-deployyml-from-another-workflow)
@@ -608,7 +608,7 @@ Currently supported providers:
 
 | Provider | Workflow value | Status |
 |---|---|---|
-| [Cloudflare Pages](https://pages.cloudflare.com/) | `cloudflare-pages` | Available |
+| [Cloudflare Workers (static assets)](https://developers.cloudflare.com/workers/static-assets/) | `cloudflare-workers` | Available |
 
 Adding a new provider is straightforward — see
 [Adding a new web hosting provider](#adding-a-new-web-hosting-provider) at
@@ -650,64 +650,69 @@ supports) need the server to rewrite all paths to `index.html`. Without this,
 refreshing or deep-linking to a route like `/dashboard` returns a 404.
 
 Flutter's **default hash-based strategy** (`/#/dashboard`) works without any
-server configuration. If you switch to path-based URLs, create a
-`web/_redirects` file so it is included in the build output:
+server configuration. With path-based URLs, the template's `wrangler.toml`
+already handles this for Cloudflare Workers via:
 
-```
-/* /index.html 200
+```toml
+[assets]
+directory = "./build/web/"
+not_found_handling = "single-page-application"
 ```
 
-> **Note:** This `_redirects` format works on Cloudflare Pages and Netlify.
-> Other providers may use different mechanisms (e.g. `vercel.json` rewrites,
-> Firebase `firebase.json` rewrites). Check your provider's documentation.
+This makes the Workers static-assets runtime serve `index.html` for any
+path that doesn't match a built asset, which is what `auto_route` needs.
+No `web/_redirects` file is required.
+
+> **Note:** Other providers use different mechanisms — Netlify still reads a
+> `web/_redirects` file containing `/* /index.html 200`, Vercel uses
+> `vercel.json` rewrites, Firebase uses `firebase.json` rewrites. If you
+> switch providers, check your provider's documentation.
 
 ### Base href
 
 By default, `flutter build web` sets the base href to `/`, which works when
-serving from the root of a domain (e.g. `https://myapp.pages.dev/`). If you
-need to serve from a subpath, pass `--base-href`:
+serving from the root of a domain (e.g. `https://my-app.workers.dev/`). If
+you need to serve from a subpath, pass `--base-href`:
 
 ```bash
 flutter build web --release --base-href=/my-app/ --dart-define-from-file=config/production.json
 ```
 
-### Cloudflare Pages setup
+### Cloudflare Workers setup
+
+The template uses [Cloudflare Workers static assets](https://developers.cloudflare.com/workers/static-assets/)
+to host the Flutter web build. The repo-root `wrangler.toml` already
+declares `build/web/` as the asset directory and enables SPA fallback —
+you only need to provision a Cloudflare account, an API token, and a
+couple of GitHub variables.
+
+> **Why Workers and not Pages?** Cloudflare is steering new and existing
+> static-site projects toward Workers + static assets — `wrangler pages
+> deploy` is the legacy command. The Workers static-assets runtime is a
+> drop-in replacement that supports SPA fallback natively and uses the
+> same `cloudflare/wrangler-action@v3` GitHub Action. See migration 009
+> for the upgrade notes if you previously used the Pages-based workflow.
 
 #### Prerequisites
 
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up)
-- A Cloudflare Pages project (created via the dashboard or CLI)
 
-#### 1. Create a Pages project
+That's it. No Worker needs to exist ahead of time — `wrangler deploy`
+creates it on the first push, named after `CLOUDFLARE_WORKER_NAME`.
 
-In the Cloudflare dashboard:
-
-1. Go to **Workers & Pages → Create**
-2. Select the **Pages** tab, then **Upload assets** (direct upload)
-3. Name your project (e.g. `my-app-staging`, `my-app-production`)
-4. Upload a placeholder file to finish creation — the GitHub Action will
-   overwrite it on the first deploy
-
-Or use the Wrangler CLI:
-
-```bash
-npx wrangler pages project create my-app-staging
-```
-
-> **Tip:** Create separate projects for staging and production if you want
-> isolated environments. Use a single project if you prefer Cloudflare's
-> built-in preview/production branch model.
-
-#### 2. Create an API token
+#### 1. Create an API token
 
 1. Go to [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens)
 2. Click **Create Token**
 3. Use the **Custom token** template
-4. Permissions: **Account → Cloudflare Pages → Edit**
-5. Account Resources: select the account that owns the Pages project
+4. Permissions:
+   - **Account → Workers Scripts → Edit**
+   - **Account → Account Settings → Read** (wrangler uses this to look up
+     the account before deploying)
+5. Account Resources: select the account that will own the Worker
 6. Create the token and copy it
 
-#### 3. Configure GitHub secrets and variables
+#### 2. Configure GitHub secrets and variables
 
 In your GitHub repository, go to **Settings → Secrets and variables →
 Actions**.
@@ -718,27 +723,35 @@ secrets:
 
 | Secret | Description |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | API token with Cloudflare Pages: Edit permission |
+| `CLOUDFLARE_API_TOKEN` | API token with Workers Scripts: Edit permission |
 
 **Variables** (non-sensitive values):
 
 | Variable | Description | Example |
 |---|---|---|
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (visible in dashboard URL) | `abc123def456` |
-| `CLOUDFLARE_PROJECT_NAME` | The Pages project name to deploy to | `my-app-staging` |
+| `CLOUDFLARE_WORKER_NAME` | The Worker name to deploy to (created on first deploy) | `my-app-staging` |
 
-> **Environment-specific projects:** If you use separate Cloudflare Pages
-> projects for staging and production, you can configure these variables as
-> [GitHub environment variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
-> rather than repository variables. Create `staging` and `production`
-> environments in GitHub and set `CLOUDFLARE_PROJECT_NAME` (and optionally
-> `CLOUDFLARE_ACCOUNT_ID`) per environment.
+> **Environment-specific Workers:** Workers cannot inject different
+> bindings for production vs. non-production builds, so staging and
+> production should be **separate Workers** (e.g. `my-app-staging` and
+> `my-app-production`). Configure `CLOUDFLARE_WORKER_NAME` as a
+> [GitHub environment variable](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
+> per environment so each environment deploys to its own Worker. Create
+> `staging` and `production` environments in GitHub and set
+> `CLOUDFLARE_WORKER_NAME` (and optionally `CLOUDFLARE_ACCOUNT_ID`) per
+> environment.
 
-#### 4. Custom domains
+#### 3. Custom domains
 
-After your first deployment, configure a custom domain in the Cloudflare
-Pages dashboard under your project's **Custom domains** tab. Cloudflare
-handles SSL automatically.
+After your first deployment, configure a custom domain on the Worker via
+the Cloudflare dashboard under **Workers & Pages → your worker → Settings
+→ Domains & Routes**. Cloudflare handles SSL automatically.
+
+By default the Worker is also reachable at
+`<worker>.<your-subdomain>.workers.dev` because `wrangler.toml` sets
+`workers_dev = true`. This is the URL the workflow returns as
+`deployment_url`.
 
 ### Running a manual web deployment
 
@@ -748,8 +761,9 @@ handles SSL automatically.
 4. Choose your **hosting provider** and **target environment**
 5. Optionally set **Git ref** to build from a specific branch, tag, or commit
    SHA (leave empty to use the branch selected in the dropdown above)
-6. Optionally set **Cloudflare Pages branch name** to create a preview
-   deployment (leave empty for a production deployment)
+6. Optionally tick **Preview** to do a versioned upload that returns a
+   unique preview URL without rolling production forward (leave unticked
+   for a production deploy)
 7. Click **Run workflow** to start
 
 The workflow provisions the environment config from templates, overwrites it
@@ -761,16 +775,16 @@ builds the Flutter web app, and deploys to your chosen provider.
 
 | Input | Required | Default | Description |
 |---|---|---|---|
-| `provider` | Yes | -- | Hosting provider (`cloudflare-pages`) |
+| `provider` | Yes | -- | Hosting provider (`cloudflare-workers`) |
 | `environment` | Yes | -- | Config to build with (`staging` or `production`) |
 | `ref` | No | current branch | Git ref to checkout (branch, tag, SHA) |
-| `cloudflare_branch` | No | _(empty)_ | Cloudflare Pages branch name. Empty = production deploy. Any value = preview deploy at `<value>.<project>.pages.dev` |
+| `preview` | No | `false` | When true, deploys via `wrangler versions upload` (returns a unique per-version preview URL that does not roll production). When false, deploys via `wrangler deploy` (rolls the live Worker). |
 
 #### Workflow outputs
 
 | Output | Description |
 |---|---|
-| `deployment_url` | URL of the deployed site (from the Cloudflare wrangler action) |
+| `deployment_url` | URL of the deployed site (from the Cloudflare wrangler action). For production deploys this is `<worker>.<subdomain>.workers.dev`; for preview deploys it's a versioned `<version>-<worker>.<subdomain>.workers.dev` URL. |
 
 ### Calling `deploy-web.yml` from another workflow
 
@@ -784,8 +798,8 @@ the branch names if your team uses a different model.
 
 #### Deploy on push to production
 
-Automatically deploys to Cloudflare Pages production when a commit lands on
-`main` (e.g. via a merged PR).
+Automatically deploys to the production Cloudflare Worker when a commit
+lands on `main` (e.g. via a merged PR).
 
 Create `.github/workflows/deploy-web-production.yml`:
 
@@ -800,15 +814,15 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-web.yml
     with:
-      provider: cloudflare-pages
+      provider: cloudflare-workers
       environment: production
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
 ```
 
-`cloudflare_branch` is omitted (empty), so Cloudflare treats this as a
-production deployment.
+`preview` is omitted (defaults to false), so the workflow runs `wrangler
+deploy --name $CLOUDFLARE_WORKER_NAME` and rolls the live Worker.
 
 > **Tip:** If you have multiple secrets to forward, you can use
 > `secrets: inherit` instead of listing each one — every secret in the
@@ -817,7 +831,7 @@ production deployment.
 
 #### Deploy on push to staging
 
-Automatically deploys to a Cloudflare Pages preview URL when a commit lands
+Automatically deploys to the staging Cloudflare Worker when a commit lands
 on `develop` or `staging`.
 
 Create `.github/workflows/deploy-web-staging.yml`:
@@ -833,23 +847,27 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-web.yml
     with:
-      provider: cloudflare-pages
+      provider: cloudflare-workers
       environment: staging
-      cloudflare_branch: staging
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
 ```
 
-`cloudflare_branch: staging` causes the deployment to appear at
-`staging.<project>.pages.dev` rather than the production URL.
+Staging is a **separate Worker** from production (e.g. `my-app-staging`),
+selected by setting `CLOUDFLARE_WORKER_NAME` differently in the
+[GitHub `staging` environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment).
+Workers static assets cannot inject different bindings per environment in
+a single Worker, so the recommended layout is one Worker per environment.
 
 #### PR preview deployments
 
 Automatically builds and deploys a preview for every pull request opened
 against `main` or `staging`. Posts the preview URL as a PR comment and
-updates it on each push. The preview is a Cloudflare Pages preview deployment
-at `pr-<number>.<project>.pages.dev`.
+updates it on each push. The preview is a Cloudflare Workers
+[versioned upload](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/)
+that returns a unique `<version>-<worker>.<subdomain>.workers.dev` URL
+without rolling production forward.
 
 Create `.github/workflows/deploy-web-preview.yml`:
 
@@ -869,10 +887,10 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-web.yml
     with:
-      provider: cloudflare-pages
+      provider: cloudflare-workers
       environment: staging
       ref: ${{ github.event.pull_request.head.sha }}
-      cloudflare_branch: pr-${{ github.event.pull_request.number }}
+      preview: true
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
@@ -911,18 +929,22 @@ jobs:
 **How it works:**
 
 - `ref` checks out the PR's head commit (not the merge commit)
-- `cloudflare_branch: pr-<number>` creates a unique preview URL per PR
+- `preview: true` makes the deploy step run `wrangler versions upload`,
+  which creates a draft version of the staging Worker and returns a
+  unique versioned preview URL — production is unaffected
 - The `comment` job reads `deployment_url` from the reusable workflow's output
 - `peter-evans/find-comment` + `create-or-update-comment` keep a single,
   updated comment (no spam on force-pushes)
 - The `concurrency` group cancels in-progress builds when new commits are
   pushed to the PR, so only the latest commit is deployed
 
-**Cloudflare preview cleanup:** Cloudflare Pages preview deployments persist
-but cost nothing (they are static assets on the free tier). No explicit
-teardown is required. If you want to actively delete previews on PR close,
-you can add a separate job triggered by `pull_request: [closed]` that calls
-the Cloudflare API.
+**Cloudflare preview cleanup:** Workers versioned uploads stay accessible
+under their unique URL until Cloudflare ages them out (subject to the
+account's version retention limits) and have negligible cost on the free
+tier. No explicit teardown is required. If you want to actively prune old
+versions, you can add a separate job triggered by
+`pull_request: [closed]` that calls `wrangler versions list` /
+`wrangler versions delete`.
 
 #### Combining workflows
 
@@ -957,7 +979,7 @@ In `.github/workflows/deploy-web.yml`:
 ```yaml
 # In workflow_dispatch.inputs.provider.options:
 options:
-  - cloudflare-pages
+  - cloudflare-workers
   - your-new-provider    # ← add here
 
 # In workflow_call.inputs.provider (string type — document valid values)
