@@ -43,8 +43,9 @@ Sentry DSN, backend mode, and feature flags* the running app sees.
 | `production` | `config/production.json` | Builds against the live production backend. |
 
 The canonical source is the `AppEnvironment` enum in
-`lib/core/env/app_environment.dart`. Matching CI secrets are
-`CONFIG_DEVELOPMENT` / `CONFIG_STAGING` / `CONFIG_PRODUCTION` — see
+`lib/core/env/app_environment.dart`. The matching CI secret is a single
+`CONFIG_FILE` placed inside each GitHub Environment (`staging`,
+`production`) — see
 [App Configuration Secrets](#app-configuration-secrets-shared).
 
 ### Lanes
@@ -110,8 +111,9 @@ There are two distinct buckets of secrets that feed every deploy:
 
 - **App configuration** — values baked into the Flutter build via
   `--dart-define-from-file` (API URL, Sentry DSN, backend mode, feature flags).
-  These live in a single `CONFIG_<ENV>` secret per environment containing the
-  full JSON body of the matching `config/<env>.json` file. See
+  These live in a single `CONFIG_FILE` secret placed inside each
+  [GitHub Environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment),
+  containing the full JSON body of the matching `config/<env>.json` file. See
   [App Configuration Secrets](#app-configuration-secrets-shared) below.
 - **Workflow tooling** — credentials the workflow itself uses to do its job
   (signing keys, store API tokens, hosting provider tokens, future things like
@@ -135,18 +137,45 @@ for the rationale and the rule that future template workflows must follow.
 ## App Configuration Secrets (shared)
 
 The deploy workflows inject environment-specific app config from a single
-secret per environment containing the **full JSON body** of the matching
-`config/<env>.json` file. This keeps real API URLs, Sentry DSNs, and any other
+`CONFIG_FILE` secret containing the **full JSON body** of the matching
+`config/<env>.json` file. The secret is placed inside the matching
+[GitHub Environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
+(`staging` or `production`), so the same secret name carries a different
+value per environment. This keeps real API URLs, Sentry DSNs, and any other
 sensitive runtime config out of the repository entirely.
 
-| Secret | Description | Required |
-|---|---|---|
-| `CONFIG_STAGING` | Full JSON body of `config/staging.json` | When deploying staging |
-| `CONFIG_PRODUCTION` | Full JSON body of `config/production.json` | When deploying production |
-| `CONFIG_DEVELOPMENT` | Full JSON body of `config/development.json` | Only if your CI build needs real values; usually unset |
+### GitHub Environment setup (one-time)
 
-Set each secret to the literal contents of the corresponding config file, e.g.
-the value of `CONFIG_PRODUCTION` is something like:
+Both `deploy.yml` and `deploy-web.yml` bind their build jobs to
+`environment: ${{ inputs.environment }}`, which means GitHub-Environment-scoped
+secrets and variables resolve to the matching environment automatically. To
+enable this, create the environments once under
+**Settings → Environments**:
+
+1. Create a `staging` environment.
+2. Create a `production` environment.
+3. Inside each, add a `CONFIG_FILE` secret containing the full JSON body of
+   the matching `config/<env>.json`.
+4. Place any other per-environment values (like
+   [`CLOUDFLARE_WORKER_NAME`](#3-required-secrets-and-variables-1) or a
+   per-env `CLOUDFLARE_API_TOKEN`) inside the same environments.
+
+Repository-level secrets and variables (like `CLOUDFLARE_API_TOKEN` or the
+mobile signing credentials) remain visible to environment-bound jobs, so
+you only need to move a value into an environment when you want it to
+differ between staging and production.
+
+> **Tip:** GitHub auto-creates an environment the first time a job
+> references it, so even an empty `staging` / `production` environment is
+> sufficient to make the workflows run. Creating them ahead of time lets
+> you also configure protection rules (required reviewers, deployment
+> branches, wait timers) for production deploys.
+
+### `CONFIG_FILE` value
+
+Set the secret to the literal contents of the corresponding config file —
+for the `production` environment, the value of `CONFIG_FILE` is something
+like:
 
 ```json
 {
@@ -157,11 +186,11 @@ the value of `CONFIG_PRODUCTION` is something like:
 }
 ```
 
-If a secret is unset for the target environment, the workflow falls back to
-the committed `config/examples/<env>.json` (placeholder values) and prints a
-log line. Manual deploys from a fresh fork therefore work end-to-end without
-configuring anything — but the resulting build will use placeholder URLs and
-DSNs.
+If `CONFIG_FILE` is unset in the target environment, the workflow falls
+back to the committed `config/examples/<env>.json` (placeholder values) and
+prints a log line. Manual deploys from a fresh fork therefore work
+end-to-end without configuring anything — but the resulting build will use
+placeholder URLs and DSNs.
 
 ### How config values reach the build
 
@@ -169,15 +198,16 @@ The flow on every workflow run is:
 
 1. `./scripts/setup.sh` copies `config/examples/<env>.json` →
    `config/<env>.json` (committed defaults).
-2. The **Apply config from secret** step looks up `CONFIG_<ENV>` for the
-   target environment, validates it as JSON, and overwrites
+2. The **Apply config from secret** step reads `CONFIG_FILE` from the
+   environment bound to the job, validates it as JSON, and overwrites
    `config/<env>.json` with its contents. If the secret is unset the step
    leaves the committed defaults in place and prints a log line.
-3. `flutter build ... --dart-define-from-file=config/<env>.json` consumes the
-   resulting file.
+3. `flutter build ... --dart-define-from-file=config/<env>.json` consumes
+   the resulting file.
 
-Adding a new app config field is therefore a one-place change: edit the JSON
-in your `CONFIG_<ENV>` secret. No workflow edit required.
+Adding a new app config field is therefore a one-place change: edit the
+JSON in the `CONFIG_FILE` secret in the matching environment. No workflow
+edit required.
 
 ---
 
@@ -448,13 +478,15 @@ jobs:
 ```
 
 `secrets: inherit` is the simplest path inside the same repository — every
-secret declared in `deploy.yml` (including `CONFIG_PRODUCTION` and the
-platform credentials) is forwarded automatically. If you call `deploy.yml`
-from a different repository, list each secret explicitly instead:
+repository-level secret is forwarded automatically, and the env-bound
+`ios:` / `android:` jobs additionally pull `CONFIG_FILE` (and any other
+env-scoped values) from the matching GitHub Environment without it needing
+to appear in the caller's `secrets:` block at all. If you call `deploy.yml`
+from a different repository, list each repo-level secret explicitly
+instead:
 
 ```yaml
     secrets:
-      CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_GIT_PRIVATE_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
@@ -465,6 +497,10 @@ from a different repository, list each secret explicitly instead:
       ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
       GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
 ```
+
+`CONFIG_FILE` is **not** in the list above because it lives inside the
+`staging` / `production` GitHub Environment in the called repository — the
+job's `environment:` binding resolves it directly.
 
 The same `concurrency` group applies to both manual and reusable invocations,
 so you cannot accidentally start two deploys for the same platform/environment
@@ -496,7 +532,7 @@ secret are needed:
 |---|---|
 | `ANDROID_KEYSTORE` | yes |
 | `ANDROID_KEY_PROPERTIES` | yes |
-| `CONFIG_STAGING` *or* `CONFIG_PRODUCTION` | yes (matching the environment) |
+| `CONFIG_FILE` (in the matching GitHub Environment) | yes |
 
 `GOOGLE_PLAY_JSON_KEY` is **not** required for `lane=github` — the
 workflow's "Write Google Play service account key" and "Preflight check"
@@ -718,29 +754,30 @@ In your GitHub repository, go to **Settings → Secrets and variables →
 Actions**.
 
 **Secrets** (sensitive values) — in addition to the shared
-[`CONFIG_STAGING` / `CONFIG_PRODUCTION`](#app-configuration-secrets-shared)
-secrets:
+[`CONFIG_FILE`](#app-configuration-secrets-shared) secret that lives in each
+GitHub Environment:
 
-| Secret | Description |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | API token with Workers Scripts: Edit permission |
+| Secret | Description | Scope |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | API token with Workers Scripts: Edit permission | Repository (or per-environment for narrower scoping) |
 
 **Variables** (non-sensitive values):
 
-| Variable | Description | Example |
-|---|---|---|
-| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (visible in dashboard URL) | `abc123def456` |
-| `CLOUDFLARE_WORKER_NAME` | The Worker name to deploy to (created on first deploy) | `my-app-staging` |
+| Variable | Description | Example | Scope |
+|---|---|---|---|
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID (visible in dashboard URL) | `abc123def456` | Repository (or per-environment) |
+| `CLOUDFLARE_WORKER_NAME` | The Worker name to deploy to (created on first deploy) | `my-app-staging` | **Per-environment** (different value in each) |
 
 > **Environment-specific Workers:** Workers cannot inject different
 > bindings for production vs. non-production builds, so staging and
-> production should be **separate Workers** (e.g. `my-app-staging` and
-> `my-app-production`). Configure `CLOUDFLARE_WORKER_NAME` as a
-> [GitHub environment variable](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
-> per environment so each environment deploys to its own Worker. Create
-> `staging` and `production` environments in GitHub and set
-> `CLOUDFLARE_WORKER_NAME` (and optionally `CLOUDFLARE_ACCOUNT_ID`) per
-> environment.
+> production must be **separate Workers** (e.g. `my-app-staging` and
+> `my-app-production`). Place `CLOUDFLARE_WORKER_NAME` inside each
+> [GitHub Environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
+> with the matching value. The `web:` job in `deploy-web.yml` is bound to
+> `environment: ${{ inputs.environment }}`, so the variable resolves to
+> the value placed in the bound environment automatically. See
+> [GitHub Environment setup](#github-environment-setup-one-time) for the
+> one-time configuration steps.
 
 #### 3. Custom domains
 
@@ -767,7 +804,8 @@ By default the Worker is also reachable at
 7. Click **Run workflow** to start
 
 The workflow provisions the environment config from templates, overwrites it
-with the contents of the `CONFIG_<ENVIRONMENT>` secret if one is set
+with the contents of the `CONFIG_FILE` secret from the matching GitHub
+Environment if one is set
 (see [How config values reach the build](#how-config-values-reach-the-build)),
 builds the Flutter web app, and deploys to your chosen provider.
 
@@ -818,11 +856,14 @@ jobs:
       environment: production
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
 ```
 
 `preview` is omitted (defaults to false), so the workflow runs `wrangler
 deploy --name $CLOUDFLARE_WORKER_NAME` and rolls the live Worker.
+
+`CONFIG_FILE` does **not** appear in the `secrets:` block — the called
+`web:` job is bound to `environment: production` and resolves
+`CONFIG_FILE` from the `production` GitHub Environment automatically.
 
 > **Tip:** If you have multiple secrets to forward, you can use
 > `secrets: inherit` instead of listing each one — every secret in the
@@ -851,7 +892,6 @@ jobs:
       environment: staging
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
 ```
 
 Staging is a **separate Worker** from production (e.g. `my-app-staging`),
@@ -859,6 +899,9 @@ selected by setting `CLOUDFLARE_WORKER_NAME` differently in the
 [GitHub `staging` environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment).
 Workers static assets cannot inject different bindings per environment in
 a single Worker, so the recommended layout is one Worker per environment.
+
+As above, `CONFIG_FILE` resolves from the `staging` GitHub Environment
+automatically — no need to forward it from the caller.
 
 #### PR preview deployments
 
@@ -893,7 +936,6 @@ jobs:
       preview: true
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
 
   comment:
     needs: deploy

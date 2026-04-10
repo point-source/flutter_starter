@@ -52,12 +52,10 @@ on:
         type: string
         default: ''
     secrets:
-      # App configuration (whole-file JSON injection — see docs/template/DEPLOYMENT.md)
-      CONFIG_STAGING:
-        description: 'Full JSON body of config/staging.json'
-        required: false
-      CONFIG_PRODUCTION:
-        description: 'Full JSON body of config/production.json'
+      # App configuration (whole-file JSON injection — see docs/template/DEPLOYMENT.md).
+      # Place this secret inside the matching GitHub Environment (staging or production).
+      CONFIG_FILE:
+        description: 'Full JSON body of config/<env>.json for the target environment'
         required: false
       # iOS code signing and store credentials
       MATCH_PASSWORD:
@@ -127,6 +125,7 @@ jobs:
   ios:
     needs: validate
     name: Deploy iOS (${{ inputs.lane }})
+    environment: ${{ inputs.environment }}
     if: (inputs.platform == 'ios' || inputs.platform == 'both') && inputs.lane != 'github'
     runs-on: macos-latest
     timeout-minutes: 60
@@ -154,22 +153,19 @@ jobs:
       - name: Apply config from secret
         working-directory: .
         env:
-          CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
-          CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
+          CONFIG_FILE: ${{ secrets.CONFIG_FILE }}
           ENV_NAME: ${{ inputs.environment }}
         run: |
-          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
-          config_json="${!var:-}"
-          if [ -z "$config_json" ]; then
-            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+          if [ -z "${CONFIG_FILE:-}" ]; then
+            echo "No CONFIG_FILE secret set in the $ENV_NAME environment — using committed config/examples/$ENV_NAME.json"
             exit 0
           fi
-          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
-            echo "::error::$var secret is not valid JSON"
+          if ! printf '%s' "$CONFIG_FILE" | jq empty 2>/dev/null; then
+            echo "::error::CONFIG_FILE secret is not valid JSON"
             exit 1
           fi
-          printf '%s' "$config_json" > "config/$ENV_NAME.json"
-          echo "Wrote config/$ENV_NAME.json from $var secret"
+          printf '%s' "$CONFIG_FILE" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from CONFIG_FILE secret in the $ENV_NAME environment"
 
       - name: Install Flutter dependencies
         working-directory: .
@@ -207,6 +203,7 @@ jobs:
   android:
     needs: validate
     name: Deploy Android (${{ inputs.lane }})
+    environment: ${{ inputs.environment }}
     if: inputs.platform == 'android' || inputs.platform == 'both'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -244,22 +241,19 @@ jobs:
       - name: Apply config from secret
         working-directory: .
         env:
-          CONFIG_STAGING: ${{ secrets.CONFIG_STAGING }}
-          CONFIG_PRODUCTION: ${{ secrets.CONFIG_PRODUCTION }}
+          CONFIG_FILE: ${{ secrets.CONFIG_FILE }}
           ENV_NAME: ${{ inputs.environment }}
         run: |
-          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
-          config_json="${!var:-}"
-          if [ -z "$config_json" ]; then
-            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+          if [ -z "${CONFIG_FILE:-}" ]; then
+            echo "No CONFIG_FILE secret set in the $ENV_NAME environment — using committed config/examples/$ENV_NAME.json"
             exit 0
           fi
-          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
-            echo "::error::$var secret is not valid JSON"
+          if ! printf '%s' "$CONFIG_FILE" | jq empty 2>/dev/null; then
+            echo "::error::CONFIG_FILE secret is not valid JSON"
             exit 1
           fi
-          printf '%s' "$config_json" > "config/$ENV_NAME.json"
-          echo "Wrote config/$ENV_NAME.json from $var secret"
+          printf '%s' "$CONFIG_FILE" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from CONFIG_FILE secret in the $ENV_NAME environment"
 
       - name: Decode Android keystore
         run: |

@@ -100,6 +100,19 @@ Yes -- four renames that derived projects must apply together:
    - Delete the old `CLOUDFLARE_PROJECT_NAME` variable once the rename is
      in place.
 
+   > **Note (added by migration 013):** when this migration originally
+   > shipped, the per-environment scoping recommended above was actually
+   > broken — the `web:` job in `deploy-web.yml` had no `environment:`
+   > binding, so `${{ vars.CLOUDFLARE_WORKER_NAME }}` silently expanded to
+   > empty string and `wrangler deploy --name=` failed.
+   > [Migration 013](013-per-env-config-secret.md) fixes this by binding
+   > the deploy jobs to `environment: ${{ inputs.environment }}` and
+   > consolidates the env-suffixed `CONFIG_*` secrets into a single
+   > per-environment `CONFIG_FILE`. If you are applying both migrations
+   > together, follow migration 013's steps to set up
+   > `CLOUDFLARE_WORKER_NAME` and `CONFIG_FILE` inside the `staging` and
+   > `production` GitHub Environments at the same time.
+
 4. **Update any caller workflows.** If you copy-pasted the example
    workflows from the [Calling deploy-web.yml from another workflow](../DEPLOYMENT.md#calling-deploy-webyml-from-another-workflow)
    section, you'll have one or more of:

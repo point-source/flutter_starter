@@ -1,5 +1,16 @@
 # Migration: 011 -- Config-from-secret, reusable mobile deploy, and consolidated DEPLOYMENT.md
 
+> **Partially superseded by migration 013.** The `CONFIG_STAGING` /
+> `CONFIG_PRODUCTION` / `CONFIG_DEVELOPMENT` env-suffixed secret names
+> introduced here were consolidated into a single per-environment
+> `CONFIG_FILE` secret (placed inside each GitHub Environment) when the
+> deploy jobs gained `environment:` binding. See
+> [013-per-env-config-secret.md](013-per-env-config-secret.md) for the
+> rename details. Everything else in this note (the `workflow_call`
+> additions to `deploy.yml`, the consolidated `DEPLOYMENT.md`, the
+> whole-file JSON injection model itself) is still current — only the
+> secret names and their scope changed.
+
 ## Summary
 
 Three related changes to the deployment workflows and their documentation:
