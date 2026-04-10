@@ -128,6 +128,13 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          # wrangler-action@v3 still defaults to wrangler 3.90.0. Pin to a
+          # current 4.x release explicitly so we get fixes and can review
+          # bumps. Wrangler v4 has no breaking changes for our usage
+          # (`deploy` / `versions upload` with `--name`, modern `[assets]`
+          # block in wrangler.toml). See:
+          # https://developers.cloudflare.com/workers/wrangler/migration/update-v3-to-v4
+          wranglerVersion: '4.81.1'
           command: >-
             ${{ inputs.preview && 'versions upload' || 'deploy' }}
             --name=${{ vars.CLOUDFLARE_WORKER_NAME }}
