@@ -41,7 +41,7 @@ platform :android do
       store_file_line = key_props.lines.find { |l| l.start_with?('storeFile=') }
       if store_file_line
         store_file = store_file_line.strip.sub('storeFile=', '')
-        resolved = File.expand_path(store_file, File.join('..', 'android'))
+        resolved = File.expand_path(store_file, File.join('..', 'android', 'app'))
         if File.exist?(resolved)
           UI.success("  OK    Keystore file (#{store_file})")
         else
