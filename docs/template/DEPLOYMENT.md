@@ -125,6 +125,11 @@ to the committed `config/examples/<env>.json` defaults and emit a log line
 explaining that no secret was provided. Real deploys obviously need both kinds
 of secrets configured.
 
+The trigger shape (manual + `workflow_call`, no auto-trigger) is intentional
+and consistent across every template workflow. See
+[ADR 012: Workflow Trigger Philosophy](adrs/012-workflow-trigger-philosophy.md)
+for the rationale and the rule that future template workflows must follow.
+
 ---
 
 ## App Configuration Secrets (shared)

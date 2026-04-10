@@ -1,10 +1,18 @@
 name: CI
 
+# Trigger philosophy: auto on PRs (the merge gate), manual via
+# workflow_dispatch for ad-hoc reruns, reusable via workflow_call so
+# derived projects can wire CI into their own pipelines. Notably no
+# `push: [main]` trigger -- the PR check is the merge gate, and a
+# post-merge re-run on the same SHA buys nothing while colliding with
+# downstream `push: [main]` automation. Projects that want direct-push
+# coverage can add `push: [main]` back themselves.
+# See docs/template/adrs/012-workflow-trigger-philosophy.md.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
