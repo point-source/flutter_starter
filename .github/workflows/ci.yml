@@ -10,6 +10,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Opt JavaScript-based actions onto Node 24 ahead of the GitHub Actions
+# default flip on 2026-06-02. Safe to leave in permanently; becomes a
+# no-op once Node 24 is the runtime default.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   lint:
     name: Lint
