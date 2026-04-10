@@ -50,27 +50,35 @@ The canonical source is the `AppEnvironment` enum in
 ### Lanes
 
 The **lane** is the [Fastlane](https://fastlane.tools/) lane that runs the
-build, i.e. *which store track the binary gets uploaded to*. Lanes only exist
-for mobile — the web workflow has no lane concept.
+build, i.e. *which distribution target the binary is published to*. Lanes
+only exist for mobile — the web workflow has no lane concept.
 
 | Value | iOS destination | Android destination |
 |---|---|---|
-| `beta` | TestFlight | Google Play internal testing |
-| `release` | App Store production | Google Play production |
+| `store_beta` | TestFlight | Google Play internal testing |
+| `store_production` | App Store production | Google Play production |
+| `github` | *(not supported)* | Signed APK attached to a GitHub Release |
 
-Lane and environment are **independent**. The `beta` lane accepts
+Lane and environment are **independent**. The `store_beta` lane accepts
 `environment:staging` (the default) or `environment:production`, so you can
 ship either config to TestFlight / Play internal — useful for a final
-pre-store smoke test against the production backend. The `release` lane only
-accepts `environment:production`; both `deploy.yml` and the Fastfile reject
-any other combination.
+pre-store smoke test against the production backend. The `store_production`
+lane only accepts `environment:production`; both `deploy.yml` and the
+Fastfile reject any other combination. The `github` lane is Android-only
+(iOS has no direct-distribution analog) and accepts both environments;
+staging builds are marked as **prereleases** on the GitHub Release, while
+production builds become stable releases. See
+[Direct APK distribution via GitHub Releases](#direct-apk-distribution-via-github-releases)
+below.
 
 | Lane | Environment | Meaning |
 |---|---|---|
-| `beta` | `staging` | **Default beta build.** Staging-config build → TestFlight / Play internal for QA. |
-| `beta` | `production` | **Pre-store smoke test.** Production-config build → TestFlight / Play internal for final verification. |
-| `release` | `production` | **Public release.** Production-config build → App Store / Play production. |
-| `release` | `staging` | **Rejected.** Release lanes always upload to the production track; this combination would silently mislabel a staging build as a real release. |
+| `store_beta` | `staging` | **Default beta build.** Staging-config build → TestFlight / Play internal for QA. |
+| `store_beta` | `production` | **Pre-store smoke test.** Production-config build → TestFlight / Play internal for final verification. |
+| `store_production` | `production` | **Public release.** Production-config build → App Store / Play production. |
+| `store_production` | `staging` | **Rejected.** `store_production` always uploads to the production store track; this combination would silently mislabel a staging build as a real release. |
+| `github` | `staging` | **Internal APK drop.** Staging-config signed APK → GitHub Release marked as prerelease. Android only. |
+| `github` | `production` | **Public APK release.** Production-config signed APK → stable GitHub Release. Android only. |
 
 ### Branches
 
@@ -327,13 +335,13 @@ cd ios
 bundle exec fastlane certificates
 
 # Build and upload to TestFlight (staging)
-bundle exec fastlane beta
+bundle exec fastlane store_beta
 
 # Build and upload to TestFlight (production)
-bundle exec fastlane beta environment:production
+bundle exec fastlane store_beta environment:production
 
 # Build and upload to App Store (always builds the production environment)
-bundle exec fastlane release
+bundle exec fastlane store_production
 ```
 
 #### Android
@@ -342,20 +350,24 @@ bundle exec fastlane release
 cd android
 
 # Build and upload to Play Store internal testing (staging)
-bundle exec fastlane beta
+bundle exec fastlane store_beta
 
 # Build and upload to Play Store internal testing (production)
-bundle exec fastlane beta environment:production
+bundle exec fastlane store_beta environment:production
 
 # Build and upload to Play Store production (always builds the production environment)
-bundle exec fastlane release
+bundle exec fastlane store_production
+
+# Build a signed APK locally for direct distribution (no upload — see
+# Direct APK distribution via GitHub Releases below for the CI flow)
+bundle exec fastlane github environment:production
 ```
 
 #### Lane options
 
 | Parameter | Description | Example |
 |---|---|---|
-| `environment` | Config environment to build with. `beta` accepts `staging` (default) or `production`; `release` only accepts `production` (and errors out otherwise). See [Terminology → Lanes](#lanes) for the full matrix. | `environment:production` |
+| `environment` | Config environment to build with. `store_beta` and `github` accept `staging` (default for `store_beta`) or `production`; `store_production` only accepts `production` (and errors out otherwise). See [Terminology → Lanes](#lanes) for the full matrix. | `environment:production` |
 | `build_number` | Override build number | `build_number:42` |
 
 ### Required GitHub secrets (mobile)
@@ -426,7 +438,7 @@ jobs:
     with:
       platform: both
       environment: production
-      lane: release
+      lane: store_production
     secrets: inherit
 ```
 
@@ -452,6 +464,92 @@ from a different repository, list each secret explicitly instead:
 The same `concurrency` group applies to both manual and reusable invocations,
 so you cannot accidentally start two deploys for the same platform/environment
 at the same time.
+
+### Direct APK distribution via GitHub Releases
+
+The `github` lane builds a signed Android APK and publishes it as a
+**GitHub Release** instead of uploading to the Play Store. Use it when you
+need internal, enterprise, or sideload distribution — situations where the
+Play Store is the wrong channel (or unavailable).
+
+The `github` lane is **Android-only**. iOS has no direct-distribution
+analog in this template; setting `platform=ios` or `platform=both` with
+`lane=github` is rejected by the workflow's validate job.
+
+Both `staging` and `production` environments are accepted. Staging builds
+are marked as **prereleases** on the GitHub Release; production builds
+become stable releases. The signing key is the same one used by
+`store_production` (read from `android/key.properties`); no Google Play
+service account JSON is required.
+
+#### Required secrets
+
+Only the Android signing secrets and the matching environment config
+secret are needed:
+
+| Secret | Required |
+|---|---|
+| `ANDROID_KEYSTORE` | yes |
+| `ANDROID_KEY_PROPERTIES` | yes |
+| `CONFIG_STAGING` *or* `CONFIG_PRODUCTION` | yes (matching the environment) |
+
+`GOOGLE_PLAY_JSON_KEY` is **not** required for `lane=github` — the
+workflow's "Write Google Play service account key" and "Preflight check"
+steps are skipped automatically when `lane=github`, since they exist
+solely for Play Store uploads.
+
+#### Triggering manually
+
+1. Go to **Actions → Deploy**
+2. Click **Run workflow**
+3. Set **platform** = `android`, **environment** = `staging` or
+   `production`, **lane** = `github`
+4. Optionally fill in **tag_name** to override the default
+   (`build-<run_number>-<environment>`)
+5. Click **Run workflow**
+
+The Android job builds a signed APK via `bundle exec fastlane github` and
+then runs `gh release create` to publish a GitHub Release pinned to the
+exact commit SHA, with auto-generated release notes (`gh release create
+--generate-notes`).
+
+#### Wiring it into a caller workflow
+
+Because `deploy.yml` already supports `workflow_call`, a derived project
+can wire automatic GitHub Releases (e.g. on push to `main`) without any
+build logic of its own:
+
+```yaml
+name: Release on push to main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      platform: android
+      environment: production
+      lane: github
+      tag_name: v${{ github.run_number }}
+    secrets: inherit
+```
+
+That caller workflow contains zero build logic — `deploy.yml` builds the
+APK *and* publishes the Release in a single called job. The Android job
+in `deploy.yml` declares `permissions: contents: write` at the job level,
+so no extra `permissions:` block is needed in the caller.
+
+#### Tag name defaults
+
+If you omit `tag_name`, the workflow uses
+`build-<github.run_number>-<environment>` (for example,
+`build-42-production`). This is unique per workflow run but **not** per
+commit — re-running the same run reuses the same tag and `gh release
+create` will fail. For real SemVer releases, override `tag_name`
+explicitly (e.g. `v1.2.3`).
 
 ### Mobile customisation
 

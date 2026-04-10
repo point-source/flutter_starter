@@ -100,8 +100,8 @@ platform :android do
     end
   end
 
-  desc 'Build and upload to Play Store internal testing (beta lane — accepts environment:staging|production)'
-  lane :beta do |options|
+  desc 'Build and upload to Play Store internal testing (store_beta lane — accepts environment:staging|production)'
+  lane :store_beta do |options|
     environment = options[:environment] || 'staging'
     build_number = options[:build_number]
 
@@ -119,13 +119,13 @@ platform :android do
     )
   end
 
-  desc 'Build and upload to Play Store production (release lane — production environment only)'
-  lane :release do |options|
+  desc 'Build and upload to Play Store production (store_production lane — production environment only)'
+  lane :store_production do |options|
     environment = options[:environment] || 'production'
     unless environment == 'production'
-      UI.user_error!('release lane only supports environment:production ' \
+      UI.user_error!('store_production lane only supports environment:production ' \
                      '(it always uploads to the Play Store production track). ' \
-                     'For pre-release distribution use the beta lane.')
+                     'For pre-release distribution use the store_beta lane.')
     end
     build_number = options[:build_number]
 
@@ -141,5 +141,43 @@ platform :android do
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
+  end
+
+  desc 'Build a signed release APK for GitHub Releases (github lane — Android-only direct distribution)'
+  lane :github do |options|
+    UI.header('Building signed release APK for GitHub Releases')
+
+    environment = options[:environment] || 'production'
+    build_number = options[:build_number]
+
+    # Signing validation (subset of preflight — no Google Play key required,
+    # since the github lane never uploads to the Play Store).
+    key_props_path = File.join('..', 'android', 'key.properties')
+    UI.user_error!('key.properties not found at android/key.properties — copy from key.properties.example') \
+      unless File.exist?(key_props_path)
+
+    key_props = File.read(key_props_path)
+    UI.user_error!('key.properties still contains placeholder passwords (changeme)') \
+      if key_props.include?('changeme')
+
+    store_file_line = key_props.lines.find { |l| l.start_with?('storeFile=') }
+    UI.user_error!('storeFile not specified in key.properties') unless store_file_line
+    store_file = store_file_line.strip.sub('storeFile=', '')
+    resolved = File.expand_path(store_file, File.join('..', 'android', 'app'))
+    UI.user_error!("Keystore file not found: #{store_file} (resolved to #{resolved})") \
+      unless File.exist?(resolved)
+
+    config_path = File.join('..', 'config', "#{environment}.json")
+    UI.user_error!("Environment config not found: config/#{environment}.json") \
+      unless File.exist?(config_path)
+
+    Dir.chdir('..') do
+      sh(flutter_build_cmd('apk', environment, build_number))
+    end
+
+    apk_path = File.join('..', 'build', 'app', 'outputs', 'flutter-apk', 'app-release.apk')
+    UI.user_error!('APK not found after build') unless File.exist?(apk_path)
+
+    UI.success("APK built: #{apk_path}")
   end
 end
