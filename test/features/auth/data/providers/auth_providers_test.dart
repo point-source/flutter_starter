@@ -5,6 +5,8 @@
 /// [AsyncValue<AuthState>] transitions.
 library;
 
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_starter/core/error/result.dart';
 import 'package:flutter_starter/core/logging/logger_provider.dart';
@@ -244,6 +246,129 @@ void main() {
       expect(state.hasValue, isTrue);
       expect(state.requireValue.isAuthenticated, isFalse);
       expect(state.requireValue.user, isNull);
+    });
+  });
+
+  /// Tests for the derived [isAuthenticatedProvider] and the in-flight
+  /// loading-state behaviour of [AuthStateRepo] mutators.
+  ///
+  /// These pin two related contracts:
+  ///
+  /// 1. While `build()` is still pending on cold start the boolean is
+  ///    `false`. The splash gate in `lib/app.dart` is what prevents the
+  ///    router (and therefore [AuthGuard]) from observing this transient
+  ///    state — if anyone changes [isAuthenticatedProvider] to return a
+  ///    different value during loading, that gate needs to be revisited.
+  /// 2. After the initial resolution, in-flight mutations preserve the
+  ///    previous data via `copyWithPrevious(state)`, so subsequent loading
+  ///    transitions still report `hasValue == true`. The splash gate
+  ///    relies on this to avoid flashing on every login/register/logout.
+  group('isAuthenticated provider and loading transitions', () {
+    test('returns false while build() is still pending (cold-start race)', () {
+      final pending = Completer<Result<User?>>();
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) => pending.future);
+
+      final container = createAuthContainer();
+
+      // Force build() to start without awaiting it.
+      final asyncValue = container.read(authStateRepoProvider);
+      expect(asyncValue.isLoading, isTrue);
+      expect(asyncValue.hasValue, isFalse);
+      expect(asyncValue.hasError, isFalse);
+
+      // The boolean derived for AuthGuard collapses loading to false.
+      expect(container.read(isAuthenticatedProvider), isFalse);
+
+      // Avoid leaking the pending future past the test.
+      pending.complete(const Success<User?>(null));
+    });
+
+    test('returns true after build() resolves to authenticated', () async {
+      final testUser = FakeData.user();
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => Success<User?>(testUser));
+
+      final container = createAuthContainer();
+      await container.read(authStateRepoProvider.future);
+
+      expect(container.read(isAuthenticatedProvider), isTrue);
+    });
+
+    test('preserves previous data during login transition', () async {
+      // Start unauthenticated.
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
+
+      // Hold the login response open so we can inspect the loading state.
+      final loginPending = Completer<Result<User>>();
+      when(
+        () => mockAuthRepository.login(any(), any()),
+      ).thenAnswer((_) => loginPending.future);
+
+      final container = createAuthContainer();
+      await container.read(authStateRepoProvider.future);
+
+      final notifier = container.read(authStateRepoProvider.notifier);
+      // Kick off the login but do not await it.
+      final loginFuture = notifier.login('test@example.com', 'password123');
+
+      // Mid-flight: still loading, but previous data is preserved.
+      final inFlight = container.read(authStateRepoProvider);
+      expect(inFlight.isLoading, isTrue);
+      expect(inFlight.hasValue, isTrue);
+      expect(inFlight.requireValue.isAuthenticated, isFalse);
+
+      // Resolve and verify final state.
+      loginPending.complete(Success(FakeData.user()));
+      await loginFuture;
+
+      final finalState = container.read(authStateRepoProvider);
+      expect(finalState.hasValue, isTrue);
+      expect(finalState.isLoading, isFalse);
+      expect(finalState.requireValue.isAuthenticated, isTrue);
+    });
+
+    test('preserves previous data during logout transition', () async {
+      final testUser = FakeData.user();
+
+      // Start authenticated.
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => Success<User?>(testUser));
+
+      // Hold the logout response open so we can inspect the loading state.
+      final logoutPending = Completer<Result<void>>();
+      when(
+        () => mockAuthRepository.logout(),
+      ).thenAnswer((_) => logoutPending.future);
+
+      final container = createAuthContainer();
+      final initial = await container.read(authStateRepoProvider.future);
+      expect(initial.isAuthenticated, isTrue);
+
+      final notifier = container.read(authStateRepoProvider.notifier);
+      // Kick off the logout but do not await it.
+      final logoutFuture = notifier.logout();
+
+      // Mid-flight: still loading, but previous (authenticated) data
+      // is preserved so the splash gate in app.dart will not re-trigger.
+      final inFlight = container.read(authStateRepoProvider);
+      expect(inFlight.isLoading, isTrue);
+      expect(inFlight.hasValue, isTrue);
+      expect(inFlight.requireValue.isAuthenticated, isTrue);
+
+      // Resolve and verify final state.
+      logoutPending.complete(const Success<void>(null));
+      await logoutFuture;
+
+      final finalState = container.read(authStateRepoProvider);
+      expect(finalState.hasValue, isTrue);
+      expect(finalState.isLoading, isFalse);
+      expect(finalState.requireValue.isAuthenticated, isFalse);
     });
   });
 }

@@ -84,7 +84,10 @@ class AuthStateRepo extends _$AuthStateRepo {
   /// Sets state to loading, then either authenticated or error.
   /// Returns a [Result] so callers can react to success or failure.
   Future<Result<void>> login(String email, String password) async {
-    state = const AsyncLoading();
+    // Preserve the prior data so the splash gate in app.dart can
+    // distinguish a fresh cold-start from an in-flight mutation.
+    // ignore: invalid_use_of_internal_member
+    state = const AsyncLoading<AuthState>().copyWithPrevious(state);
     final repository = ref.read(authRepositoryProvider);
     final logger = ref.read(loggerProvider);
     final result = await repository.login(email, password);
@@ -119,7 +122,10 @@ class AuthStateRepo extends _$AuthStateRepo {
     required String password,
     required String name,
   }) async {
-    state = const AsyncLoading();
+    // Preserve the prior data so the splash gate in app.dart can
+    // distinguish a fresh cold-start from an in-flight mutation.
+    // ignore: invalid_use_of_internal_member
+    state = const AsyncLoading<AuthState>().copyWithPrevious(state);
     final repository = ref.read(authRepositoryProvider);
     final result = await repository.register(
       email: email,
@@ -155,7 +161,10 @@ class AuthStateRepo extends _$AuthStateRepo {
 
   /// End the current session and return to the unauthenticated state.
   Future<void> logout() async {
-    state = const AsyncLoading();
+    // Preserve the prior data so the splash gate in app.dart can
+    // distinguish a fresh cold-start from an in-flight mutation.
+    // ignore: invalid_use_of_internal_member
+    state = const AsyncLoading<AuthState>().copyWithPrevious(state);
     final repository = ref.read(authRepositoryProvider);
     final logger = ref.read(loggerProvider);
     await repository.logout();
