@@ -1,7 +1,13 @@
 include: package:flutter_lints/flutter.yaml
 
-plugins:
-  import_rules: ^0.0.7
+# import_rules plugin disabled: analysis_server_plugin 0.3.4 deadlocks dart analyze
+# on Dart 3.12 due to a plugin protocol change in the SDK's analysis server. Upgrading
+# analysis_server_plugin to >=0.3.9 is blocked by auto_route_generator ^10.4.0 and
+# riverpod_generator ^4.0.0+1 both requiring analyzer <10.0.0. Re-enable once those
+# generators ship versions supporting analyzer >=10.x.
+# TODO(deps): re-enable when auto_route_generator and riverpod_generator support analyzer 10.x
+# plugins:
+#   import_rules: ^0.0.8
 
 analyzer:
   language:

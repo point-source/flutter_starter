@@ -62,7 +62,9 @@ dev_dependencies:
 
   # Linting
   flutter_lints: ^6.0.0
-  import_rules: ^0.0.7
+  # import_rules plugin is currently disabled in analysis_options.yaml (deadlocks
+  # dart analyze on Dart 3.12); kept as a dependency so it's ready to re-enable.
+  import_rules: ^0.0.8
 
 flutter:
   uses-material-design: true
