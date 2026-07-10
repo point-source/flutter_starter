@@ -15,7 +15,7 @@ scaffolding that now only causes warnings and hard failures."
 
 ## Apple targets integrate plugins through Swift Package Manager only §spec:spm-only-integration
 
-*Status: not started*
+*Status: complete*
 
 Both Apple targets build with SPM as the sole native dependency system. The
 `ios/` and `macos/` directories carry no CocoaPods integration of any kind: no
