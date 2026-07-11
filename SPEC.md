@@ -116,7 +116,7 @@ re-added deliberately — a visible, reviewed change.
 
 ## CI guards the CocoaPods-free state on every change §spec:ci-apple-build-guard
 
-*Status: not started*
+*Status: complete*
 
 Continuous integration builds both the iOS and the macOS targets on every pull
 request and fails if either Apple build breaks. In addition to compiling, CI runs
