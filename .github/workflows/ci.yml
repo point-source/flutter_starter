@@ -143,9 +143,15 @@ jobs:
   # SPM (or any other Apple build break) fails the merge gate. Unsigned: the
   # guard proves plugins resolve and the target compiles under SPM, not signing
   # or distribution -- that remains the release pipeline's job.
+  #
+  # Gated to the template repo: macOS runners are slow and costly, so derived
+  # projects don't pay for the Apple builds by default. A fork that wants Apple
+  # build coverage can change this condition (or delete it) for their own slug.
+  # The cheap static no-cocoapods guard still runs everywhere.
   build-ios:
     name: Build (iOS, unsigned)
     runs-on: macos-latest
+    if: github.repository == 'point-source/flutter_starter'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
@@ -184,10 +190,12 @@ jobs:
 
   # Build the macOS target on every PR. macOS is where the original no-CocoaPods
   # hard failure surfaced, so guarding it is essential; a broken macOS build
-  # fails the merge gate here.
+  # fails the merge gate here. Gated to the template repo for the same
+  # cost reason as build-ios above.
   build-macos:
     name: Build (macOS)
     runs-on: macos-latest
+    if: github.repository == 'point-source/flutter_starter'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
