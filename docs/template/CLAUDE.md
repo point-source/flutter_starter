@@ -216,6 +216,13 @@ flutter run --dart-define-from-file=config/staging.json
 # Release build (production)
 flutter build apk --release --dart-define-from-file=config/production.json
 
+# Build iOS (Apple targets use Swift Package Manager -- no CocoaPods / pod install)
+# --no-codesign builds unsigned, so it succeeds on any machine with just Flutter + Xcode
+flutter build ios --no-codesign --dart-define-from-file=config/production.json
+
+# Build macOS
+flutter build macos --release --dart-define-from-file=config/production.json
+
 # Build web (development)
 flutter build web --release --dart-define-from-file=config/development.json
 
