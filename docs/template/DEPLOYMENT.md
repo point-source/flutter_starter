@@ -236,6 +236,10 @@ cd ios && bundle install
 cd android && bundle install
 ```
 
+> The Apple targets resolve native plugin dependencies through Swift Package
+> Manager (on by default in supported Flutter versions), so there is no
+> `pod install` step and CocoaPods is not required to build `ios/` or `macos/`.
+
 ### Preflight check
 
 Before configuring anything, run the preflight check to see what still needs

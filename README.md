@@ -209,6 +209,8 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 | `flutter test` | Run all tests |
 | `flutter test --coverage` | Run tests with coverage |
 | `flutter build apk --release --dart-define-from-file=config/production.json` | Build release APK |
+| `flutter build ios --no-codesign --dart-define-from-file=config/production.json` | Build iOS (SPM, no CocoaPods) |
+| `flutter build macos --release --dart-define-from-file=config/production.json` | Build macOS (SPM, no CocoaPods) |
 | `dart run build_runner build --delete-conflicting-outputs` | Run code generation (one-shot) |
 | `dart run build_runner watch --delete-conflicting-outputs` | Run code generation (watch mode) |
 | `dart run slang` | Generate i18n string files |
