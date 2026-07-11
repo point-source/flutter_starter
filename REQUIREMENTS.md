@@ -27,9 +27,12 @@ without the CocoaPods toolchain present and stays a faithful, modern reference.
   the built app runs with every plugin functioning.
 - A build succeeds on a machine or CI image that does not have the CocoaPods
   toolchain installed — the absence of CocoaPods is no longer a failure.
-- An automated CI check builds both the iOS and the macOS targets on every
-  change and fails if either the CocoaPods regression returns or an Apple build
-  otherwise breaks.
+- An automated CI check builds both the iOS and the macOS targets on every pull
+  request to the `main` integration branch and fails if either the CocoaPods
+  regression returns or an Apple build otherwise breaks. The cheap, toolchain-free
+  CocoaPods-artifact check runs everywhere; the costlier macOS-runner Apple builds
+  run in the template repository (they are gated so forks do not pay for them by
+  default).
 - A developer who freshly clones the repository can build both Apple targets by
   following the project's documented steps, without separately installing or
   configuring CocoaPods.

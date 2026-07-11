@@ -119,17 +119,22 @@ re-added deliberately — a visible, reviewed change.
 *Status: complete*
 
 Continuous integration builds both the iOS and the macOS targets on every pull
-request and fails if either Apple build breaks. In addition to compiling, CI runs
-a static regression check that fails if any CocoaPods artifact — a `Podfile`,
-`Podfile.lock`, a `Pods/` directory, a `Pods.xcodeproj` workspace reference, or a
-`Pods-Runner` xcconfig include — reappears anywhere in `ios/` or `macos/`.
+request targeting the `main` integration branch and fails if either Apple build
+breaks. In addition to compiling, CI runs a static regression check that fails if
+any CocoaPods artifact — a `Podfile`, `Podfile.lock`, a `Pods/` directory, a
+`Pods.xcodeproj` workspace reference, or a `Pods-Runner` xcconfig include —
+reappears anywhere in `ios/` or `macos/`. The static check runs on every such PR
+regardless of repository; the macOS-runner Apple builds are gated to the template
+repository (`github.repository == 'point-source/flutter_starter'`) so forks do not
+pay for them by default.
 
-**Observable behavior / test path:** Opening a PR triggers an iOS build job and a
-macOS build job on macOS runners; both must pass for the merge gate. A PR that
-reintroduces a `Podfile` (or any other CocoaPods artifact) fails the static check
-with a clear message, even though the runner image happens to ship CocoaPods. A PR
-that breaks an Apple build (e.g. a plugin that no longer resolves under SPM) fails
-the corresponding build job.
+**Observable behavior / test path:** Opening a PR against `main` in the template
+repository triggers an iOS build job and a macOS build job on macOS runners; both
+must pass for the merge gate. A PR that reintroduces a `Podfile` (or any other
+CocoaPods artifact) fails the static check with a clear message — even though the
+runner image happens to ship CocoaPods, and even on a fork where the macOS build
+jobs are skipped. A PR that breaks an Apple build (e.g. a plugin that no longer
+resolves under SPM) fails the corresponding build job.
 
 **Decision and the constraint that drove it:** Guard with *both* a real build of
 each platform *and* a cheap static anti-regression check — the operator's choice
