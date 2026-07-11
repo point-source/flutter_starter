@@ -164,7 +164,7 @@ follows the removal work rather than leading it.
 
 ## A fresh clone builds both Apple targets without configuring CocoaPods §spec:fresh-clone-build-docs
 
-*Status: not started*
+*Status: complete*
 
 A developer who freshly clones the repository can build both Apple targets by
 following the project's documented setup steps, without separately installing or
