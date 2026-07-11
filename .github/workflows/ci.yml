@@ -124,3 +124,102 @@ jobs:
 
       - name: Verify generated files are up to date
         run: ./scripts/ci-check.sh --check codegen
+
+  # Static anti-regression guard for the CocoaPods-free Apple targets.
+  # Filesystem-only, so it runs on a cheap Linux runner and does NOT depend on
+  # what the runner image ships: GitHub's macOS runners have CocoaPods
+  # pre-installed, so a re-added Podfile could otherwise build green in the
+  # Apple build jobs below and slip through. See docs SPEC §spec:ci-apple-build-guard.
+  no-cocoapods:
+    name: No CocoaPods Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Assert no CocoaPods artifacts under ios/ or macos/
+        run: ./scripts/check-no-cocoapods.sh
+
+  # Build the iOS target on every PR so a plugin that no longer resolves under
+  # SPM (or any other Apple build break) fails the merge gate. Unsigned: the
+  # guard proves plugins resolve and the target compiles under SPM, not signing
+  # or distribution -- that remains the release pipeline's job.
+  build-ios:
+    name: Build (iOS, unsigned)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Provision config from templates
+        run: ./scripts/setup.sh
+
+      - name: Apply config from secret
+        env:
+          CONFIG_DEVELOPMENT: ${{ secrets.CONFIG_DEVELOPMENT }}
+          ENV_NAME: development
+        run: |
+          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+          config_json="${!var:-}"
+          if [ -z "$config_json" ]; then
+            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+            exit 0
+          fi
+          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
+            echo "::error::$var secret is not valid JSON"
+            exit 1
+          fi
+          printf '%s' "$config_json" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from $var secret"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no code signing)
+        run: flutter build ios --no-codesign --dart-define-from-file=config/development.json
+
+  # Build the macOS target on every PR. macOS is where the original no-CocoaPods
+  # hard failure surfaced, so guarding it is essential; a broken macOS build
+  # fails the merge gate here.
+  build-macos:
+    name: Build (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Provision config from templates
+        run: ./scripts/setup.sh
+
+      - name: Apply config from secret
+        env:
+          CONFIG_DEVELOPMENT: ${{ secrets.CONFIG_DEVELOPMENT }}
+          ENV_NAME: development
+        run: |
+          var="CONFIG_$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+          config_json="${!var:-}"
+          if [ -z "$config_json" ]; then
+            echo "No $var secret set — using committed config/examples/$ENV_NAME.json"
+            exit 0
+          fi
+          if ! printf '%s' "$config_json" | jq empty 2>/dev/null; then
+            echo "::error::$var secret is not valid JSON"
+            exit 1
+          fi
+          printf '%s' "$config_json" > "config/$ENV_NAME.json"
+          echo "Wrote config/$ENV_NAME.json from $var secret"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --dart-define-from-file=config/development.json
