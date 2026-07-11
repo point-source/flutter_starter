@@ -79,7 +79,7 @@ themselves — an explicit, documented escape hatch rather than latent scaffoldi
 
 ## The release pipeline requires no CocoaPods toolchain §spec:release-pipeline-cocoapods-free
 
-*Status: not started*
+*Status: complete*
 
 The iOS release path (Fastlane, invoked from `deploy.yml`) builds and ships
 without any CocoaPods dependency. The `cocoapods` gem is removed from
