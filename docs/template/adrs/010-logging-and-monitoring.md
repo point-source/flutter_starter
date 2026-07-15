@@ -35,7 +35,9 @@ Global error handlers are configured in `bootstrap.dart`:
 - `PlatformDispatcher.instance.onError` captures uncaught async errors.
 - Both forward to Sentry when enabled.
 
-The `LoggingInterceptor` in the Dio chain logs HTTP requests and responses, redacting sensitive headers (Authorization).
+Backend-specific logging is added only with the selected backend and must redact
+credentials, sensitive payloads, and request details. The explicit REST
+capability supplies its own transport logging behavior.
 
 ## Consequences
 

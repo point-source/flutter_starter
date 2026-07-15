@@ -8,6 +8,6 @@ vars:
     prompt: What is the feature name?
   dio:
     type: boolean
-    description: Include Dio/Retrofit data layer (service, DTO, mapper, Dio repository)
+    description: Include REST data layer (requires the dio_rest capability)
     default: false
-    prompt: Include Dio/Retrofit data layer?
+    prompt: Include opted-in REST data layer?

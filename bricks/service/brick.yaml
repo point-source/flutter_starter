@@ -1,5 +1,5 @@
 name: service
-description: Scaffold a Retrofit API service for an existing feature.
+description: Scaffold a Retrofit service for a project with dio_rest installed.
 version: 0.1.0
 vars:
   feature_name:

@@ -22,7 +22,9 @@ The template needs a structure that:
 
 Use **feature-first** architecture. Each feature is a self-contained directory under `lib/features/` containing its own `data/`, `domain/`, and `ui/` layers.
 
-Shared infrastructure lives in `lib/core/`, organized by concern (error handling, networking, routing, storage, theming, logging).
+Shared infrastructure lives in `lib/core/`, organized by concern (error
+handling, routing, storage, theming, logging, and explicitly selected shared
+clients).
 
 Directory structure:
 
@@ -31,7 +33,7 @@ lib/
   core/          # Shared infrastructure (no feature logic)
     env/
     error/
-    network/
+    selected_client/          # Only when a chosen backend is shared
     routing/
     storage/
     theme/
