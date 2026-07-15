@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:mason/mason.dart';
 
@@ -28,19 +29,30 @@ const _retrofitBuilder =
 void run(HookContext context) {
   final pubspec = File('pubspec.yaml');
   final build = File('build.yaml');
+  final configFiles = <File>[
+    File('config/examples/development.json'),
+    File('config/examples/staging.json'),
+    File('config/examples/production.json'),
+  ];
 
-  if (!pubspec.existsSync() || !build.existsSync()) {
+  if (!pubspec.existsSync() ||
+      !build.existsSync() ||
+      configFiles.any((file) => !file.existsSync())) {
     _abort(context, 'dio_rest must run from the Flutter project root.');
   }
 
   final originalPubspec = pubspec.readAsStringSync();
   final originalBuild = build.readAsStringSync();
+  final originalConfigs = {
+    for (final file in configFiles) file.path: file.readAsStringSync(),
+  };
 
   try {
     final updatedPubspec = _updatePubspec(originalPubspec);
     final updatedBuild = _updateBuild(originalBuild);
     pubspec.writeAsStringSync(updatedPubspec);
     build.writeAsStringSync(updatedBuild);
+    _updateConfigExamples(configFiles);
     context.logger.success(
       'REST capability installed. Set REST_API_URL in config/examples/*.json, '
       'then run flutter pub get and build_runner.',
@@ -48,8 +60,37 @@ void run(HookContext context) {
   } on FormatException catch (error) {
     pubspec.writeAsStringSync(originalPubspec);
     build.writeAsStringSync(originalBuild);
+    for (final entry in originalConfigs.entries) {
+      File(entry.key).writeAsStringSync(entry.value);
+    }
     _removeGeneratedCapability();
     _abort(context, error.message);
+  }
+}
+
+void _updateConfigExamples(List<File> files) {
+  const exampleUrls = {
+    'development': 'http://localhost:3000',
+    'staging': 'https://api-staging.example.com',
+    'production': 'https://api.example.com',
+  };
+
+  for (final file in files) {
+    final decoded = jsonDecode(file.readAsStringSync());
+    if (decoded is! Map<String, dynamic>) {
+      throw FormatException('${file.path} must contain a JSON object.');
+    }
+    final environment = decoded['ENVIRONMENT'];
+    if (environment is! String || !exampleUrls.containsKey(environment)) {
+      throw FormatException(
+        '${file.path} must declare a supported ENVIRONMENT before dio_rest '
+        'can add its endpoint.',
+      );
+    }
+    decoded.putIfAbsent('REST_API_URL', () => exampleUrls[environment]!);
+    file.writeAsStringSync(
+      '${const JsonEncoder.withIndent('  ').convert(decoded)}\n',
+    );
   }
 }
 
