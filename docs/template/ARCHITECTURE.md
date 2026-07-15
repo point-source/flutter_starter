@@ -30,10 +30,10 @@ layering. Each feature is organized into three layers with strict dependency rul
   │                                                             │
   │  Repositories (impl)         Providers (@riverpod)          │
   │  - Source of truth            - Infrastructure wiring        │
-  │  - Exception -> Result        Services (@RestApi, optional) │
-  │  - Backend integration        - HTTP endpoints (Dio)        │
-  │  DTOs (optional)              Mappers (optional)            │
-  │  - JSON serialization         - DTO -> Domain entity        │
+  │  - Source error -> Failure   Sources (optional)             │
+  │  - Return Result<T>           - Mock / SDK / local / REST    │
+  │  Source models (optional)    Mappers (optional)             │
+  │  - Data-layer only            - Source -> Domain entity      │
   └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -49,8 +49,10 @@ local preferences may skip the domain layer entirely. Add it when the feature
 has its own entity types, repository abstraction, or failure hierarchy.
 
 Features default to **mock implementations**. The data layer starts with a mock
-repository and providers wired to it. Services, DTOs, and mappers are added
-later when connecting a real backend (REST API, SDK, etc.).
+repository and providers wired to it. A project may later bind the same
+repository interface to an SDK, local store, custom client, or REST client.
+Source models, adapters, and mappers stay in the data layer and are added only
+when the selected implementation needs them.
 
 ## Data Flow
 
@@ -66,26 +68,19 @@ The standard request lifecycle follows this path:
   ViewModel (@riverpod AsyncNotifier) or data/providers/ notifier
       |  reads provider, calls method
       v
-  Repository (implements IXxxRepository)
-      |  calls service, catches exceptions
+  Repository interface (domain contract)
+      ^  implemented by
+      |
+  Repository implementation (data layer)
+      |  translates source values/errors
       v
-  Service (@RestApi / retrofit)
-      |  sends HTTP request via Dio
-      v
-  Dio Interceptor Chain
-      |  AuthInterceptor -> RefreshTokenInterceptor
-      |  -> LoggingInterceptor -> ErrorInterceptor
-      v
-  REST API
+  Selected source (mock / SDK / local / custom client / REST)
 ```
 
 ### Response Flow (Success)
 
 ```
-  API Response (JSON)
-      |
-      v
-  Retrofit (deserializes to DTO)
+  Source value (record / SDK model / DTO / entity)
       |
       v
   Repository
@@ -104,19 +99,11 @@ The standard request lifecycle follows this path:
 ### Response Flow (Error)
 
 ```
-  HTTP Error / Network Failure
-      |
-      v
-  Dio throws DioException
-      |
-      v
-  ErrorInterceptor (in core/http/)
-      |  wraps as DioApiException (Dio-specific, lives in core/http/)
-      |  re-throws as DioException with DioApiException in .error
+  Source-specific exception or rejected operation
       v
   Repository catch block
-      |  inspects DioApiException.statusCode
-      |  maps to feature-specific Failure subtype
+      |  inspects only the selected source's error
+      |  maps it to an application Failure subtype
       |  returns Err(failure)
       v
   ViewModel
@@ -136,16 +123,11 @@ typed, pattern-matchable values.
 ### The Error Type Hierarchy
 
 ```
-  DioException (from Dio)
-      |
-      | ErrorInterceptor converts to:
-      v
-  DioApiException (sealed class, Dio-specific, in core/http/)
-      |-- ServerException       statusCode, message
-      |-- NetworkException      no connectivity
-      |-- TimeoutException      request timed out
-      |-- ParseException        response parsing failed
-      |-- CacheException        local storage failed
+  Source-specific exception (data layer only)
+      |-- SDK exception
+      |-- local persistence exception
+      |-- custom-client exception
+      |-- REST transport exception (only after REST opt-in)
       |
       | Repository catches and maps to:
       v
@@ -226,8 +208,8 @@ TaskWork<T> function
   the tracker directly.
 - **TaskProgress**: Sealed hierarchy supporting indeterminate (spinner), determinate
   (0.0–1.0 fraction), and phased (labelled steps with optional fraction) progress.
-- **CancellationToken**: Pure Dart cooperative cancellation — no Dio dependency.
-  Features bridge to Dio's `CancelToken` inside the work function.
+- **CancellationToken**: Pure Dart cooperative cancellation. Features bridge it
+  to a selected client's cancellation primitive inside the work function.
 - **Throttling**: Categories with a registered `maxConcurrent` limit queue excess
   tasks as `pending` and auto-promote them when slots open.
 - **Retry**: Tasks marked `retryable: true` retain their work factory for re-execution.
@@ -243,14 +225,14 @@ are organized by responsibility.
 ### Provider Hierarchy for a Feature
 
 ```
-  dioProvider (@Riverpod keepAlive)
+  selectedSourceProvider (@riverpod, only after backend selection)
       |
       v
-  authServiceProvider (@riverpod)          ─┐
-      |  creates AuthService(dio)           │  data/providers/
+  authClientProvider (@riverpod)           ─┐
+      |  creates the selected client        │  data/providers/
       v                                     │  auth_providers.dart
   authRepositoryProvider (@riverpod)        │
-      |  creates AuthRepository(...)        │
+      |  returns IAuthRepository            │
       v                                     │
   authStateRepoProvider (@Riverpod keepAlive)│
       |  AsyncNotifier holding AuthState    │
@@ -269,7 +251,7 @@ and only created when a page needs significant data transformation.
 
 | Pattern | Annotation | Location | Use Case |
 |---|---|---|---|
-| App-lifetime singleton | `@Riverpod(keepAlive: true)` | `data/providers/` | Dio, AppRouter, AuthStateRepo |
+| App-lifetime singleton | `@Riverpod(keepAlive: true)` | `data/providers/` | AppRouter, AuthStateRepo, selected long-lived client |
 | Infrastructure wiring | `@riverpod` (function) | `data/providers/` | Services, repositories |
 | Shared state notifier | `@Riverpod(keepAlive: true)` (class) | `data/providers/` | Auth state, preferences |
 | Page-specific ViewModel | `@riverpod` (class) | `ui/view_models/` | Complex data transformation |
@@ -353,20 +335,16 @@ for CI pipelines.
 6. Create `ProviderScope` with `SharedPreferences` override
 7. Run `App` widget
 
-## Dio Interceptor Chain (core/http/)
+## Backend Capabilities
 
-HTTP requests pass through four interceptors in order:
+The base starter does not install a real-backend client. Mocks, SDKs, local
+sources, custom clients, and REST are peer repository implementations. A chosen
+backend owns its client configuration, source-specific models, security rules,
+and exception mapping in the data layer.
 
-1. **AuthInterceptor** -- reads access token from `ITokenStorage`, adds
-   `Authorization: Bearer <token>` header
-2. **RefreshTokenInterceptor** (`QueuedInterceptor`) -- on 401, acquires lock,
-   calls refresh endpoint using a separate plain Dio instance (avoiding
-   interceptor recursion), retries the original request. On refresh failure,
-   clears tokens and fires `onAuthExpired` callback to invalidate auth state
-3. **LoggingInterceptor** -- logs request/response details via `IAppLogger`
-   with sensitive data redaction
-4. **ErrorInterceptor** -- converts `DioException` into `DioApiException` subtypes
-   preserving the HTTP status code for downstream mapping
+Projects that deliberately choose the supported Dio/Retrofit REST capability run
+`mason make dio_rest`. The opt-in adds its HTTP foundation and a project-owned
+`docs/project/REST_DIO.md` guide. Those details are not base architecture.
 
 ## Testing Strategy
 
@@ -541,7 +519,7 @@ Rationale for major architectural choices is documented in ADRs:
 |---|---|
 | [001](adrs/001-riverpod-for-state-and-di.md) | Riverpod for state management and DI |
 | [002](adrs/002-auto-route-for-navigation.md) | auto_route for navigation |
-| [003](adrs/003-dio-retrofit-for-networking.md) | Dio + Retrofit for networking |
+| [003](adrs/003-dio-retrofit-for-networking.md) | Dio + Retrofit for explicitly opted-in REST projects |
 | [004](adrs/004-dart-mappable-for-models.md) | dart_mappable for data modeling |
 | [005](adrs/005-sealed-result-for-errors.md) | Sealed Result type for error handling |
 | [006](adrs/006-slang-for-i18n.md) | slang for internationalization |

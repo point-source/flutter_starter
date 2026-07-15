@@ -93,22 +93,27 @@ final class EmailAlreadyInUse extends AuthFailure { ... }
 
 - Domain layer must not import from the data layer or UI layer.
 - Domain layer must not depend on Flutter framework classes.
-- Domain layer must not depend on Dio, Retrofit, or any networking library.
+- Domain layer must not depend on any SDK, persistence, transport, or other
+  source library.
 - Use cases are only added when logic spans multiple repositories.
 
-**When to skip**: Skip the domain layer when the feature has no API, no DTOs to map, and no feature-specific failures (e.g., the settings feature).
+**When to skip**: Skip the domain layer when the feature needs no independent
+entity, repository contract, or feature-specific failures (for example, simple
+settings state used only inside one provider).
 
 ## Data Layer
 
 **Location**: `features/<name>/data/`
 
-**Contains**: Repository implementations, infrastructure providers, and optionally Retrofit services, DTOs, and DTO-to-entity mappers when connecting a backend.
+**Contains**: Repository implementations, infrastructure providers, and any
+optional source adapters, source models, and source-to-entity mappers.
 
 **Responsibilities**:
 
 - Implement repository interfaces defined in the domain layer.
-- Call external services (REST APIs via Retrofit, SDK clients, local storage).
-- Map DTOs to domain entities using mapper extensions.
+- Call the selected source (mock state, SDK client, local storage, custom client,
+  or an explicitly opted-in REST client).
+- Map source-specific models to domain entities when needed.
 - Catch exceptions and return `Result<T>` values.
 - Manage side effects (token persistence, cache writes).
 - Provide Riverpod providers for services and repositories in `data/providers/`.
@@ -117,24 +122,22 @@ final class EmailAlreadyInUse extends AuthFailure { ... }
 ```dart
 // Repository implementation in data layer
 class AuthRepository implements IAuthRepository {
-  const AuthRepository(this._authService, this._tokenStorage);
+  const AuthRepository(this._authClient, this._tokenStorage);
 
-  final AuthService _authService;
+  final ProjectAuthClient _authClient;
   final ITokenStorage _tokenStorage;
 
   @override
   Future<Result<User>> login(String email, String password) async {
     try {
-      final response = await _authService.login(
-        LoginRequest(email: email, password: password),
-      );
+      final response = await _authClient.login(email, password);
       await _tokenStorage.saveTokens(
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
       );
       return Success(response.user.toDomain());
-    } on DioException catch (e, st) {
-      return Err(_mapDioException(e, st));
+    } on ProjectInvalidCredentials catch (_, st) {
+      return Err(InvalidCredentials(st));
     } on Exception catch (e, st) {
       return Err(UnexpectedFailure(e, st));
     }
@@ -145,8 +148,8 @@ class AuthRepository implements IAuthRepository {
 **Rules**:
 
 - Repositories must always return `Result<T>`, never throw exceptions.
-- DTOs must not leak into the domain or UI layers -- always map to entities.
-- Retrofit services must be stateless HTTP wrappers (code-generated). SDK clients are injected directly.
+- Source records, DTOs, and SDK models must not leak into domain or UI layers.
+- Inject selected clients/sources into repository implementations.
 - The repository is the single source of truth for data operations within the feature.
 
 ## Dependency Direction Summary

@@ -26,12 +26,12 @@ Future<Result<User>> login(String email, String password);
 ```
 
 ```dart
-/// Provides the main [Dio] instance with all interceptors configured.
+/// Provide the selected profile client.
 ///
-/// This is the Dio instance that all retrofit services should use.
-/// It includes auth, refresh, logging, and error interceptors.
-@Riverpod(keepAlive: true)
-Dio dio(DioRef ref) { ... }
+/// Keep the source client in the data layer; repositories translate its models
+/// and errors before returning domain values.
+@riverpod
+ProjectProfileClient profileClient(Ref ref) { ... }
 ```
 
 ```dart
@@ -88,11 +88,10 @@ await _tokenStorage.clearTokens();
 Each file starts with a `///` doc comment on the primary class or function, explaining its role in the architecture:
 
 ```dart
-/// Retrofit service for authentication API endpoints.
+/// Adapt the selected authentication source for the data layer.
 ///
-/// Defines the HTTP contract for login, registration, logout, and
-/// session retrieval. The generated implementation delegates to [Dio]
-/// and handles JSON serialisation via dart_mappable.
+/// Keep source-specific request, response, and exception types behind the
+/// authentication repository.
 library;
 
 // ... imports and code
@@ -104,7 +103,7 @@ Use the `library;` directive to attach the file-level doc comment to the library
 
 - **Never document** generated files (`.g.dart`, `.gr.dart`, `.mapper.dart`).
 - **Always document** the source annotations that drive generation:
-  - The `@RestApi()` class and its methods.
+  - Backend-specific annotated clients only after that backend is selected.
   - The `@riverpod` / `@Riverpod` annotated functions and classes.
   - The `@MappableClass()` class and its fields.
   - The `@RoutePage()` widget.

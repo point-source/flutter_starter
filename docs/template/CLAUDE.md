@@ -16,7 +16,7 @@
 |---|---|---|
 | State / DI | `flutter_riverpod` + `riverpod_generator` | `@riverpod` code gen for all providers |
 | Navigation | `auto_route` + `auto_route_generator` | Type-safe routes, guards, nested nav |
-| HTTP | `dio` + `retrofit` + `retrofit_generator` | Code-gen API services per feature |
+| Data Access | Repository interfaces + project-selected sources | Mocks by default; SDK, local, custom, or REST implementations are peers |
 | Data Models | `dart_mappable` + `dart_mappable_builder` | Immutable models, JSON, copyWith |
 | Collections | `fast_immutable_collections` | IList, IMap, ISet for domain models |
 | Error Handling | Custom sealed `Result<T>` | No fpdart -- failures are values |
@@ -41,7 +41,6 @@ lib/
   core/                  # Shared infrastructure
     env/                 # AppEnvironment enum + compile-time config
     error/               # Result<T>, Failure hierarchy
-    http/                # Dio HTTP infrastructure (self-contained, optional)
     storage/             # Token storage, secure storage, shared prefs providers
     tasks/               # TaskTracker, TaskChannel, progress, cancellation
     routing/             # AppRouter, route guards
@@ -69,9 +68,9 @@ features/<name>/
     repositories/        # Repository implementation (mock by default)
     providers/           # @riverpod infrastructure providers
     # Optional -- added when connecting a backend:
-    # services/          # @RestApi() retrofit service (Dio backends)
-    # models/            # @MappableClass() DTOs (any backend with its own response types)
-    # mappers/           # DTO-to-domain mapping extensions (any backend with DTOs)
+    # sources/           # Optional SDK, local, custom-client, or REST adapters
+    # models/            # Optional source-specific data models
+    # mappers/           # Optional source-model to domain mapping extensions
   domain/
     entities/            # @MappableClass() domain models
     repositories/        # Abstract repository interface (IXxxRepository)
@@ -104,7 +103,7 @@ from `data/providers/` directly when no transformation is needed.
 - Annotations that trigger code gen:
   - `@riverpod` / `@Riverpod(keepAlive: true)` -- provider generation
   - `@MappableClass()` -- data model generation (JSON, copyWith)
-  - `@RestApi()` -- retrofit HTTP service generation
+  - Backend-specific annotations only after that backend capability is selected
   - `@RoutePage()` -- auto_route page registration
 - Files using code gen include `part '<filename>.g.dart';`
 
@@ -114,7 +113,7 @@ from `data/providers/` directly when no transformation is needed.
 - ViewModels are optional `@riverpod` AsyncNotifier classes in `ui/view_models/`
 - Only create a ViewModel when the page needs significant data transformation
 - Pages can watch `data/providers/` directly for simple passthrough cases
-- Use `@Riverpod(keepAlive: true)` for app-lifetime providers (Dio, router, auth)
+- Use `@Riverpod(keepAlive: true)` for app-lifetime providers (router, auth, long-lived selected clients)
 - Use `ref.read()` for one-shot reads, `ref.watch()` for reactive dependencies
 - Cross-feature sharing happens through `data/providers/`, never `ui/view_models/`
 
@@ -124,7 +123,8 @@ from `data/providers/` directly when no transformation is needed.
 - Infrastructure failures: `NetworkFailure`, `ServerFailure`, `CacheFailure`
 - Feature failures: sealed class extending `Failure` (e.g., `AuthFailure`)
 - ViewModels call `result.when(success:, failure:)` to map to `AsyncValue`
-- `DioApiException` is Dio-specific and lives in `core/http/`; caught by Dio-backed repositories
+- Repositories catch errors from their selected source and map them to application `Failure` values
+- Source exceptions and response types never cross the repository boundary
 
 ### Background Tasks
 - Long-running user tasks (uploads, syncs) use `TaskTracker` in `core/tasks/`
@@ -140,10 +140,10 @@ from `data/providers/` directly when no transformation is needed.
 - Dev → `ConsoleLogger` (dart:developer); staging/prod → `SentryReporter` (breadcrumbs + events)
 - Severity: `debug` (dev diagnostics), `info` (normal events), `warning` (domain failures), `error` (unexpected exceptions), `fatal` (unrecoverable)
 - Always pass `tag` — feature name for features (`'auth'`), specific name for infra (`'http'`)
-- Repositories: log `error` in `on Exception catch` blocks (Dio-backed only, not mocks)
+- Repositories: log `error` when an unexpected source exception becomes `UnexpectedFailure`
 - Notifiers: log `warning` when mapping a failure to `AsyncError` or `FailureException`
 - Auth: log `info` + call `setUser()` on login/register success; `setUser(null, null)` on logout
-- Access via `ref.read(loggerProvider)` in providers; constructor injection in Dio repositories
+- Access via `ref.read(loggerProvider)` in providers; inject it into repositories that can encounter runtime source errors
 - See `docs/template/architecture-rules/14-logging.md` for full patterns
 
 ### UI Structure
@@ -233,26 +233,25 @@ flutter build web --release --dart-define-from-file=config/production.json
 ## Error Handling Flow
 
 ```
-DioException --> ErrorInterceptor --> DioApiException     (core/http/)
-    (in Dio)                          (in DioException.error)
-
-DioApiException --> Repository catch --> Failure (feature-specific)
-                                  --> Result<T> (Success or Err)
-
-Result<T> --> ViewModel .when() --> AsyncValue (AsyncData or AsyncError)
-          --> UI reacts to AsyncValue states
+Selected source (mock / SDK / local / custom / REST)
+    --> source value or source-specific exception
+    --> repository maps value to entity or exception to Failure
+    --> Result<T> (Success or Err)
+    --> notifier/ViewModel .when() --> AsyncValue
+    --> UI renders the same success or failure states for every source
 ```
+
+The repository is the translation boundary. Domain and UI code must not import
+SDK models, transport responses, database records, or source exception types.
 
 ## Adding a New Feature
 
 **Follow the Auth feature (`lib/features/auth/`) as the canonical reference.**
 
 New features use a **mock-first** approach: start with a mock repository, then
-optionally add Dio/Retrofit integration later.
+replace its provider binding only after the project selects a real data source.
 
 1. Run `mason make feature` to scaffold the feature with a mock repository
-   - Use `mason make feature --dio` to generate the full Dio data layer
-     (services, models, mappers) connecting to `core/http/`
 2. Define domain entities (`@MappableClass()`) and repository interface
 3. Define feature-specific failures (sealed class extending `Failure`)
 4. Implement the mock repository (returns `Result<T>`, hard-coded or in-memory data)
@@ -262,6 +261,11 @@ optionally add Dio/Retrofit integration later.
 8. Register routes in `app_router.dart`
 9. Run `dart run build_runner build --delete-conflicting-outputs`
 10. Add tests mirroring the `lib/` structure under `test/`
+
+Mocks, SDK clients, local stores, custom clients, and REST clients are peer
+repository implementations. If the project deliberately selects the supported
+Dio/Retrofit REST capability, run `mason make dio_rest` first; that opt-in emits
+its concrete setup and generation guide at `docs/project/REST_DIO.md`.
 
 ## Commit Style
 

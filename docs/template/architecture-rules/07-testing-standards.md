@@ -11,11 +11,8 @@ test/
   core/
     error/
       result_test.dart
-    network/
-      dio_provider_test.dart
-      interceptors/
-        auth_interceptor_test.dart
-        refresh_token_interceptor_test.dart
+    error/
+      result_documentation_test.dart
   features/
     auth/
       data/
@@ -64,9 +61,8 @@ import 'package:mocktail/mocktail.dart';
 
 class MockAuthRepository extends Mock implements IAuthRepository {}
 class MockProfileRepository extends Mock implements IProfileRepository {}
-class MockAuthService extends Mock implements AuthService {}
+class MockAuthClient extends Mock implements ProjectAuthClient {}
 class MockTokenStorage extends Mock implements ITokenStorage {}
-class MockDio extends Mock implements Dio {}
 ```
 
 ### Fake Data
@@ -89,21 +85,21 @@ Test that repositories correctly map service responses to `Result` values:
 
 ```dart
 void main() {
-  late MockAuthService mockService;
+  late MockAuthClient mockClient;
   late MockTokenStorage mockTokenStorage;
   late AuthRepository repository;
 
   setUp(() {
-    mockService = MockAuthService();
+    mockClient = MockAuthClient();
     mockTokenStorage = MockTokenStorage();
-    repository = AuthRepository(mockService, mockTokenStorage);
+    repository = AuthRepository(mockClient, mockTokenStorage);
   });
 
   group('login', () {
     test('returns Success with User on successful login', () async {
       // Arrange
-      when(() => mockService.login(any()))
-          .thenAnswer((_) async => AuthResponse(/* ... */));
+      when(() => mockClient.login(any(), any()))
+          .thenAnswer((_) async => ProjectAuthRecord(/* ... */));
       when(() => mockTokenStorage.saveTokens(
             accessToken: any(named: 'accessToken'),
             refreshToken: any(named: 'refreshToken'),
@@ -123,12 +119,8 @@ void main() {
 
     test('returns Err with InvalidCredentials on 401', () async {
       // Arrange
-      when(() => mockService.login(any())).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(),
-          error: const ServerException('Unauthorized', statusCode: 401),
-        ),
-      );
+      when(() => mockClient.login(any(), any()))
+          .thenThrow(const ProjectInvalidCredentials());
 
       // Act
       final result = await repository.login('test@example.com', 'wrong');
@@ -214,8 +206,7 @@ testWidgets('shows error message on login failure', (tester) async {
 | ViewModels | High | State management logic |
 | Domain entities | Medium | Value equality, computed properties |
 | Widgets | Medium | Key interactions and error states |
-| Services | Low | Generated code, test via integration |
-| Interceptors | Medium | Edge cases in auth/refresh flow |
+| Selected source adapters | Appropriate to risk | Source integration and mapping edge cases |
 
 ## DO
 
@@ -229,7 +220,8 @@ testWidgets('shows error message on login failure', (tester) async {
 ## DO NOT
 
 - Do not test generated code (`.g.dart`, `.mapper.dart`, `.gr.dart`).
-- Do not make real network calls in unit tests -- always mock services.
+- Do not make real SDK, database, filesystem, or network calls in unit tests --
+  fake or mock the selected source.
 - Do not share mutable state between tests -- use `setUp` for fresh instances.
 - Do not test private methods directly -- test through the public API.
 - Do not write tests that depend on execution order.

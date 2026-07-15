@@ -2,199 +2,147 @@
 
 ## Overview
 
-Errors are handled through a two-tier system: **exceptions** at the data layer boundary and **Result values** above the repository layer. Exceptions are thrown and caught. Results are returned and pattern-matched.
+Errors use a two-tier boundary: a selected data source may throw its own
+exceptions inside the data layer, while repositories return explicit `Result`
+values to the rest of the application. No SDK, persistence, transport, or other
+source exception crosses the repository boundary.
 
-`DioApiException` is **Dio-specific** and lives in `core/http/`. It is internal to the Dio integration layer and not a general concern. Features that use non-Dio backends (e.g., Supabase, Firebase) catch their own backend-specific exceptions in their repository implementations and map them to `Failure` types directly.
-
-## Error Flow
-
+```text
+Selected source (mock / SDK / local / custom / REST)
+    -> source value or source-specific exception
+Repository
+    -> maps value to domain entity
+    -> maps exception to application Failure
+    -> returns Result<T>
+Notifier / ViewModel
+    -> maps Result with when(success:, failure:)
+UI
+    -> renders AsyncValue success or failure state
 ```
-Service (throws backend-specific exception, e.g. DioApiException from Dio)
-    |
-    v
-Repository (catches exception, returns Result<T>)
-    |
-    v
-ViewModel (calls .when() on Result, sets AsyncValue state)
-    |
-    v
-View (renders based on AsyncValue: loading/error/data)
-```
 
-## The Result Type
+## Result Contract
 
 All repository methods return `Future<Result<T>>`:
 
 ```dart
-// In the repository interface
-Future<Result<User>> login(String email, String password);
+abstract interface class IProfileRepository {
+  Future<Result<Profile>> getProfile();
+}
+```
 
-// In the repository implementation
-Future<Result<User>> login(String email, String password) async {
+Implementations catch only errors they understand and translate those errors to
+application failures. Preserve unexpected error objects and stack traces:
+
+```dart
+Future<Result<Profile>> getProfile() async {
   try {
-    final response = await _authService.login(
-      LoginRequest(email: email, password: password),
-    );
-    await _tokenStorage.saveTokens(
-      accessToken: response.accessToken,
-      refreshToken: response.refreshToken,
-    );
-    return Success(response.user.toDomain());
-  } on DioException catch (e, st) {
-    return Err(_mapDioException(e, st));
-  } on Exception catch (e, st) {
-    return Err(UnexpectedFailure(e, st));
+    final record = await _source.readProfile();
+    return Success(record.toDomain());
+  } on SourceMissingRecord catch (_, stackTrace) {
+    return Err(ProfileNotFound(stackTrace));
+  } on Exception catch (error, stackTrace) {
+    return Err(UnexpectedFailure(error, stackTrace));
   }
 }
 ```
 
+`SourceMissingRecord` is a placeholder for the selected source's exception. It
+must stay in the data implementation; callers see only `ProfileNotFound`.
+
 ## Failure Hierarchy
 
+Use `Failure` subclasses for application-meaningful outcomes:
+
+```text
+Failure
+  +-- NetworkFailure (NoConnection, Timeout)
+  +-- ServerFailure (BadResponse, Unauthorized, Forbidden, NotFound)
+  +-- CacheFailure (CacheReadFailure, CacheWriteFailure)
+  +-- UnexpectedFailure
+  +-- <Feature>Failure (feature-specific sealed hierarchy)
 ```
-Failure (abstract base)
-  |
-  +-- NetworkFailure (sealed)
-  |     +-- NoConnection (final)
-  |     +-- Timeout (final)
-  |
-  +-- ServerFailure (sealed)
-  |     +-- BadResponse (final, carries statusCode)
-  |     +-- Unauthorized (final)
-  |     +-- Forbidden (final)
-  |     +-- NotFound (final)
-  |
-  +-- CacheFailure (sealed)
-  |     +-- CacheReadFailure (final)
-  |     +-- CacheWriteFailure (final)
-  |
-  +-- UnexpectedFailure (final, carries original error)
-  |
-  +-- AuthFailure (sealed, in features/auth/domain/failures/)
-  |     +-- InvalidCredentials (final)
-  |     +-- EmailAlreadyInUse (final)
-  |     +-- SessionExpired (final)
-  |     +-- AuthServerError (final)
-  |
-  +-- ProfileFailure (sealed, in features/profile/domain/failures/)
-        +-- ...
-```
+
+These are application failures, not a universal taxonomy for every backend.
+Prefer feature failures when callers or UI need distinct behavior. Use core
+infrastructure failures only when their meaning is truthful for the selected
+source.
+
+## Backend-specific Translation
+
+Each repository implementation owns its mapping. For example, an SDK repository
+may translate an SDK's invalid-session exception to `SessionExpired`, a local
+repository may translate a read error to `CacheReadFailure`, and an opted-in REST
+repository may translate a transport response to `Unauthorized`. Do not force
+unrelated source errors through one low-level exception hierarchy.
+
+Known failures should be safe for application handling. Raw exception messages,
+request URIs, payloads, provider identifiers, and credentials must not become
+user-facing `Failure.message` content.
 
 ## Failure Equality
 
-`Failure` subclasses implement **value equality** based on their semantic
-fields. This ensures that `Err(NotFound()) == Err(NotFound())` works
-correctly with `Result<T>`.
-
-**Equality rules:**
-- The base `Failure.==` compares `runtimeType` + `message`.
-- `stackTrace` is **excluded** from equality (it is diagnostic, not semantic).
-- Subclasses with extra fields (e.g., `BadResponse.statusCode`,
-  `UnexpectedFailure.error`) must override `==` and `hashCode` to include
-  those fields.
-
-**When adding a new failure with extra fields:**
+`Failure` subclasses use value equality based on semantic fields. Stack traces
+are diagnostic and excluded. A subclass with additional semantic fields must
+include them in `==` and `hashCode`:
 
 ```dart
-final class RateLimited extends ServerFailure {
+final class RateLimited extends Failure {
   const RateLimited(this.retryAfter, [StackTrace? stackTrace])
-      : super('Rate limited', stackTrace);
+    : super('Rate limited', stackTrace);
 
   final Duration retryAfter;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is RateLimited &&
-          retryAfter == other.retryAfter &&
-          message == other.message;
+      other is RateLimited && retryAfter == other.retryAfter;
 
   @override
-  int get hashCode => Object.hash(retryAfter, message);
-
-  @override
-  String toString() => 'RateLimited: $message (retry after $retryAfter)';
-}
-```
-
-## Exception-to-Failure Mapping
-
-Repositories catch backend-specific exceptions and map them to feature-specific failures. For Dio-based backends, this means catching `DioException` (which wraps `DioApiException` from `ErrorInterceptor` in `core/http/`). Other backends (e.g., Supabase, Firebase) have their own exception types that repositories catch directly.
-
-```dart
-AuthFailure _mapDioException(DioException e, StackTrace st) {
-  final error = e.error;
-  if (error is DioApiException) {
-    return switch (error.statusCode) {
-      401 => InvalidCredentials(st),
-      409 => EmailAlreadyInUse(st),
-      _ => AuthServerError(error.message, st),
-    };
-  }
-  return AuthServerError(e.message ?? 'Unknown auth error', st);
+  int get hashCode => retryAfter.hashCode;
 }
 ```
 
 ## Notifier Consumption
 
-Notifiers (in `data/providers/` or `ui/view_models/`) convert `Result<T>` to `AsyncValue` state:
+Notifiers convert both Result branches to presentation state without knowing the
+source implementation:
 
 ```dart
-Future<void> login(String email, String password) async {
+Future<void> loadProfile() async {
   state = const AsyncLoading();
-  final result = await ref.read(authRepositoryProvider).login(email, password);
-
+  final result = await ref.read(profileRepositoryProvider).getProfile();
   state = result.when(
-    success: (user) => AsyncData(AuthState.authenticated(user)),
+    success: AsyncData.new,
     failure: (failure) => AsyncError(failure, StackTrace.current),
   );
 }
 ```
 
-## UI Error Display
+Views render `AsyncValue` and use the failure-message mapper for localized,
+user-facing text.
 
-Views use `AsyncValue.when()` and the failure message mapper:
+## Adding a Feature Failure
 
-```dart
-final state = ref.watch(authStateRepoProvider);
-
-state.when(
-  loading: () => const CircularProgressIndicator(),
-  error: (error, _) => Text(mapFailureToMessage(error)),
-  data: (authState) => /* success UI */,
-);
-```
-
-## Adding a New Feature Failure
-
-1. Create a sealed class in `features/<name>/domain/failures/`:
-
-```dart
-sealed class ProfileFailure extends Failure {
-  const ProfileFailure(super.message, [super.stackTrace]);
-}
-
-final class ProfileNotFound extends ProfileFailure {
-  const ProfileNotFound([StackTrace? stackTrace])
-      : super('Profile not found', stackTrace);
-}
-```
-
-2. Map exceptions to the failure in the repository's `_mapDioException` method.
-3. Add user-facing messages to `failure_message_mapper.dart` for **each failure subtype**. Every `final class` in the sealed hierarchy must have a corresponding switch case so that the UI displays a specific, localized message rather than falling through to the generic wildcard.
-4. Add the corresponding translation keys to `lib/core/l10n/en.i18n.json` and regenerate with `dart run slang`.
+1. Create a sealed hierarchy under `features/<name>/domain/failures/`.
+2. Map the selected source's relevant errors inside its repository implementation.
+3. Add a localized message mapping for every final failure subtype.
+4. Test the mapping through the repository interface and test the visible error
+   state through the notifier or widget.
 
 ## DO
 
 - Always return `Result<T>` from repository methods.
-- Always catch `DioException` and generic `Exception` in repository methods.
-- Always include `StackTrace` when creating `Err` values.
-- Use feature-specific failure types for errors that require distinct UI behavior.
-- Use `UnexpectedFailure` as the catch-all for truly unexpected exceptions.
+- Catch source-specific exceptions only inside their data implementation.
+- Preserve `StackTrace` when creating `Err` values.
+- Preserve the original object in `UnexpectedFailure(error, stackTrace)`.
+- Use feature failures for outcomes requiring distinct product behavior.
+- Keep failure messages safe and map them to localized UI text separately.
 
 ## DO NOT
 
-- Do not throw exceptions from repository methods -- return `Err` instead.
-- Do not let `DioApiException`, `DioException`, or any backend-specific exception propagate to the ViewModel or UI layer.
-- Do not catch errors in ViewModels -- let the `Result` type handle it.
-- Do not use generic `Failure` where a feature-specific failure exists.
-- Do not put user-facing error messages in `Failure.message` -- use the failure message mapper.
+- Do not throw expected source failures from repository methods.
+- Do not import backend types into domain, notifier, ViewModel, or UI code.
+- Do not teach one transport exception as the default failure source.
+- Do not catch errors in the UI.
+- Do not stringify an unexpected error before passing it to
+  `UnexpectedFailure`; retain the original object for diagnostics.

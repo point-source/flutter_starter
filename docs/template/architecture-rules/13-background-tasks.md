@@ -10,7 +10,7 @@ Long-running user-initiated tasks (file uploads, data syncs, batch processing) a
 core/tasks/
   task_progress.dart       -- Sealed progress hierarchy
   tracked_task.dart        -- TrackedTask model + TaskStatus enum
-  cancellation_token.dart  -- Cooperative cancellation (pure Dart, no Dio)
+  cancellation_token.dart  -- Backend-neutral cooperative cancellation
   task_tracker.dart        -- TaskTracker notifier, failures, IMap filters
   task_tracker.g.dart      -- Generated Riverpod code
   task_channel.dart        -- Feature-scoped wrapper
@@ -25,7 +25,7 @@ core/tasks/
 | `TrackedTask` | Immutable model: `id`, `category`, `label`, `status`, `progress`, `failure`, `result`. |
 | `TaskStatus` | Enum: `pending`, `running`, `completed`, `failed`, `cancelled`. |
 | `TaskProgress` | Sealed class: `IndeterminateProgress`, `DeterminateProgress(fraction)`, `PhasedProgress(label, [fraction])`. |
-| `CancellationToken` | Cooperative cancel signal. Pure Dart — no Dio dependency. |
+| `CancellationToken` | Cooperative cancel signal with no backend dependency. |
 | `TaskWork<T>` | Typedef: `Future<T> Function(CancellationToken, void Function(TaskProgress))`. |
 
 ## Feature Integration Pattern
@@ -148,17 +148,17 @@ switch (task.progress) {
 
 ## Cooperative Cancellation
 
-`CancellationToken` is pure Dart. Features that use Dio bridge to Dio's `CancelToken` themselves:
+`CancellationToken` is pure Dart. If a selected client has its own cancellation
+primitive, bridge it inside the work function:
 
 ```dart
 work: (token, report) async {
-  final dioCancel = CancelToken();
-  token.cancelled.then((_) => dioCancel.cancel('Task cancelled'));
+  final clientCancellation = ProjectCancellation();
+  token.cancelled.then((_) => clientCancellation.cancel('Task cancelled'));
 
-  final response = await dio.post(
-    '/upload',
+  final response = await projectClient.upload(
     data: formData,
-    cancelToken: dioCancel,
+    cancellation: clientCancellation,
     onSendProgress: (sent, total) {
       report(TaskProgress.determinate(sent / total));
     },
@@ -168,7 +168,7 @@ work: (token, report) async {
 }
 ```
 
-For non-Dio work, check at safe points:
+Without a client cancellation primitive, check at safe points:
 
 ```dart
 work: (token, report) async {
@@ -238,7 +238,8 @@ These are used internally by `TaskChannel` and can be used directly with `ref.wa
 - Create one `TaskChannel` per feature category.
 - Use the channel's `selector` getter with `ref.watch` for efficient UI rebuilds.
 - Report progress via the `report` callback — do not mutate tracker state directly.
-- Bridge to Dio's `CancelToken` inside the work function, not in the tracker.
+- Bridge to a selected client's cancellation primitive inside the work
+  function, not in the tracker.
 - Use `PhasedProgress` for multi-step tasks to give the user context.
 - Mark tasks as `retryable: true` when the operation is safe to repeat.
 - Await all task futures in tests before disposing the `ProviderContainer`.

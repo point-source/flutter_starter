@@ -58,7 +58,7 @@ class User with UserMappable {
 Key rules:
 
 - Entities may have computed properties, domain validation, or different field names than the DTO.
-- Entities must not depend on data-layer classes (Dio, Retrofit, DTOs).
+- Entities must not depend on data-layer SDKs, clients, records, or DTOs.
 - Entities are the types used by ViewModels and Views.
 
 ## Mappers
