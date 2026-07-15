@@ -81,11 +81,14 @@ class {{feature_name.pascalCase()}}Repository implements I{{feature_name.pascalC
     if (error is DioApiException) {
       return switch (error.statusCode) {
         404 => {{feature_name.pascalCase()}}NotFound(st),
-        _ => {{feature_name.pascalCase()}}ServerError(error.message, st),
+        _ => {{feature_name.pascalCase()}}ServerError(
+            '{{feature_name.pascalCase()}} service unavailable',
+            st,
+          ),
       };
     }
     return {{feature_name.pascalCase()}}ServerError(
-      e.message ?? 'Unknown {{feature_name.camelCase()}} error',
+      '{{feature_name.pascalCase()}} service unavailable',
       st,
     );
   }

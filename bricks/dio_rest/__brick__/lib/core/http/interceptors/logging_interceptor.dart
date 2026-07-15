@@ -13,7 +13,7 @@ class RestLoggingInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    _logger.debug('${options.method} ${options.uri}', tag: 'http');
+    _logger.debug('${options.method} ${options.uri.path}', tag: 'http');
     handler.next(options);
   }
 
@@ -23,7 +23,7 @@ class RestLoggingInterceptor extends Interceptor {
     ResponseInterceptorHandler handler,
   ) {
     _logger.debug(
-      '${response.statusCode ?? '?'} ${response.requestOptions.uri}',
+      '${response.statusCode ?? '?'} ${response.requestOptions.uri.path}',
       tag: 'http',
     );
     handler.next(response);
@@ -32,7 +32,7 @@ class RestLoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     _logger.warning(
-      '${err.response?.statusCode ?? '?'} ${err.requestOptions.uri}',
+      '${err.response?.statusCode ?? '?'} ${err.requestOptions.uri.path}',
       tag: 'http',
     );
     handler.next(err);

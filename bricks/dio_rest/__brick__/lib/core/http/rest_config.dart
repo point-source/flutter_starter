@@ -22,7 +22,10 @@ abstract final class RestConfig {
         uri == null ||
         !uri.isAbsolute ||
         (uri.scheme != 'http' && uri.scheme != 'https') ||
-        uri.host.isEmpty) {
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasQuery ||
+        uri.hasFragment) {
       throw StateError(
         'REST_API_URL is required after installing the dio_rest capability. '
         'Set an absolute http(s) URL in config/<environment>.json (copied '

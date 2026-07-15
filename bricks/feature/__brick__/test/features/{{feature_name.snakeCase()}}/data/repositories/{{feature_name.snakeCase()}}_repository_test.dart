@@ -50,10 +50,13 @@ void main() {
     final result = await repository.getAll();
 
     expect(result, isA<Err<List<{{feature_name.pascalCase()}}>>>());
-    expect(
-      result.when(success: (_) => null, failure: (failure) => failure),
-      isA<{{feature_name.pascalCase()}}ServerError>(),
+    final failure = result.when(
+      success: (_) => null,
+      failure: (failure) => failure,
     );
+    expect(failure, isA<{{feature_name.pascalCase()}}ServerError>());
+    expect(failure?.message, '{{feature_name.pascalCase()}} service unavailable');
+    expect(failure?.message, isNot(contains('Unavailable')));
   });
 }
 {{/dio}}

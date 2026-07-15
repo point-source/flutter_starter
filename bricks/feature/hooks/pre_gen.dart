@@ -10,6 +10,16 @@ const _installMessage =
 
 /// Stop REST generation before rendering when its foundation is not installed.
 void run(HookContext context) {
+  final featureName = context.vars['feature_name'];
+  if (featureName is! String ||
+      !RegExp(r'^[A-Za-z][A-Za-z0-9 _-]*$').hasMatch(featureName)) {
+    const message =
+        'feature_name must start with a letter and contain only '
+        'letters, numbers, spaces, underscores, or hyphens.';
+    context.logger.err(message);
+    throw StateError(message);
+  }
+
   if (context.vars['dio'] != true) return;
 
   final problem = validateDioRestCapability();

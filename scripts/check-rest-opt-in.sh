@@ -57,7 +57,7 @@ archive_to "$opt_in_dir"
   dart format --output=none --set-exit-if-changed --line-length=80 lib test
   dart analyze --fatal-warnings
   flutter test \
-    test/core/http/rest_config_test.dart \
+    test/core/http \
     test/features/rest_probe/data/repositories/rest_probe_repository_test.dart \
     test/features/rest_probe/ui/pages/rest_probe_page_test.dart
 )

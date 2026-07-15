@@ -36,8 +36,15 @@ void main() {
       );
     });
 
-    test('rejects non-HTTP and relative endpoints', () {
-      for (final value in ['api.example.com', '/v1', 'ftp://example.com']) {
+    test('rejects unsafe, non-HTTP, and relative endpoints', () {
+      for (final value in [
+        'api.example.com',
+        '/v1',
+        'ftp://example.com',
+        'https://user:password@example.com',
+        'https://example.com?token=secret',
+        'https://example.com/#fragment',
+      ]) {
         expect(
           () => RestConfig.validateApiBaseUrl(value),
           throwsA(isA<StateError>()),
