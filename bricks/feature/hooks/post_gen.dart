@@ -17,15 +17,52 @@ void run(HookContext context) {
 
     // Remove empty .dart files within generated feature output.
     for (final entity in featureDir.listSync(recursive: true)) {
-      if (entity is File &&
-          entity.path.endsWith('.dart') &&
-          entity.readAsStringSync().trim().isEmpty) {
-        entity.deleteSync();
+      if (entity is File && entity.path.endsWith('.dart')) {
+        final contents = entity.readAsStringSync();
+        if (contents.trim().isEmpty) {
+          entity.deleteSync();
+        } else {
+          entity.writeAsStringSync('${contents.trimRight()}\n');
+        }
       }
     }
 
     // Remove empty directories (depth-first).
     _removeEmptyDirs(featureDir);
+    _formatDartFiles(featureDir, context);
+    _normalizeEndOfFiles(featureDir);
+  }
+}
+
+void _formatDartFiles(Directory root, HookContext context) {
+  final files = root
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((file) => file.path.endsWith('.dart'))
+      .map((file) => file.path)
+      .toList();
+  if (files.isEmpty) return;
+
+  final result = Process.runSync(Platform.resolvedExecutable, [
+    'format',
+    '--line-length=80',
+    ...files,
+  ]);
+  if (result.exitCode != 0) {
+    context.logger.warn(
+      'Generated the feature, but Dart formatting failed. Run '
+      '`dart format lib test` before commit.',
+    );
+  }
+}
+
+void _normalizeEndOfFiles(Directory root) {
+  for (final file
+      in root
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.dart'))) {
+    file.writeAsStringSync('${file.readAsStringSync().trimRight()}\n');
   }
 }
 

@@ -13,7 +13,7 @@ sealed class DioApiException implements Exception {
   final int? statusCode;
 
   @override
-  String toString() => '$runtimeType: $message';
+  String toString() => 'DioApiException: $message';
 }
 
 /// Represent an HTTP response or other server-side failure.

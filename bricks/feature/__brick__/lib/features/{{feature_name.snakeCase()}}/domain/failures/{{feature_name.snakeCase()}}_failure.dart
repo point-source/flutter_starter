@@ -31,7 +31,7 @@ final class {{feature_name.pascalCase()}}ServerError extends {{feature_name.pasc
   /// Create a [{{feature_name.pascalCase()}}ServerError] failure with an
   /// optional detail [message].
   const {{feature_name.pascalCase()}}ServerError([
-    String message = '{{feature_name.pascalCase()}} server error',
-    StackTrace? stackTrace,
-  ]) : super(message, stackTrace);
+    super.message = '{{feature_name.pascalCase()}} server error',
+    super.stackTrace,
+  ]);
 }

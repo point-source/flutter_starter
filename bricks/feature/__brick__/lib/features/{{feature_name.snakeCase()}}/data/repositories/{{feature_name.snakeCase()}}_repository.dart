@@ -8,10 +8,9 @@
 library;
 
 import 'package:dio/dio.dart';
-
-import 'package:flutter_starter/core/http/dio_api_exception.dart';
 import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/core/http/dio_api_exception.dart';
 import 'package:flutter_starter/core/logging/app_logger.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/mappers/{{feature_name.snakeCase()}}_mapper.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/services/{{feature_name.snakeCase()}}_service.dart';

@@ -27,6 +27,7 @@ class ErrorInterceptor extends Interceptor {
       DioExceptionType.unknown => ServerException(
         err.message ?? 'Unknown REST error',
       ),
+      _ => ServerException(err.message ?? 'REST request failed'),
     };
 
     handler.next(

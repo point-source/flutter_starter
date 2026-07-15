@@ -34,7 +34,7 @@ request is sent.
 ## Generate a REST-backed feature
 
 ```bash
-mason make feature --feature_name orders --dio
+mason make feature --feature_name orders --dio true
 dart run build_runner build --delete-conflicting-outputs
 ```
 
