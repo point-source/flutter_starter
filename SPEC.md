@@ -6,7 +6,7 @@ on the adopter's behalf.
 
 ## The base starter has no real-backend networking stack §spec:backend-neutral-base
 
-*Status: not started*
+*Status: complete*
 
 A fresh starter contains no Dio/Retrofit dependencies, shared REST client,
 REST-client generation, or tests and generated artifacts whose only purpose is
@@ -150,7 +150,7 @@ library.
 
 ## Backend configuration appears only after a backend is selected §spec:explicit-backend-configuration
 
-*Status: not started*
+*Status: complete*
 
 The base starter exposes neither a default API URL nor an SSL-pinning switch.
 When a project selects a backend, it defines configuration in the terms that
