@@ -1,20 +1,27 @@
 /// Represents the outcome of an operation that can either succeed or fail.
 ///
 /// Use [Result] as the return type for any operation that might fail in an
-/// expected way (network errors, validation failures, etc.). This makes
-/// failure handling explicit in the type system, unlike exceptions which
-/// are invisible in function signatures.
+/// expected way (source errors, validation failures, etc.). This makes failure
+/// handling explicit in the type system, unlike exceptions which are invisible
+/// in function signatures. Repositories translate source-specific exceptions
+/// into application [Failure] values before returning them to callers:
 ///
 /// ```dart
-/// Future<Result<User>> login(String email, String password) async {
+/// Future<Result<String>> loadTheme() async {
 ///   try {
-///     final user = await dataSource.login(email, password);
-///     return Success(user);
+///     return Success(await preferenceSource.readTheme());
+///   } on SourceReadException catch (_, stackTrace) {
+///     return Err(PreferenceReadFailure(stackTrace));
 ///   } on Exception catch (error, stackTrace) {
-///     return Err(UnexpectedFailure(error.toString(), stackTrace));
+///     return Err(UnexpectedFailure(error, stackTrace));
 ///   }
 /// }
 /// ```
+///
+/// Here `SourceReadException` belongs to the selected data source and
+/// `PreferenceReadFailure` belongs to the application. The same boundary works
+/// for mocks, local stores, SDKs, custom clients, and REST clients. The example
+/// is compiled and exercised in `test/core/error/result_documentation_test.dart`.
 ///
 /// See also:
 /// - [Failure] for the error hierarchy
