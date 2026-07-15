@@ -223,16 +223,15 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 
 The app uses compile-time constants via `--dart-define-from-file`. Config files are **not committed** -- only templates in `config/examples/` are tracked. Run `./scripts/setup.sh` to create your local copies.
 
-| Template | Environment | API URL |
-|----------|-------------|---------|
-| `config/examples/development.json` | Development | `http://localhost:3000` |
-| `config/examples/staging.json` | Staging | Configured per project |
-| `config/examples/production.json` | Production | Configured per project |
+| Template | Environment |
+|----------|-------------|
+| `config/examples/development.json` | Development |
+| `config/examples/staging.json` | Staging |
+| `config/examples/production.json` | Production |
 
 Each config file defines:
 
 - `ENVIRONMENT` -- Environment name (`development`, `staging`, `production`)
-- `API_URL` -- Backend API base URL
 - `SENTRY_DSN` -- Sentry DSN for error reporting (empty in dev)
 
 See `lib/core/env/app_environment.dart` for how these values are consumed at runtime.

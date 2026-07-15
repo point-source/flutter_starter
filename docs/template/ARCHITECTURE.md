@@ -332,13 +332,11 @@ flutter build apk --release --dart-define-from-file=config/production.json
 
 ### AppEnvironment Enum
 
-`AppEnvironment` reads compile-time constants (`ENVIRONMENT`, `API_URL`,
-`SENTRY_DSN`) and exposes environment-aware configuration:
+`AppEnvironment` reads compile-time constants (`ENVIRONMENT`, `SENTRY_DSN`)
+and exposes environment-aware configuration:
 
-- `apiBaseUrl` -- per-environment API endpoint
 - `sentryEnabled` -- true for staging/production
 - `sentrySampleRate` -- 1.0 staging, 0.1 production
-- `sslPinningEnabled` -- disabled in development for proxy inspection
 
 Strict mode (`STRICT_ENV=true`) throws on invalid environment values, intended
 for CI pipelines.

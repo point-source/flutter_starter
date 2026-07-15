@@ -6,7 +6,7 @@ Accepted (amended)
 
 ## Context
 
-The application must support multiple environments (development, staging, production) with different API base URLs, Sentry DSNs, feature flags, and behavioral differences (SSL pinning, logging verbosity).
+The application must support multiple environments (development, staging, production) with different Sentry DSNs, feature flags, and behavioral differences such as logging verbosity.
 
 Common approaches:
 
@@ -24,10 +24,10 @@ Implementation:
 - Example config files live in `config/examples/` and are committed to the repo.
 - Active config files (`config/*.json`) are gitignored. Run `./scripts/setup.sh` to provision them from the templates.
 - The `AppEnvironment` enum reads compile-time constants via `String.fromEnvironment` and `bool.fromEnvironment`.
-- Configuration values include: `ENVIRONMENT`, `API_URL`, `SENTRY_DSN`.
+- Configuration values include: `ENVIRONMENT`, `SENTRY_DSN`.
 - Sensible defaults apply when no config file is specified (defaults to development).
 - A `STRICT_ENV` flag enables strict validation in CI, throwing `StateError` on invalid environment values.
-- Environment-specific behavior (Sentry enablement, SSL pinning, sample rates) is computed from the `AppEnvironment` enum's instance properties.
+- Environment-specific behavior (Sentry enablement and sample rates) is computed from the `AppEnvironment` enum's instance properties.
 - Multiple `--dart-define-from-file` args can be layered, with later files overriding earlier values. This enables overlay configs for auth bypass modes.
 
 Build commands:
