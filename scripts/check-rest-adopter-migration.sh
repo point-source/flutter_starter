@@ -42,8 +42,10 @@ overlay_fixture() {
   local destination="$2"
   cp -R "$fixture"/. "$destination"/
   while IFS= read -r -d '' source; do
-    mv "$source" "${source%.fixture}"
-  done < <(find "$destination" -type f -name '*.fixture' -print0)
+    local relative="${source#"$fixture"/}"
+    local target="$destination/$relative"
+    mv "$target" "${target%.fixture}"
+  done < <(find "$fixture" -type f -name '*.fixture' -print0)
 }
 
 add_legacy_metadata() {
