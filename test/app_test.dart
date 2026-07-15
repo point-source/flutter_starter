@@ -26,6 +26,7 @@ import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/core/storage/shared_prefs_provider.dart';
 import 'package:flutter_starter/features/auth/data/providers/auth_providers.dart';
 import 'package:flutter_starter/features/auth/domain/entities/user.dart';
+import 'package:flutter_starter/features/auth/domain/failures/auth_failure.dart';
 import 'package:flutter_starter/features/auth/ui/pages/login_page.dart';
 import 'package:flutter_starter/features/dashboard/ui/pages/dashboard_page.dart';
 import 'package:flutter_starter/gen/strings.g.dart';
@@ -64,6 +65,67 @@ void main() {
       ),
     );
   }
+
+  /// Pump [App] with its default mock-backed repository binding.
+  Future<void> pumpDefaultApp(WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(sharedPreferences),
+          loggerProvider.overrideWithValue(mockLogger),
+        ],
+        child: TranslationProvider(child: const App()),
+      ),
+    );
+  }
+
+  group('default mock-backed example', () {
+    testWidgets('shows mock data and completes the login flow', (tester) async {
+      await pumpDefaultApp(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LoginPage), findsOneWidget);
+      final fields = find.byType(TextFormField);
+      expect(
+        tester.widget<TextFormField>(fields.at(0)).controller!.text,
+        'dev@example.com',
+      );
+      expect(
+        tester.widget<TextFormField>(fields.at(1)).controller!.text,
+        'password',
+      );
+
+      await tester.tap(find.text('Log In'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DashboardPage), findsOneWidget);
+      expect(find.text('Welcome, Dev User'), findsOneWidget);
+    });
+
+    testWidgets('shows an explicit failure returned by the repository', (
+      tester,
+    ) async {
+      when(
+        () => mockAuthRepository.getCurrentUser(),
+      ).thenAnswer((_) async => const Success<User?>(null));
+      when(
+        () => mockAuthRepository.login(any(), any()),
+      ).thenAnswer((_) async => const Err(InvalidCredentials()));
+
+      await pumpApp(tester);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Log In'));
+      await tester.pump();
+
+      expect(find.text('Invalid email or password'), findsOneWidget);
+      final element = tester.element(find.byType(LoginPage));
+      final state = ProviderScope.containerOf(
+        element,
+      ).read(authStateRepoProvider);
+      expect(state.hasError, isTrue);
+      expect(state.error, isA<InvalidCredentials>());
+    });
+  });
 
   group('cold-start auth gating', () {
     testWidgets('shows splash while initial auth state is loading', (
