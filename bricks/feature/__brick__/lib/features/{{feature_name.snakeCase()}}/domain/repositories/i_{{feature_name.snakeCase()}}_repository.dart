@@ -11,8 +11,8 @@ import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/ent
 
 /// Contract for {{feature_name.camelCase()}} operations.
 ///
-/// Implementations are responsible for communicating with the API,
-/// and mapping data-layer models to domain entities.
+/// Implementations communicate with the selected data source and map any
+/// source-specific models or errors to domain entities and [Result] failures.
 abstract interface class I{{feature_name.pascalCase()}}Repository {
   /// Retrieve a single [{{feature_name.pascalCase()}}] by its [id].
   Future<Result<{{feature_name.pascalCase()}}>> getById(String id);

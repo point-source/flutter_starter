@@ -9,20 +9,24 @@ import 'package:mason/mason.dart';
 /// files and any directories that become empty as a result.
 void run(HookContext context) {
   final featureName = _toSnakeCase(context.vars['feature_name'] as String);
-  final featureDir = Directory('lib/features/$featureName');
-  if (!featureDir.existsSync()) return;
+  for (final featureDir in [
+    Directory('lib/features/$featureName'),
+    Directory('test/features/$featureName'),
+  ]) {
+    if (!featureDir.existsSync()) continue;
 
-  // Remove empty .dart files within the generated feature directory.
-  for (final entity in featureDir.listSync(recursive: true)) {
-    if (entity is File &&
-        entity.path.endsWith('.dart') &&
-        entity.readAsStringSync().trim().isEmpty) {
-      entity.deleteSync();
+    // Remove empty .dart files within generated feature output.
+    for (final entity in featureDir.listSync(recursive: true)) {
+      if (entity is File &&
+          entity.path.endsWith('.dart') &&
+          entity.readAsStringSync().trim().isEmpty) {
+        entity.deleteSync();
+      }
     }
-  }
 
-  // Remove empty directories (depth-first).
-  _removeEmptyDirs(featureDir);
+    // Remove empty directories (depth-first).
+    _removeEmptyDirs(featureDir);
+  }
 }
 
 void _removeEmptyDirs(Directory dir) {
