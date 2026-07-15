@@ -99,7 +99,7 @@ that shape part of the backend-neutral application contract.
 
 ## Repository and failure guidance is backend-agnostic §spec:backend-agnostic-contracts
 
-*Status: not started*
+*Status: complete*
 
 The starter's human-facing and agent-facing guidance describes repositories as
 the boundary between product code and any external data source. Repositories
