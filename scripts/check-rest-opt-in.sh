@@ -37,6 +37,10 @@ archive_to "$gate_dir"
     exit 1
   fi
 )
+# The gate fixture is no longer needed. Release it before code generation and
+# Flutter compilation in the opted-in fixture to keep peak temporary disk usage
+# bounded on CI runners.
+rm -rf "$gate_dir"
 
 archive_to "$opt_in_dir"
 (
@@ -51,11 +55,17 @@ archive_to "$opt_in_dir"
   grep -q '^      retrofit_generator:' build.yaml
   grep -q '"REST_API_URL"' config/examples/development.json
   test -f .flutter_starter/capabilities/dio_rest.json
+  grep -q 'REST is one repository implementation alongside mocks' \
+    docs/project/REST_DIO.md
+  grep -q 'same public `Result<T>` contract' docs/project/REST_DIO.md
 
   flutter pub get
   dart run build_runner build --delete-conflicting-outputs
   dart format --output=none --set-exit-if-changed --line-length=80 lib test
   dart analyze --fatal-warnings
+  # Generation is complete. The copied bricks and build caches are not test
+  # inputs, so release them before Flutter creates compiler output.
+  rm -rf bricks build .dart_tool/build
   flutter test \
     test/core/http \
     test/features/rest_probe/data/repositories/rest_probe_repository_test.dart \
@@ -76,6 +86,18 @@ if grep -q '"REST_API_URL"' "$REPO_ROOT"/config/examples/*.json; then
 fi
 if [[ -d "$REPO_ROOT/lib/core/http" ]]; then
   echo "The neutral starter unexpectedly contains shared HTTP code." >&2
+  exit 1
+fi
+
+base_guidance=(
+  "$REPO_ROOT/docs/template/CLAUDE.md"
+  "$REPO_ROOT/docs/template/ARCHITECTURE.md"
+  "$REPO_ROOT/docs/template/architecture-rules"
+)
+if grep -R -E -q \
+  'DioException -->|Always catch `DioException`|Dio Interceptor Chain \(core/http/\)|Dio infrastructure lives in `core/http/`|Provides the main \[Dio\] instance' \
+  "${base_guidance[@]}"; then
+  echo "Base guidance still presents Dio/Retrofit as current infrastructure." >&2
   exit 1
 fi
 
