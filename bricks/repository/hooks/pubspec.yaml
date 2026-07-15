@@ -1,0 +1,8 @@
+name: repository_hooks
+publish_to: none
+
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+
+dependencies:
+  mason: any
