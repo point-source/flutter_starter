@@ -1,97 +1,124 @@
-# Migrate Apple Builds from CocoaPods to Swift Package Manager
+# Make the Starter Networking Baseline Backend-Neutral
 
 ## Problem statement §req:problem-statement
 
-Flutter now resolves Apple plugins through Swift Package Manager (SPM), but this
-project's `ios/` and `macos/` directories still carry the older CocoaPods
-integration alongside it. On macOS, every plugin the project uses is already a
-Swift Package, so the leftover CocoaPods wiring is pure legacy: the build emits a
-warning instructing the developer to remove it, and in environments where
-CocoaPods is not installed the build fails outright with
-`Error: CocoaPods not installed or not in valid state`.
+The Flutter starter template is intended to let teams begin with a runnable,
+mock-first app and choose their backend only when the product needs one. Today,
+the base template still presents a REST/Dio shape as if it were the normal
+starting point: Dio/Retrofit dependencies are present, shared HTTP code is in the
+starter app, REST-oriented configuration appears in the environment model, and
+agent-facing documentation describes Dio/Retrofit as current infrastructure.
 
-This blocks anyone trying to build the Apple targets on a machine or CI image
-that does not have the CocoaPods toolchain, and it adds build time and
-maintenance overhead even where it does succeed. As a starter template intended
-to be a clean reference implementation, carrying two competing native dependency
-systems sends the wrong signal to every team that forks it. The goal is to make
-Apple builds depend only on Swift Package Manager, so the project builds cleanly
-without the CocoaPods toolchain present and stays a faithful, modern reference.
+That default is costly for teams whose apps use Supabase, Firebase, custom SDKs,
+or no backend yet. They inherit networking code and configuration they do not
+use, they must carry local removals during template syncs, and contributors or
+AI agents can be nudged toward a REST architecture the project did not choose.
+Most known adopters so far have used Supabase, but the requirement is not to
+make the template Supabase-specific. The requirement is to make the starter's
+visible baseline genuinely backend-neutral while preserving a simple mock-backed
+starting experience.
 
 ## Success criteria §req:success-criteria
 
-- Building the app for iOS produces no CocoaPods-related warning or error, and
-  the built app runs with every plugin functioning (secure storage, connectivity,
-  deep links, package info, launching URLs, Sentry reporting).
-- Building the app for macOS produces no CocoaPods-related warning or error, and
-  the built app runs with every plugin functioning.
-- A build succeeds on a machine or CI image that does not have the CocoaPods
-  toolchain installed — the absence of CocoaPods is no longer a failure.
-- An automated CI check builds both the iOS and the macOS targets on every pull
-  request to the `main` integration branch and fails if either the CocoaPods
-  regression returns or an Apple build otherwise breaks. The cheap, toolchain-free
-  CocoaPods-artifact check runs everywhere; the costlier macOS-runner Apple builds
-  run in the template repository (they are gated so forks do not pay for them by
-  default).
-- A developer who freshly clones the repository can build both Apple targets by
-  following the project's documented steps, without separately installing or
-  configuring CocoaPods.
+- A fresh starter app can be installed, analyzed, tested, and run with mock data
+  without selecting, configuring, or understanding any real backend.
+- A fresh starter app does not expose Dio/Retrofit as part of its default visible
+  surface: consumers do not see those dependencies, generated base files,
+  default code paths, configuration prompts, or agent-facing instructions unless
+  they intentionally opt into REST networking material.
+- A downstream SDK-backed or no-backend project can sync the template without
+  carrying a local patch whose only purpose is to remove Dio/Retrofit code,
+  dependencies, REST configuration, or REST-biased agent guidance.
+- A contributor or AI agent adding a feature sees repository and `Result`
+  expectations described in backend-agnostic terms, so the default path does not
+  steer new work toward REST/Dio when the project has not chosen it.
+- Any backend-related configuration visible in the base starter is demonstrably
+  useful beyond a REST backend, or it is absent from the base starter. The starter
+  does not expose security controls that imply a protection users can enable when
+  no such protection is present in the running app.
+- A team that later wants REST/Dio networking can identify that it is an explicit
+  choice rather than a hidden default. A polished automated opt-in flow is
+  desirable, but it is secondary to keeping the base starter free of REST/Dio
+  assumptions.
 
 ## User stories §req:user-stories
 
-- As a developer on a machine without CocoaPods, I can build and run the iOS and
-  macOS apps so that I am not forced to install a native toolchain the project no
-  longer needs.
-- As a developer building the macOS app today, I no longer see the "remove
-  CocoaPods integration" warning, so my build output is clean and I trust the
-  project is set up correctly.
-- As a maintainer of this template, I can point adopters to a project that uses a
-  single, current native dependency system, so forks start from a modern baseline
-  rather than inheriting legacy scaffolding.
-- As a reviewer merging a change, I can rely on CI to catch any accidental
-  reintroduction of CocoaPods or breakage of an Apple build before it lands.
-- As an end user of an app built from this template, the iOS and macOS apps
-  behave exactly as before the migration — nothing about the app's features or
-  reliability regresses.
+- As a developer starting an SDK-backed app, I can create a new project from the
+  starter and begin feature work without first deleting a REST stack I will never
+  use.
+- As a developer maintaining an existing SDK-backed app, I can sync template
+  updates without repeatedly resolving local differences caused by removing
+  Dio/Retrofit from my project.
+- As a developer building UI before a backend is chosen, I can run the starter
+  with mock data so that early product work is not blocked by backend selection.
+- As a contributor or AI agent adding a repository-backed feature, I can follow
+  the documented `Result` and failure-handling contract without being told that
+  backend failures must originate from Dio.
+- As a team choosing REST later, I can recognize REST/Dio as an explicit product
+  decision and add it intentionally, rather than inheriting it from the starter
+  before the app needs it.
+- As a template maintainer, I can describe the starter as backend-neutral with a
+  straight face because its default app, docs, and configuration all match that
+  promise.
 
 ## Quality attributes §req:quality-attributes
 
-- **Build reproducibility** — Apple builds succeed on a clean image with only the
-  standard Flutter and Xcode toolchain; no CocoaPods gem or `pod` binary required.
-- **Build performance** — removing the redundant CocoaPods step should not slow
-  Apple builds and is expected to reduce build time.
-- **Functional parity** — all plugins currently in use continue to work
-  identically on both Apple platforms after the migration.
-- **Compatibility** — raising the minimum supported iOS/macOS version is
-  acceptable if the migration requires it (see Constraints).
-- **Regression safety** — the CocoaPods-free state is protected by automated CI so
-  it cannot silently degrade over time.
+- **Backend neutrality** — the base starter works equally well as the starting
+  point for SDK-backed, REST-backed, custom-backend, and mock-only apps because it
+  does not privilege one backend style by default.
+- **Low onboarding friction** — a new user can run the starter immediately with
+  mock data and a small set of concepts; backend selection is not part of the
+  first-run path.
+- **Dependency minimalism** — the default dependency set contains what the
+  starter app uses, not dormant reference infrastructure for a backend the
+  consumer may never choose.
+- **Documentation reliability** — human-facing and agent-facing guidance must
+  describe the default app accurately enough that following it does not introduce
+  an unintended backend architecture.
+- **Configuration honesty** — configuration exposed by the starter must
+  correspond to behavior the user can observe or to backend-agnostic concepts the
+  starter actually needs.
+- **Template sync friendliness** — downstream projects that do not use REST/Dio
+  should receive template improvements without repeatedly re-removing the same
+  networking assumptions.
 
 ## Constraints §req:constraints
 
-- Both Apple platforms (`ios/` and `macos/`) are in scope; neither should carry
-  CocoaPods integration when the work is complete.
-- CocoaPods is to be fully removed, not merely disabled — the Podfile and Pods
-  scaffolding come out for a clean project, with no CocoaPods fallback retained.
-- Raising the app's minimum supported iOS and/or macOS version is permitted where
-  Swift Package Manager requires it; dropping support for older OS versions is an
-  accepted tradeoff.
-- The CI Apple build guard must cover both iOS and macOS (the most thorough, and
-  most expensive, option was chosen deliberately). CI today only builds web, so
-  this adds new Apple build coverage.
-- The app's user-facing behavior and feature set must not change; this is an
-  infrastructure migration only.
-- Follow Flutter's official guidance for app developers migrating to Swift
-  Package Manager as the reference for the migration mechanics.
+- The base starter must not require Dio, Retrofit, Retrofit code generation, or
+  shared Dio HTTP infrastructure unless the consumer has explicitly opted into
+  REST/Dio networking.
+- The starter must remain runnable without a real backend. A minimal mock-backed
+  experience is part of the base product, not an optional add-on.
+- The template should not be tailored to Supabase, Firebase, or any other single
+  backend provider. Popular SDK-backed adopters are evidence that REST defaults
+  are too specific, not a reason to replace one backend assumption with another.
+- Existing REST adopters do not define the default baseline. It is acceptable for
+  them to take deliberate migration or opt-in steps if that is the cost of making
+  the base starter clean.
+- REST-oriented environment values and security toggles belong in the base only
+  if they are useful to the backend-neutral starter experience. Values that only
+  make sense for a REST client, or that imply unimplemented security behavior,
+  should not appear as default app concepts.
+- The exact opt-in mechanism for REST/Dio is a specification decision. The
+  requirement is that opt-in be explicit and that the starter app not depend on
+  Dio/Retrofit before that choice is made.
 
 ## Priorities §req:priorities
 
-1. **Restore buildability without CocoaPods** — highest impact and the reason the
-   task exists. macOS builds currently hard-fail where CocoaPods is absent;
-   removing that dependency unblocks every affected developer and CI image.
-2. **Complete both platforms cleanly** — doing iOS and macOS together in one pass,
-   with CocoaPods fully removed, is what keeps this a trustworthy reference
-   template and avoids leaving a half-migrated state that confuses adopters.
-3. **Lock it in with CI** — the both-platforms CI guard is essential to prevent
-   silent regression, but it depends on the migration itself being correct first,
-   so it follows the migration work rather than leading it.
+1. **Make the default starter genuinely backend-neutral** — this has the highest
+   impact because it removes the repeated local divergence carried by SDK-backed
+   adopters and aligns the product with its mock-first promise.
+2. **Preserve an out-of-the-box mock app** — backend neutrality is valuable only
+   if the starter still runs immediately and demonstrates the app architecture
+   without requiring a live service.
+3. **Keep agents and contributors on neutral rails** — documentation is part of
+   the product surface for this template. If the docs imply REST/Dio as the
+   normal path, future work will recreate the same drift even after code is
+   cleaned up.
+4. **Remove misleading configuration concepts** — REST URLs and unimplemented
+   security toggles are smaller than dependencies, but they still shape user
+   expectations and should not survive as default concepts unless they serve the
+   backend-neutral app.
+5. **Make REST opt-in understandable without compromising the base** — REST/Dio
+   remains a valid choice for some teams, but convenience for that path is
+   secondary to ensuring no consumer gets it by accident.
