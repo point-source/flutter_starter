@@ -195,7 +195,7 @@ inspectable: a visible control either works or does not exist.
 
 ## Existing REST adopters migrate deliberately §spec:rest-adopter-migration
 
-*Status: not started*
+*Status: complete*
 
 The baseline change applies to new starter output and future template-owned
 guidance; it does not silently rewrite a downstream project's chosen backend.

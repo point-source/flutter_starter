@@ -9,6 +9,23 @@ ACTIVE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/flutter-starter-active-rest-XXXXXX")"
 SDK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/flutter-starter-sdk-no-rest-XXXXXX")"
 trap 'rm -rf "$ACTIVE_DIR" "$SDK_DIR"' EXIT
 
+assert_migration_guidance() {
+  local guide="$REPO_ROOT/docs/template/migrations/014-backend-neutral-networking.md"
+  test -f "$guide"
+  grep -q 'Runtime networking behavior warning' "$guide"
+  grep -q 'Retain as project-owned' "$guide"
+  grep -q 'Adopt the supported opt-in' "$guide"
+  grep -q 'SDK or no backend' "$guide"
+  grep -q '`API_URL`.*`REST_API_URL`' "$guide"
+  grep -q 'authentication headers and token refresh' "$guide"
+  grep -q 'interceptor order' "$guide"
+  grep -q 'timeouts, error mapping, and logging' "$guide"
+  grep -q 'TLS and certificate-pinning behavior' "$guide"
+  grep -q 'backend provider binding' "$guide"
+  grep -q 'project-owned after selection' \
+    "$REPO_ROOT/docs/template/TEMPLATE_SYNC.md"
+}
+
 archive_to() {
   local destination="$1"
   git -C "$REPO_ROOT" archive HEAD | tar -x -C "$destination"
@@ -127,6 +144,8 @@ run_project_checks() {
       --dart-define-from-file=config/development.json
   )
 }
+
+assert_migration_guidance
 
 archive_to "$ACTIVE_DIR"
 if apply_active_rest_sync "$ACTIVE_DIR" 2>/dev/null; then
