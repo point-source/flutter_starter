@@ -139,7 +139,7 @@ run_project_checks() {
     # Generated sources remain under lib/. The brick copies and build caches are
     # not test inputs, so release them before Flutter compiles the fixture.
     rm -rf bricks build .dart_tool/build
-    flutter test "$@"
+    flutter test --concurrency=1 "$@"
     flutter build bundle --debug \
       --dart-define-from-file=config/development.json
   )

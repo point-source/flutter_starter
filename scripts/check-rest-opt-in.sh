@@ -66,7 +66,7 @@ archive_to "$opt_in_dir"
   # Generation is complete. The copied bricks and build caches are not test
   # inputs, so release them before Flutter creates compiler output.
   rm -rf bricks build .dart_tool/build
-  flutter test \
+  flutter test --concurrency=1 \
     test/core/http \
     test/features/rest_probe/data/repositories/rest_probe_repository_test.dart \
     test/features/rest_probe/ui/pages/rest_probe_page_test.dart
