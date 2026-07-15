@@ -1,0 +1,14 @@
+/// Verify an SDK-backed repository remains runnable after template sync.
+library;
+
+import 'package:flutter_starter/core/error/result.dart';
+import 'package:flutter_starter/features/sdk_probe/data/repositories/sdk_probe_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('keeps the SDK implementation behind Result', () async {
+    final result = await SdkProbeRepository().load();
+
+    expect(result, const Success('sdk-value'));
+  });
+}

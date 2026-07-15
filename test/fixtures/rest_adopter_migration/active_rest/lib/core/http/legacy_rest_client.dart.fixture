@@ -1,0 +1,45 @@
+/// Representative project-owned client retained from the former REST baseline.
+library;
+
+import 'package:dio/dio.dart';
+
+/// Read the current access token for an outgoing request.
+typedef AccessTokenReader = Future<String?> Function();
+
+/// Add the adopter's bearer token to requests that need authentication.
+final class LegacyAuthInterceptor extends Interceptor {
+  /// Create an interceptor backed by [readAccessToken].
+  LegacyAuthInterceptor(this.readAccessToken);
+
+  /// Read the token from the adopter's project-owned auth storage.
+  final AccessTokenReader readAccessToken;
+
+  @override
+  Future<void> onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final token = await readAccessToken();
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    handler.next(options);
+  }
+}
+
+/// Create the adopter's retained Dio client with its established behavior.
+Dio createLegacyRestClient({
+  required String apiUrl,
+  required AccessTokenReader readAccessToken,
+}) {
+  final client = Dio(
+    BaseOptions(
+      baseUrl: apiUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 15),
+    ),
+  );
+  client.interceptors.add(LegacyAuthInterceptor(readAccessToken));
+  return client;
+}

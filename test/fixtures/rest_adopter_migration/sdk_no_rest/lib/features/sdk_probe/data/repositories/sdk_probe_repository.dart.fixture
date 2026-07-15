@@ -1,0 +1,10 @@
+/// Representative repository retained by an SDK-backed downstream project.
+library;
+
+import 'package:flutter_starter/core/error/result.dart';
+
+/// Return SDK-owned data through the starter's backend-neutral contract.
+final class SdkProbeRepository {
+  /// Load a value supplied by the project's selected SDK.
+  Future<Result<String>> load() async => const Success('sdk-value');
+}

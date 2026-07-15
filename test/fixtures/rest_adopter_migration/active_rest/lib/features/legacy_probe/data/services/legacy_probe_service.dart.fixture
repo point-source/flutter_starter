@@ -1,0 +1,18 @@
+/// Representative Retrofit service owned by an active REST adopter.
+library;
+
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
+
+part 'legacy_probe_service.g.dart';
+
+/// Call the adopter's existing health endpoint.
+@RestApi()
+abstract class LegacyProbeService {
+  /// Create a service using the adopter's retained Dio client.
+  factory LegacyProbeService(Dio dio) = _LegacyProbeService;
+
+  /// Fetch the backend health payload.
+  @GET('/health')
+  Future<Map<String, dynamic>> fetchHealth();
+}
