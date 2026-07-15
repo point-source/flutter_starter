@@ -15,15 +15,6 @@ targets:
           include:
             - lib/**
 
-      # retrofit code generation
-      retrofit_generator:
-        enabled: true
-        generate_for:
-          include:
-            - lib/core/http/**
-            - lib/features/**/data/services/**
-            - lib/features/**/services/**
-
       # dart_mappable code generation
       dart_mappable_builder:
         enabled: true

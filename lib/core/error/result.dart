@@ -8,10 +8,10 @@
 /// ```dart
 /// Future<Result<User>> login(String email, String password) async {
 ///   try {
-///     final user = await api.login(email, password);
+///     final user = await dataSource.login(email, password);
 ///     return Success(user);
-///   } on DioException catch (e) {
-///     return Err(ServerFailure.fromDioException(e));
+///   } on Exception catch (error, stackTrace) {
+///     return Err(UnexpectedFailure(error.toString(), stackTrace));
 ///   }
 /// }
 /// ```

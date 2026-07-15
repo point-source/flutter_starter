@@ -16,7 +16,7 @@ part 'profile_providers.g.dart';
 ///
 /// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-/// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
+/// [IProfileRepository] backed by the project-selected data source.
 @riverpod
 IProfileRepository profileRepository(Ref _) {
   if (AppEnvironment.backendMode == .mock) {
