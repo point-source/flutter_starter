@@ -142,6 +142,9 @@ run_project_checks() {
     # not test inputs, so release them before Flutter compiles the fixture.
     rm -rf bricks build .dart_tool/build
     flutter test --concurrency=1 "$@"
+    # The run-equivalent build only needs package_config.json and generated
+    # sources. Drop fixture history and build_runner-only caches first.
+    rm -rf .git .dart_tool/build_resolvers .dart_tool/hooks_runner .dart_tool/pub
     flutter build bundle --debug \
       --dart-define-from-file=config/development.json
   )
