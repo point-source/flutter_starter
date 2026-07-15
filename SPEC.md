@@ -1,210 +1,240 @@
-# Migrate Apple Builds from CocoaPods to Swift Package Manager — Technical Spec
+# Make the Starter Networking Baseline Backend-Neutral — Technical Spec
 
-This spec covers the removal of CocoaPods from the `ios/` and `macos/` targets so
-that Apple builds resolve native plugins exclusively through Swift Package Manager
-(SPM). It is an infrastructure migration: no user-facing app behavior changes.
+The starter begins as a runnable, mock-first Flutter application. A real backend
+is a project decision made after adoption, not a choice the base template makes
+on the adopter's behalf.
 
-Grounding fact that shapes every decision below: **SPM is enabled by default in
-Flutter as of 3.44**, so no per-machine flag or per-project opt-in is required for
-a fresh clone or a CI runner to build against it. Flutter's build tooling already
-reports that every plugin in use is available as a Swift Package. The work is
-therefore not "adopt SPM" — that is done — but "retire the redundant CocoaPods
-scaffolding that now only causes warnings and hard failures."
+## The base starter has no real-backend networking stack §spec:backend-neutral-base
 
----
+*Status: not started*
 
-## Apple targets integrate plugins through Swift Package Manager only §spec:spm-only-integration
+A fresh starter contains no Dio/Retrofit dependencies, shared REST client,
+REST-client generation, or tests and generated artifacts whose only purpose is
+to support that stack. Its example features continue to run against mock-backed
+repositories, and choosing no backend remains a complete, supported starting
+state. Removing the REST reference surface does not remove the repository
+boundary, explicit result handling, or the ability to replace a mock repository
+with a project-selected implementation.
 
-*Status: complete*
+**Observable behavior / test path:** A developer creates a fresh app, resolves
+its dependencies, analyzes and tests it, and launches its example flow without
+selecting a backend or supplying network configuration. Searching the app's
+default dependencies, generated surface, and runtime code reveals no Dio or
+Retrofit requirement. The same flow produces the expected mock data and explicit
+success or failure states.
 
-Both Apple targets build with SPM as the sole native dependency system. The
-`ios/` and `macos/` directories carry no CocoaPods integration of any kind: no
-`Podfile`, no `Podfile.lock`, no `Pods/` scaffolding, no `Pods.xcodeproj`
-reference in the workspace, no `[CP]` build phases or `Pods_Runner` linkage in the
-Xcode project, and no `#include? ".../Pods-Runner.*.xcconfig"` lines in the
-`Flutter/*.xcconfig` files. Every plugin currently in use — secure storage,
-connectivity, deep links (`app_links`), package info, URL launching, and Sentry
-reporting — continues to function identically on both platforms after the change.
+**Decision and driving constraint:** The system removes REST reference
+infrastructure from the base rather than merely describing it as optional. The
+driving constraint is backend neutrality: dormant code and dependencies still
+shape contributor decisions and force SDK-backed adopters to carry a deletion
+delta. The existing mock-first repository boundary already proves that the app
+can remain useful without a concrete networking stack, so no replacement backend
+is introduced.
 
-**Observable behavior / test path:** On a machine that has the standard Flutter +
-Xcode toolchain but *no* `pod` binary and no CocoaPods gem, `flutter build ios`
-and `flutter build macos` both complete with no CocoaPods warning and no
-`Error: CocoaPods not installed or not in valid state`. The resulting apps launch
-and every listed plugin works (e.g. a value written to secure storage survives a
-relaunch, a deep link opens the app, connectivity state is reported, Sentry
-receives an event).
+**Alternatives considered:** Keeping Dio/Retrofit as shipped reference
+infrastructure was rejected because its visible presence continues to privilege
+REST even when no feature uses it. Replacing Dio with Supabase, Firebase, or
+another SDK was rejected because it exchanges one backend assumption for another.
+Shipping multiple backend examples was rejected because it increases the default
+dependency and concept surface while making no single project more complete.
 
-**Decision and the constraint that drove it:** Remove CocoaPods *entirely* rather
-than disable or hide it. The driving constraint is that macOS builds today
-*hard-fail* wherever CocoaPods is absent (the failure the task exists to fix), and
-the requirement is explicit that CocoaPods be fully removed with no fallback
-retained. A clean reference template must not ship two competing native dependency
-systems. A useful defensive property falls out of full removal: because there is
-no `Podfile`, Flutter cannot silently fall back to a broken CocoaPods path — if
-SPM were ever disabled, the build fails loudly at integration time rather than
-producing a subtly wrong artifact.
+**Tradeoffs:** REST teams lose a worked client inside every fresh checkout and
+must make an explicit opt-in. In return, all teams receive a smaller and more
+truthful base, and non-REST teams no longer begin by deleting code. The starter
+continues to teach stable application boundaries but no longer treats one
+transport implementation as part of those boundaries.
 
-**Minimum OS versions:** The current deployment targets (iOS 13.0, macOS 10.15)
-already satisfy SPM's floor and every in-use plugin's declared platform minimum,
-so no version bump is planned. The constraint that governs this: raising the
-minimum iOS/macOS version is permitted *only if* a plugin's Swift Package manifest
-declares a higher floor than the project sets, in which case the target is raised
-to the lowest version that satisfies all plugins. Dropping support for older OS
-versions is an accepted tradeoff, but it is not to be done gratuitously — the
-observable trigger is a real build error, not a preference.
-
-**Alternatives considered:**
-- *Keep both systems, suppress the warning* (e.g. leave the `Podfile` and rely on
-  the `#include?` optional include) — rejected: it does not fix the no-CocoaPods
-  hard failure, and it perpetuates the dual-system state the template must not
-  model.
-- *Delete only the `Podfile` but leave the Xcode/workspace scaffolding* — rejected:
-  a half-removed state leaves stale `[CP]` build phases and `Pods_Runner`
-  references that break the build or confuse adopters.
-- *Revert to CocoaPods and pin it* — rejected: the CocoaPods registry becomes
-  read-only on 2026-12-02 and SPM is the forward path; reverting moves against
-  both Flutter's guidance and the requirement.
-
-**Tradeoffs:** The project loses the ability to fall back to CocoaPods for a
-plugin that is not yet SPM-ready; this is acceptable because every plugin in use
-is already a Swift Package (confirmed by Flutter's own build output). Adopters who
-add a future plugin that is CocoaPods-only would need to re-enable SPM's fallback
-themselves — an explicit, documented escape hatch rather than latent scaffolding.
-
-*Follows Flutter's official app-developer guidance for the migration mechanics.*
-
-§req:problem-statement, §req:success-criteria, §req:constraints, §req:quality-attributes, §req:user-stories, §req:priorities
+§req:problem-statement, §req:success-criteria, §req:user-stories,
+§req:quality-attributes, §req:constraints, §req:priorities
 
 ---
 
-## The release pipeline requires no CocoaPods toolchain §spec:release-pipeline-cocoapods-free
+## REST with Dio is a deliberate supported opt-in §spec:dio-rest-opt-in
 
-*Status: complete*
+*Status: not started*
 
-The iOS release path (Fastlane, invoked from `deploy.yml`) builds and ships
-without any CocoaPods dependency. The `cocoapods` gem is removed from
-`ios/Gemfile`, so `bundle install` on a release image installs neither the gem nor
-its transitive toolchain, and no `pod install` runs during a build.
+A team that chooses a REST backend can explicitly add the starter's supported
+Dio/Retrofit capability. The opt-in supplies the coherent REST foundation needed
+by REST-backed repositories and makes its added dependencies, configuration
+needs, error mapping, and maintenance ownership clear before the team accepts
+them. Feature-level REST generation is available only after that foundation has
+been selected; requesting REST output without its prerequisite fails early with
+an actionable explanation rather than leaving a partially configured project.
 
-**Observable behavior / test path:** On a clean CI image, `bundle install` in
-`ios/` succeeds without pulling `cocoapods`, and a Fastlane iOS build lane
-completes end-to-end, producing a signed artifact, with no `pod` invocation in the
-logs.
+**Observable behavior / test path:** Starting from a fresh neutral app, a
+developer follows the documented opt-in once and can then add a REST-backed
+feature whose repository returns the same public result contract as a mock or
+SDK-backed repository. The app resolves, analyzes, and tests successfully. If
+the developer requests REST-backed feature material before opting in, the request
+stops without partial output and tells them how to make the explicit choice.
 
-**Decision and the constraint that drove it:** Extend removal into the release
-pipeline, not just the project scaffolding — the operator chose the fuller scope.
-The driving constraint is the stated quality attribute that Apple builds require
-"no CocoaPods gem or `pod` binary" and that CocoaPods be *fully* removed. Leaving
-the gem in the `Gemfile` would contradict a clean reference template and leave a
-vestigial dependency that a future change could accidentally reactivate.
+**Decision and driving constraint:** REST support is retained as an optional,
+cohesive capability rather than as latent base-template code or disconnected
+feature fragments. The driving constraint is that opt-in must be genuine: the
+base cannot depend on Dio/Retrofit before selection, while a selected REST path
+must remain understandable and must not generate code whose shared foundation is
+missing. This preserves the evolution path for REST adopters without weakening
+the neutral default.
 
-**Alternatives considered:**
-- *Remove project scaffolding only, keep the `cocoapods` gem* — rejected by the
-  operator: smaller blast radius on the release path, but it leaves a contradictory
-  leftover dependency in a template meant to model a clean baseline.
+**Alternatives considered:** Keeping only the existing feature switch was
+rejected because generated REST features can assume infrastructure the neutral
+base no longer contains. A copy-and-paste recipe was rejected as the supported
+path because it drifts silently and offers no reliable completeness check. A
+separate REST edition of the whole starter was rejected because parallel
+templates duplicate unrelated architecture and make improvements harder to sync.
+Removing all REST guidance was rejected because REST remains a valid backend
+choice and the starter already has a coherent pattern worth preserving as an
+explicit option.
 
-**Tradeoffs:** Touching the release pipeline carries more risk than editing only
-the app project. The risk is bounded: Fastlane's build step only runs `pod
-install` when a `Podfile` is present, and that file is removed by
-§spec:spm-only-integration, so no lane relies on the gem once both changes land.
-If a future Fastlane action were to require CocoaPods, it would need the gem
-re-added deliberately — a visible, reviewed change.
+**Tradeoffs:** The opt-in has its own compatibility surface and requires ongoing
+maintenance, and REST teams perform an extra intentional step. That cost buys a
+safe failure mode and prevents every non-REST consumer from inheriting the same
+dependencies. The optional capability recommends a REST shape but does not make
+that shape part of the backend-neutral application contract.
 
-§req:constraints, §req:quality-attributes, §req:user-stories
-
----
-
-## CI guards the CocoaPods-free state on every change §spec:ci-apple-build-guard
-
-*Status: complete*
-
-Continuous integration builds both the iOS and the macOS targets on every pull
-request targeting the `main` integration branch and fails if either Apple build
-breaks. In addition to compiling, CI runs a static regression check that fails if
-any CocoaPods artifact — a `Podfile`, `Podfile.lock`, a `Pods/` directory, a
-`Pods.xcodeproj` workspace reference, or a `Pods-Runner` xcconfig include —
-reappears anywhere in `ios/` or `macos/`. The static check runs on every such PR
-regardless of repository; the macOS-runner Apple builds are gated to the template
-repository (`github.repository == 'point-source/flutter_starter'`) so forks do not
-pay for them by default.
-
-**Observable behavior / test path:** Opening a PR against `main` in the template
-repository triggers an iOS build job and a macOS build job on macOS runners; both
-must pass for the merge gate. A PR that reintroduces a `Podfile` (or any other
-CocoaPods artifact) fails the static check with a clear message — even though the
-runner image happens to ship CocoaPods, and even on a fork where the macOS build
-jobs are skipped. A PR that breaks an Apple build (e.g. a plugin that no longer
-resolves under SPM) fails the corresponding build job.
-
-**Decision and the constraint that drove it:** Guard with *both* a real build of
-each platform *and* a cheap static anti-regression check — the operator's choice
-over build-only. The driving constraint is regression safety: GitHub's
-`macos-latest` runners ship CocoaPods pre-installed, so a re-added `Podfile` could
-still build green under the runner's pod toolchain and slip through a build-only
-guard. The static check closes that gap by asserting the *absence* of CocoaPods
-artifacts directly, independent of what the runner has installed. Covering both
-platforms (rather than macOS alone, where the original failure surfaced) was
-deliberately chosen as the most thorough option despite being the most expensive.
-
-The iOS build runs unsigned (no code-signing secrets), because the guard's job is
-to prove that plugins resolve and the target compiles under SPM, not to exercise
-signing or distribution — that remains the release pipeline's responsibility.
-
-**Alternatives considered:**
-- *Build only, no static check* — rejected by the operator: the pod-equipped
-  runner could mask a re-added `Podfile`, defeating the regression-safety goal.
-- *Guard a single platform* — rejected by the requirement: leaving one Apple
-  target unguarded lets a regression land on it silently.
-
-**Tradeoffs:** macOS runners are materially slower and costlier than the Linux
-runners used by the existing web/lint/test jobs, and Apple builds are the longest
-in the matrix, so every PR pays that time-and-cost premium. This was accepted as
-the deliberate price of preventing silent regression. This guard depends on the
-migration itself being correct first (it codifies the finished state), so it
-follows the removal work rather than leading it.
-
-§req:success-criteria, §req:constraints, §req:quality-attributes, §req:user-stories, §req:priorities
+§req:success-criteria, §req:user-stories, §req:quality-attributes,
+§req:constraints, §req:priorities
 
 ---
 
-## A fresh clone builds both Apple targets without configuring CocoaPods §spec:fresh-clone-build-docs
+## Repository and failure guidance is backend-agnostic §spec:backend-agnostic-contracts
 
-*Status: complete*
+*Status: not started*
 
-A developer who freshly clones the repository can build both Apple targets by
-following the project's documented setup steps, without separately installing or
-configuring CocoaPods. The documented Apple prerequisites and build steps make no
-reference to a `pod` toolchain, and any mention of CocoaPods in build/deploy docs
-is removed or replaced with the SPM reality.
+The starter's human-facing and agent-facing guidance describes repositories as
+the boundary between product code and any external data source. Repositories
+return the shared explicit result contract and translate backend-specific errors
+into application failures; no transport exception, SDK exception, or provider
+type escapes into presentation or domain behavior. Examples in the neutral base
+compile conceptually against APIs the base actually provides and do not name
+nonexistent conversion helpers.
 
-**Observable behavior / test path:** Following `docs/template/DEPLOYMENT.md` (and
-the CLAUDE.md common-commands section) from a clean checkout — `./scripts/setup.sh`,
-`flutter pub get`, `flutter build ios` / `flutter build macos` — succeeds on a
-machine with only Flutter and Xcode installed, and the docs never instruct the
-reader to install CocoaPods or run `pod install`.
+Architecture decisions that recommend Dio/Retrofit apply only to projects that
+have selected the REST capability. The default architecture rules present REST,
+SDK-backed services, custom clients, local sources, and mocks as alternative
+repository implementations rather than ranking one as current infrastructure.
 
-**Decision and the constraint that drove it:** Rely on Flutter's default-on SPM
-(3.44+) and keep the onboarding path free of any CocoaPods setup step; do not add
-a per-machine `flutter config` instruction, because none is needed. The driving
-constraint is the success criterion that a fresh clone build must not require
-installing or configuring CocoaPods, plus the build-reproducibility quality
-attribute (Apple builds succeed on a clean image with only the standard toolchain).
-Documentation is treated as part of the deliverable because a reference template's
-docs are a first-class interface: an adopter who reads "run `pod install`" would
-reintroduce the very dependency being removed.
+**Observable behavior / test path:** A contributor or AI agent follows only the
+base starter guidance to add a mock-backed or SDK-backed repository. The feature
+handles success and failure through the documented result contract without
+adding Dio, importing backend types above the repository boundary, or discovering
+that a documented helper does not exist. A REST-opted-in project can follow its
+REST-specific guidance and reach the same user-visible success and failure
+states.
 
-**Alternatives considered:**
-- *Leave docs as-is* — rejected: current docs are largely CocoaPods-free already,
-  but any residual gem/toolchain instruction (e.g. in the Fastlane prerequisites)
-  that implies CocoaPods must be corrected so the documented path matches the
-  CocoaPods-free reality.
-- *Add an explicit "enable SPM" step to the docs* — rejected: SPM is on by default
-  in supported Flutter versions, so the step would be noise that implies a
-  configuration burden that does not exist.
+**Decision and driving constraint:** The system standardizes the boundary and
+observable error behavior, not the mechanism that produces errors. The driving
+constraint is documentation reliability across multiple valid backends: guidance
+that tells contributors to catch one library's exception recreates coupling even
+after that library leaves the base. REST-specific recommendations remain scoped
+to the explicit REST choice so they can still be concrete where appropriate.
 
-**Tradeoffs:** This section's correctness is only as durable as the reader's
-Flutter version; a developer pinned to a pre-3.44 Flutter would need SPM enabled
-manually. That is out of scope — the project targets the stable channel, which is
-well past 3.44 — but it is the one assumption a future reader should know about.
+**Alternatives considered:** Generalizing every backend into a universal network
+exception hierarchy was rejected because SDK, transport, local, and mock failure
+modes do not share a truthful low-level taxonomy. Removing the result and failure
+contract was rejected because explicit, testable failure behavior is valuable
+independently of backend choice. Leaving accepted REST decisions unqualified was
+rejected because it contradicts the base starter's observable contents and would
+continue to steer future work toward Dio.
 
-§req:success-criteria, §req:user-stories, §req:quality-attributes
+**Tradeoffs:** Backend-neutral guidance cannot teach every provider's detailed
+failure API; project-specific guidance must supply that detail after a backend is
+chosen. In exchange, product-facing code and tests remain stable when the data
+source changes, and neutral examples cannot become stale against an absent REST
+library.
+
+§req:problem-statement, §req:success-criteria, §req:user-stories,
+§req:quality-attributes, §req:constraints, §req:priorities
+
+---
+
+## Backend configuration appears only after a backend is selected §spec:explicit-backend-configuration
+
+*Status: not started*
+
+The base starter exposes neither a default API URL nor an SSL-pinning switch.
+When a project selects a backend, it defines configuration in the terms that
+backend actually consumes, and any security control exposed to operators
+corresponds to protection enforced by the running application. REST opt-in may
+introduce a REST endpoint value, but it does not claim that certificate pinning
+exists unless the selected capability implements and verifies pinning behavior.
+
+**Observable behavior / test path:** A developer launches a fresh starter in
+each supported environment without supplying an API URL or SSL-pinning setting,
+and the app neither prompts for them nor reports them as available controls. A
+project that opts into a backend receives a clear failure when a configuration
+value that backend truly requires is absent. Changing a documented security
+control has a testable effect on connection acceptance; otherwise that control
+is not presented.
+
+**Decision and driving constraint:** Remove the two REST-oriented concepts from
+the neutral base instead of renaming them into a speculative universal backend
+configuration. The driving constraint is configuration honesty. Supabase,
+Firebase, REST services, local stores, and custom SDKs do not share one useful
+endpoint or transport-security contract, and an unimplemented pinning toggle
+misstates the application's protection. Explicit backend-owned values are more
+accurate than a weak abstraction.
+
+**Alternatives considered:** A generalized `backendUrl` was rejected because
+many SDKs require several provider-specific values or manage endpoints
+internally, so the name would remain misleading. Keeping the API URL as an
+unused convenience was rejected because unused configuration biases the design
+and complicates onboarding. Keeping the SSL-pinning switch as a future hook was
+rejected because a security setting that changes no runtime behavior creates
+false assurance.
+
+**Tradeoffs:** Teams cannot rely on one predeclared location for all future
+backend settings and must add explicit configuration when they make a backend
+choice. That small setup cost keeps the base minimal and makes security posture
+inspectable: a visible control either works or does not exist.
+
+§req:success-criteria, §req:user-stories, §req:quality-attributes,
+§req:constraints, §req:priorities
+
+---
+
+## Existing REST adopters migrate deliberately §spec:rest-adopter-migration
+
+*Status: not started*
+
+The baseline change applies to new starter output and future template-owned
+guidance; it does not silently rewrite a downstream project's chosen backend.
+Existing projects that use the shipped Dio infrastructure can retain it as
+project-owned REST code or adopt the supported REST opt-in shape through an
+explicit migration. Existing projects that already removed Dio can accept the
+new baseline without reintroducing REST artifacts or preserving a local
+removal-only delta. Migration guidance distinguishes files and choices a project
+must retain from obsolete template defaults, and it calls out any action that
+could change runtime networking behavior.
+
+**Observable behavior / test path:** A maintainer tests the template update
+against two representative downstream projects: one that actively uses the
+current Dio stack and one that removed it for an SDK backend. The REST project is
+not left with missing dependencies or a partially removed client without an
+explicit migration decision; the SDK-backed project completes the sync without
+REST code or configuration returning. Both projects can analyze and run after
+following the applicable migration path.
+
+**Decision and driving constraint:** Compatibility is provided through a
+documented, deliberate migration rather than by keeping the old REST baseline
+indefinitely or automatically deleting downstream code. The driving constraint
+is template sync friendliness without destructive assumptions: active REST
+projects have user-owned behavior worth protecting, but preserving dormant
+defaults would perpetuate the divergence this change exists to remove.
+
+**Alternatives considered:** Maintaining the old base indefinitely for existing
+REST consumers was rejected because it prevents the starter from becoming
+neutral. Automatically removing or transforming every downstream REST use was
+rejected because the template cannot safely infer whether customized networking
+code is still required. Providing no migration contract was rejected because a
+baseline change of this breadth would otherwise fail unpredictably for projects
+that accepted the original reference stack.
+
+**Tradeoffs:** Active REST adopters must make and review a one-time migration
+choice, and the template does not promise that their old copied infrastructure
+evolves automatically forever. This favors a clean long-term baseline and safe,
+visible change over zero-effort compatibility with an architecture the starter
+no longer selects by default.
+
+§req:success-criteria, §req:user-stories, §req:quality-attributes,
+§req:constraints, §req:priorities
