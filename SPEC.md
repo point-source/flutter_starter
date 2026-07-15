@@ -51,7 +51,7 @@ transport implementation as part of those boundaries.
 
 ## REST with Dio is a deliberate supported opt-in §spec:dio-rest-opt-in
 
-*Status: not started*
+*Status: complete*
 
 A team that chooses a REST backend can explicitly add the starter's supported
 Dio/Retrofit capability. The opt-in supplies the coherent REST foundation needed

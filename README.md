@@ -9,7 +9,6 @@ An enterprise-ready Flutter starter template with clean architecture, code gener
 ![Dart](https://img.shields.io/badge/Dart-3.10-0175C2?logo=dart)
 ![Riverpod](https://img.shields.io/badge/Riverpod-3.x-00B4D8)
 ![AutoRoute](https://img.shields.io/badge/AutoRoute-11.x-6C63FF)
-![Retrofit](https://img.shields.io/badge/Retrofit-4.x-009688)
 ![License](https://img.shields.io/badge/License-BSD--3--Clause-lightgrey)
 
 ---
@@ -25,7 +24,7 @@ feature/
   ui/         -- Pages, view models (Riverpod), widgets
 ```
 
-Shared infrastructure lives in `lib/core/`. State management uses Riverpod with code-generated providers. Navigation uses AutoRoute with typed route guards. Networking uses Dio + Retrofit for type-safe API clients.
+Shared infrastructure lives in `lib/core/`. State management uses Riverpod with code-generated providers. Navigation uses AutoRoute with typed route guards. Features begin with repository interfaces and mock implementations; real backend infrastructure is an explicit project choice.
 
 For a full breakdown, see [docs/template/ARCHITECTURE.md](docs/template/ARCHITECTURE.md) and the ADRs in `docs/template/adrs/`.
 
@@ -160,8 +159,7 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
    # Scaffold a full feature (data + domain + ui layers)
    mason make feature --feature_name my_feature
 
-   # Or scaffold individual parts:
-   mason make repository --feature_name my_feature --entity_name order
+   # Or scaffold a backend-neutral view model:
    mason make view_model --feature_name my_feature --page_name detail
    ```
 
@@ -171,28 +169,41 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 
 4. **Create a repository interface** in `domain/repositories/` (e.g. `i_my_feature_repository.dart`).
 
-5. **Create DTOs** in `data/models/` with `@MappableClass()` annotation.
+5. **Implement a mock repository** in `data/repositories/` so the feature remains runnable without a backend.
 
-6. **Create a Retrofit service** in `data/services/` with `@RestApi()` annotation.
+6. **Build view models** in `ui/view_models/` using `@riverpod` annotation.
 
-7. **Implement the repository** in `data/repositories/`, injecting the service and mapping DTOs to entities.
+7. **Build pages and widgets** in `ui/pages/` and `ui/widgets/`.
 
-8. **Create a mapper** in `data/mappers/` for DTO-to-entity conversion.
+8. **Register routes** in `lib/core/routing/app_router.dart`.
 
-9. **Build view models** in `ui/view_models/` using `@riverpod` annotation.
-
-10. **Build pages and widgets** in `ui/pages/` and `ui/widgets/`.
-
-11. **Register routes** in `lib/core/routing/app_router.dart`.
-
-12. **Run code generation:**
+9. **Run code generation:**
     ```bash
     dart run build_runner build --delete-conflicting-outputs
     ```
 
-13. **Add feature-scoped translations** in `features/<name>/l10n/` if needed, then run `dart run slang`.
+10. **Add feature-scoped translations** in `features/<name>/l10n/` if needed, then run `dart run slang`.
 
-14. **Write tests** mirroring the feature structure under `test/features/<name>/`.
+11. **Write tests** mirroring the feature structure under `test/features/<name>/`.
+
+### Opt into Dio and Retrofit REST support
+
+The starter does not include a network client by default. If the project has
+selected a REST backend, install the supported capability once before asking a
+feature brick for REST material:
+
+```bash
+mason make dio_rest
+flutter pub get
+mason make feature --feature_name orders --dio true
+dart run build_runner build --delete-conflicting-outputs
+```
+
+The opt-in adds its Dio/Retrofit dependencies, shared HTTP foundation,
+`REST_API_URL` examples, generator configuration, tests, and a project-owned
+guide at `docs/project/REST_DIO.md`. Running a REST feature, repository, or
+service brick before this opt-in stops before writing files and explains the
+prerequisite.
 
 ---
 
@@ -216,6 +227,7 @@ Use the Auth feature (`lib/features/auth/`) as a reference implementation.
 | `dart run slang` | Generate i18n string files |
 | `dart analyze` | Run static analysis |
 | `dart format .` | Format all Dart files |
+| `./scripts/check-rest-opt-in.sh` | Verify clean REST opt-in and prerequisite failure paths |
 
 ---
 
