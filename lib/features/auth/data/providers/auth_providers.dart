@@ -30,7 +30,7 @@ part 'auth_providers.g.dart';
 ///
 /// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-/// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
+/// [IAuthRepository] backed by the project-selected data source.
 @riverpod
 IAuthRepository authRepository(Ref _) {
   if (AppEnvironment.backendMode == .mock) {

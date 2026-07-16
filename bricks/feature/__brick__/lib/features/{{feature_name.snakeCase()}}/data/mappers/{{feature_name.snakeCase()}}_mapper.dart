@@ -14,10 +14,8 @@ import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/ent
 extension {{feature_name.pascalCase()}}DtoMapper on {{feature_name.pascalCase()}}Dto {
   /// Convert this [{{feature_name.pascalCase()}}Dto] to a domain
   /// [{{feature_name.pascalCase()}}] entity.
-  {{feature_name.pascalCase()}} toDomain() {
-    return {{feature_name.pascalCase()}}(
+  {{feature_name.pascalCase()}} toDomain() => {{feature_name.pascalCase()}}(
       id: id,
     );
-  }
 }
 {{/dio}}

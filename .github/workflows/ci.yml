@@ -125,6 +125,29 @@ jobs:
       - name: Verify generated files are up to date
         run: ./scripts/ci-check.sh --check codegen
 
+  backend-migration:
+    name: Backend Migration Paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Mason
+        run: |
+          dart pub global activate mason_cli
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Exercise clean REST opt-in
+        run: ./scripts/check-rest-opt-in.sh
+
+      - name: Exercise downstream template syncs
+        run: ./scripts/check-rest-adopter-migration.sh
+
   # Static anti-regression guard for the CocoaPods-free Apple targets.
   # Filesystem-only, so it runs on a cheap Linux runner and does NOT depend on
   # what the runner image ships: GitHub's macOS runners have CocoaPods

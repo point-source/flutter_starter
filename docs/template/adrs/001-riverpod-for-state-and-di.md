@@ -28,10 +28,13 @@ Use **Riverpod** with **riverpod_generator** (`@riverpod` / `@Riverpod` annotati
 
 Providers serve a dual role:
 
-1. **DI containers** -- functional providers (annotated functions) create and wire dependencies such as Dio, repositories, and services.
+1. **DI containers** -- functional providers create and wire repositories and
+   whichever sources a project has explicitly selected.
 2. **State holders** -- notifier providers (annotated classes extending `_$ClassName`) manage UI-facing state with `AsyncValue` for loading/error/data states.
 
-The `@Riverpod(keepAlive: true)` annotation replaces manual `.autoDispose` management for long-lived providers like the Dio instance, the router, and the auth view model.
+The `@Riverpod(keepAlive: true)` annotation replaces manual `.autoDispose`
+management for long-lived providers such as the router, auth state, and a
+selected client whose lifecycle requires it.
 
 ## Consequences
 

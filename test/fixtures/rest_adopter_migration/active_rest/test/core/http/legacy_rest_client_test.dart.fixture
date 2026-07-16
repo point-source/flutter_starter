@@ -1,0 +1,33 @@
+/// Verify behavior that must survive a retain-as-project-owned migration.
+library;
+
+import 'package:dio/dio.dart';
+import 'package:flutter_starter/core/http/legacy_rest_client.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('retains endpoint, timeouts, and bearer authentication', () async {
+    final client = createLegacyRestClient(
+      apiUrl: 'https://legacy.example.test',
+      readAccessToken: () async => 'retained-token',
+    );
+    RequestOptions? captured;
+    client.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          captured = options;
+          handler.reject(DioException(requestOptions: options, type: .cancel));
+        },
+      ),
+    );
+
+    await expectLater(
+      client.get<void>('/health'),
+      throwsA(isA<DioException>()),
+    );
+
+    expect(client.options.baseUrl, 'https://legacy.example.test');
+    expect(client.options.connectTimeout, const Duration(seconds: 15));
+    expect(captured?.headers['Authorization'], 'Bearer retained-token');
+  });
+}

@@ -1,5 +1,5 @@
 name: repository
-description: Scaffold a repository with service, DTOs, mapper, and implementation.
+description: Scaffold a REST repository for a project with dio_rest installed.
 version: 0.1.0
 vars:
   feature_name:

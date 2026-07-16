@@ -43,7 +43,7 @@ Use the `tag` parameter to identify the subsystem that produced the log entry:
 
 ## Where to Log
 
-### Repositories (Dio-backed)
+### Repositories with runtime data sources
 
 Log `error` in `on Exception catch` blocks — these represent genuinely unexpected exceptions that were converted to `UnexpectedFailure`:
 
@@ -51,10 +51,10 @@ Log `error` in `on Exception catch` blocks — these represent genuinely unexpec
 @override
 Future<Result<Profile>> getProfile() async {
   try {
-    final dto = await _service.getProfile();
-    return Success(dto.toDomain());
-  } on DioException catch (e, st) {
-    return Err(_mapDioException(e, st));
+    final record = await _source.getProfile();
+    return Success(record.toDomain());
+  } on ProjectProfileMissing catch (_, st) {
+    return Err(ProfileNotFound(st));
   } on Exception catch (e, st) {
     _logger.error(
       'Unexpected error fetching profile',
@@ -67,7 +67,8 @@ Future<Result<Profile>> getProfile() async {
 }
 ```
 
-Domain-mapped failures (`_mapDioException`) are expected and do **not** need logging at the repository level — they are logged downstream by notifiers.
+Known source failures mapped to domain failures are expected and do **not** need
+error logging at the repository level; notifiers record the visible failure.
 
 ### Notifiers / ViewModels
 
@@ -120,12 +121,12 @@ logger.info('Something happened', tag: 'feature');
 
 Read the logger once (typically in `build()` or at call site) — do not `watch` it.
 
-### In Dio-backed repositories (constructor injection)
+### In repositories with runtime sources (constructor injection)
 
 ```dart
 class ProfileRepository implements IProfileRepository {
-  const ProfileRepository(this._service, this._logger);
-  final ProfileService _service;
+  const ProfileRepository(this._source, this._logger);
+  final ProjectProfileSource _source;
   final IAppLogger _logger;
 }
 ```
@@ -136,7 +137,7 @@ Wire the logger in the repository provider:
 @riverpod
 IProfileRepository profileRepository(Ref ref) =>
     ProfileRepository(
-      ref.read(profileServiceProvider),
+      ref.read(profileSourceProvider),
       ref.read(loggerProvider),
     );
 ```

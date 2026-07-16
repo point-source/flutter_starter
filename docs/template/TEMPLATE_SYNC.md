@@ -64,6 +64,13 @@ Check `docs/template/migrations/` in the template repo for migration files cover
 - Step-by-step migration instructions
 - Expected merge conflicts and how to resolve them
 
+For the backend-neutral baseline, read
+[`014-backend-neutral-networking.md`](migrations/014-backend-neutral-networking.md)
+before resolving `pubspec.yaml`, `build.yaml`, `lib/core/http/`, environment
+configuration, or backend provider conflicts. An active REST project must choose
+to retain its client as project-owned code or adopt the supported opt-in. An SDK
+or no-backend project should keep REST artifacts absent.
+
 ### 3. Merge Updates
 
 ```bash
@@ -112,10 +119,9 @@ Common conflict scenarios:
 These files should generally be synced from the template:
 
 ```
-lib/core/                          # Shared infrastructure
+lib/core/                          # Shared baseline infrastructure; review selected capabilities
   ├── env/                         # Environment configuration
   ├── error/                       # Result<T>, Failure
-  ├── network/                     # Dio setup, interceptors
   ├── storage/                     # Storage providers
   ├── routing/                     # Router setup (merge routes carefully)
   ├── theme/                       # FlexColorScheme themes
@@ -158,6 +164,12 @@ config/                            # Your environment configs
 pubspec.yaml                       # Your dependencies (merge carefully)
 pubspec.lock                       # Generated from your dependencies
 
+lib/core/http/                     # Present only after a project selects REST
+lib/features/**/data/sources/      # SDK, local, custom, or REST adapters
+.flutter_starter/capabilities/     # Explicitly selected capability markers
+
+build.yaml                         # Merge selected backend generators carefully
+
 docs/project/                      # Your project docs, decisions, and planning
   └── CLAUDE.md                    # Project block imported by root CLAUDE.md
 
@@ -178,8 +190,31 @@ test/                              # Your tests
 ```
 lib/core/routing/app_router.dart   # Template patterns + your routes
 lib/core/l10n/                     # Core strings, but you may add your own
+lib/core/env/app_environment.dart  # Baseline environment + selected backend config
 CLAUDE.md                          # Thin shell: project overview + @imports
 ```
+
+Backend clients, source adapters, their dependencies and generators, consumed
+configuration, security controls, and provider bindings are project-owned after selection.
+A capability may create files under a path that otherwise looks like
+shared infrastructure; that does not make the selected backend safe to overwrite
+or delete during a later template sync.
+
+## Backend Decision Gate
+
+Before resolving a template update that adds, removes, or changes networking:
+
+1. Identify the repository implementation each runtime environment selects.
+2. Inventory endpoint selection, auth and refresh, interceptors, timeouts, error
+   mapping/logging, TLS controls, code generation, and provider bindings.
+3. Choose the migration path in the applicable guide. Never infer “unused” from
+   a conflict-free deletion.
+4. Resolve the backend client and its dependencies/configuration/tests as one
+   owned unit.
+5. Analyze, test, and run or build the selected backend flow after the merge.
+
+For migration 014, use its **Retain as project-owned**, **Adopt the supported
+opt-in**, or **SDK or no backend** path and complete its runtime checklist.
 
 ## CLAUDE.md and AI Agent Context
 
@@ -222,7 +257,9 @@ When syncing template updates, follow this checklist:
 ## Best Practices
 
 1. **Sync regularly**: Pull template updates monthly or quarterly, not annually
-2. **Don't modify template-owned files**: Extend instead (e.g., add interceptors, don't rewrite the Dio provider)
+2. **Respect ownership after selection**: Treat a chosen backend client,
+   interceptors, configuration, dependencies, and provider bindings as
+   project-owned; merge template baseline changes around them deliberately
 3. **Follow template patterns**: When adding features, follow `lib/features/auth/` structure
 4. **Use `docs/project/decisions/`** for app-specific ADRs instead of adding to `docs/template/adrs/` (which is template-owned)
 5. **Document deviations**: If you must deviate from the template, record a project ADR explaining why

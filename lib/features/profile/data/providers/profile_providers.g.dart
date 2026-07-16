@@ -12,7 +12,7 @@ part of 'profile_providers.dart';
 ///
 /// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-/// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
+/// [IProfileRepository] backed by the project-selected data source.
 
 @ProviderFor(profileRepository)
 final profileRepositoryProvider = ProfileRepositoryProvider._();
@@ -21,7 +21,7 @@ final profileRepositoryProvider = ProfileRepositoryProvider._();
 ///
 /// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-/// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
+/// [IProfileRepository] backed by the project-selected data source.
 
 final class ProfileRepositoryProvider
     extends
@@ -35,7 +35,7 @@ final class ProfileRepositoryProvider
   ///
   /// Returns [MockProfileRepository] when `BACKEND=mock` (the default).
   /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-  /// [IProfileRepository] backed by Supabase, Firebase, Dio, etc.
+  /// [IProfileRepository] backed by the project-selected data source.
   ProfileRepositoryProvider._()
     : super(
         from: null,

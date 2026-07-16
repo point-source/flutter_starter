@@ -1,14 +1,14 @@
 /// Enable cooperative cancellation of background tasks.
 ///
-/// [CancellationToken] is a pure Dart abstraction with no dependency on
-/// Dio or any HTTP library. Features that make Dio calls can bridge to
-/// Dio's `CancelToken` in their work function:
+/// [CancellationToken] is a pure Dart abstraction with no dependency on a
+/// particular data source. Work functions can check it around operations:
 ///
 /// ```dart
 /// work: (token, report) async {
-///   final dioCancel = CancelToken();
-///   token.cancelled.then((_) => dioCancel.cancel('Task cancelled'));
-///   return dio.post(url, cancelToken: dioCancel);
+///   token.throwIfCancelled();
+///   final result = await dataSource.load();
+///   token.throwIfCancelled();
+///   return result;
 /// }
 /// ```
 library;

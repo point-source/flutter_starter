@@ -113,12 +113,14 @@ run_lint() {
 # ── Test ────────────────────────────────────────────────────────────────────
 
 run_test() {
-  local flags=()
+  # Keep the repository suite reliable on shared CI runners with constrained
+  # memory and disk. The migration fixtures use the same bounded concurrency.
+  local flags=(--concurrency=1)
   if [ "$COVERAGE" = true ]; then
     flags+=(--coverage)
-    step "Tests (flutter test --coverage)"
+    step "Tests (flutter test --concurrency=1 --coverage)"
   else
-    step "Tests (flutter test)"
+    step "Tests (flutter test --concurrency=1)"
   fi
 
   if flutter test ${flags[@]+"${flags[@]}"}; then

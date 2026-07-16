@@ -1,186 +1,132 @@
-# Architecture Rule 08: API Integration
+# Architecture Rule 08: Backend Integration
 
 ## Overview
 
-Features default to **mock repository implementations**. When connecting a real backend, Dio + Retrofit is the reference REST API integration, but it is one option among several. Features may also integrate SDK-based backends (e.g., Supabase, Firebase) where the SDK itself acts as the service layer.
+Features start with mock repository implementations. A real data source is a
+project decision: SDKs, local stores, custom clients, and REST clients are peer
+implementations behind the same repository interface. The base starter does not
+select or install one.
 
-For REST APIs, the project uses **Retrofit** for code-generated service classes and **Dio** for the HTTP client with a composable interceptor chain. Dio infrastructure lives in `core/http/`. Each feature defines its own Retrofit service, and all services share a single configured Dio instance.
+The stable application contract is:
 
-## Retrofit Service Definition (Dio Backend)
+```text
+UI / notifier -> repository interface -> Result<domain value>
+                         ^
+                         |
+              selected data implementation
+```
 
-Each feature's API surface is defined as an abstract Retrofit class:
+## Repository Boundary
+
+Repository interfaces live in the domain layer and use domain entities,
+application failures, and `Result<T>`. They must not expose SDK models, database
+records, HTTP responses, or source-specific exception types.
 
 ```dart
-// features/auth/data/services/auth_service.dart
-@RestApi(parser: .DartMappable)
-abstract class AuthService {
-  factory AuthService(Dio dio) = _AuthService;
-
-  @POST('/auth/login')
-  Future<AuthResponse> login(@Body() LoginRequest request);
-
-  @POST('/auth/register')
-  Future<AuthResponse> register(@Body() RegisterRequest request);
-
-  @POST('/auth/logout')
-  Future<void> logout();
-
-  @GET('/auth/me')
-  Future<UserDto> getCurrentUser();
+abstract interface class IProfileRepository {
+  Future<Result<Profile>> getProfile();
 }
 ```
 
-Key rules:
+Each implementation owns three translations:
 
-- One service per feature (e.g., `AuthService`, `ProfileService`).
-- Services are stateless -- they receive Dio via constructor and do nothing else.
-- Return types are DTOs (from `data/models/`), not domain entities.
-- Request bodies use `@Body()` with request DTO classes.
-
-## Service Provider
-
-Each service gets a Riverpod provider, typically defined alongside the ViewModel:
+1. Call its selected source.
+2. Convert source values to domain entities when necessary.
+3. Catch source-specific exceptions and convert them to application `Failure`
+   values before returning `Err`.
 
 ```dart
-@riverpod
-AuthService authService(Ref ref) {
-  return AuthService(ref.read(dioProvider));
-}
-```
-
-## Dio Configuration
-
-The main Dio instance is created in `core/http/dio_provider.dart`:
-
-```dart
-@Riverpod(keepAlive: true)
-Dio dio(DioRef ref) {
-  final tokenStorage = ref.read(tokenStorageProvider);
-  final logger = ref.read(loggerProvider);
-
-  final dio = Dio(
-    BaseOptions(
-      baseUrl: AppEnvironment.current.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 15),
-    ),
-  );
-
-  dio.interceptors.addAll([
-    AuthInterceptor(tokenStorage),
-    RefreshTokenInterceptor(
-      tokenStorage: tokenStorage,
-      dio: refreshDio,           // Separate Dio to avoid recursion
-      onAuthExpired: () => ref.invalidateSelf(),
-    ),
-    LoggingInterceptor(logger),
-    ErrorInterceptor(),
-  ]);
-
-  return dio;
-}
-```
-
-## Interceptor Chain
-
-Interceptors execute in the order they are added:
-
-| Order | Interceptor | Responsibility |
-|-------|------------|----------------|
-| 1 | `AuthInterceptor` | Adds `Authorization: Bearer <token>` header |
-| 2 | `RefreshTokenInterceptor` | Intercepts 401, refreshes token, retries request |
-| 3 | `LoggingInterceptor` | Logs request/response with sensitive data redaction |
-| 4 | `ErrorInterceptor` | Maps `DioException` to `DioApiException` subtypes |
-
-### AuthInterceptor
-
-Reads the access token from `ITokenStorage` and adds it to request headers:
-
-```dart
-class AuthInterceptor extends Interceptor {
-  AuthInterceptor(this._tokenStorage);
-  final ITokenStorage _tokenStorage;
-
-  @override
-  Future<void> onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    final token = await _tokenStorage.getAccessToken();
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
-    }
-    handler.next(options);
+Future<Result<Profile>> getProfile() async {
+  try {
+    final record = await _client.fetchProfile();
+    return Success(record.toDomain());
+  } on ClientNotFoundException catch (_, stackTrace) {
+    return Err(ProfileNotFound(stackTrace));
+  } on Exception catch (error, stackTrace) {
+    return Err(UnexpectedFailure(error, stackTrace));
   }
 }
 ```
 
-### RefreshTokenInterceptor
+`ClientNotFoundException` and the record type remain private to the data layer.
+Callers see only `Result<Profile>` and `ProfileFailure`/`Failure` values.
 
-Extends `QueuedInterceptor` to serialize concurrent 401 handling:
+## Peer Implementations
 
-- On 401, acquires the queue lock, calls the refresh endpoint.
-- Uses a **separate Dio instance** (no auth/refresh interceptors) to avoid recursion.
-- On success, saves new tokens and retries the original request.
-- On failure, clears tokens and calls `onAuthExpired` callback.
+| Implementation | Source owned by data layer | Typical mapping |
+|---|---|---|
+| Mock/in-memory | Hard-coded or mutable in-memory state | Domain values and deliberate test failures |
+| SDK-backed | Provider SDK client and SDK response types | SDK exceptions/models to application failures/entities |
+| Local | Preferences, secure storage, SQLite, or files | Storage errors/records to cache or feature failures/entities |
+| Custom client | Project-owned protocol/client | Client errors/payloads to application failures/entities |
+| REST | HTTP client, transport errors, and DTOs | Transport errors/DTOs to application failures/entities |
 
-### ErrorInterceptor
+Do not add a universal source-exception hierarchy. Low-level failure taxonomies
+are not interchangeable; the repository's application-facing contract is.
 
-Maps `DioException` types to `DioApiException` subtypes for structured error handling in repositories.
+## Provider Wiring
 
-## Auth Flow Summary
+Providers return the repository interface so changing the implementation does
+not change callers:
 
+```dart
+@riverpod
+IProfileRepository profileRepository(Ref ref) {
+  return MockProfileRepository();
+}
 ```
-Request -> AuthInterceptor (adds token) -> Server
-                                              |
-                                        401 Unauthorized
-                                              |
-RefreshTokenInterceptor (queues requests, calls /auth/refresh)
-  |                             |
-  Success                       Failure
-  |                             |
-  Retry original request        Clear tokens, call onAuthExpired
+
+After selecting a backend, replace only the binding and inject its client:
+
+```dart
+@riverpod
+IProfileRepository profileRepository(Ref ref) {
+  return SdkProfileRepository(ref.read(profileClientProvider));
+}
 ```
 
-## SDK-Based Backends
+## Adding a Backend Implementation
 
-When using an SDK-based backend (e.g., Supabase, Firebase), the SDK client replaces the Retrofit service layer. There is no need for Retrofit or Dio in these features.
+1. Keep or define the domain repository interface and failure types first.
+2. Add the selected client/source under the feature's data layer, or under
+   `core/` only when it is genuinely shared by multiple features.
+3. Implement the interface and keep all source types inside the data layer.
+4. Map known source errors to feature-specific failures; preserve unexpected
+   errors and stack traces with `UnexpectedFailure`.
+5. Test successful value mapping and each meaningful failure mapping through
+   the public repository API.
+6. Swap the provider binding only after the implementation tests pass.
+7. Exercise the same Result-driven UI success and failure states used by mocks.
 
-- The repository implementation calls the SDK client directly.
-- Backend-specific exceptions (e.g., `AuthException` from Supabase) are caught in the repository and mapped to feature-specific `Failure` types.
-- `DioApiException` and the Dio interceptor chain are not involved.
-- DTOs and mappers may still be needed when SDK response types differ from domain entities.
+## REST Opt-in
 
-## Feature Default: Mock Implementations
+If the project deliberately chooses the starter's supported Dio/Retrofit REST
+capability, install it once with:
 
-Features start with a **mock repository** that returns hardcoded or in-memory data. This enables UI development and testing without a backend.
+```bash
+mason make dio_rest
+```
 
-- The repository provider wires the mock implementation by default.
-- To connect a real backend, implement the repository interface against Dio/Retrofit or an SDK, then swap the provider binding.
-- Services are Dio/Retrofit-specific. DTOs and mappers may be needed for any backend whose response types differ from domain entities.
-
-## Adding a New API Feature (Dio/Retrofit)
-
-1. Create DTOs in `features/<name>/data/models/`.
-2. Create the Retrofit service in `features/<name>/data/services/`.
-3. Create a Riverpod provider for the service.
-4. Run `dart run build_runner build`.
-5. Implement the repository interface, calling the service and returning `Result<T>`.
-6. Update the repository provider to wire the real implementation instead of the mock.
+That command adds the REST dependencies and foundation, then emits concrete
+configuration, generation, interceptor, and transport-error guidance at
+`docs/project/REST_DIO.md`. Only an opted-in project should run REST-specific
+feature, repository, or service generation. The generated repository still
+implements the same domain interface and returns the same `Result<T>` contract.
 
 ## DO
 
-- Use one Retrofit service per feature.
-- Share the single `dioProvider` across all services.
-- Use `@Body()` for request bodies, `@Query()` for query parameters, `@Path()` for path parameters.
-- Map all DioExceptions to DioApiExceptions in the ErrorInterceptor.
-- Use the separate "refresh Dio" for token refresh calls.
+- Start features with a runnable mock implementation.
+- Return domain entities and `Result<T>` from repository interfaces.
+- Keep source models, clients, and exceptions inside the data layer.
+- Map source-specific errors at the repository boundary.
+- Test repository success and failure through the public interface.
+- Record project-specific backend decisions in `docs/project/decisions/`.
 
 ## DO NOT
 
-- Do not create Dio instances outside of `core/http/dio_provider.dart`.
-- Do not add feature-specific interceptors to the shared Dio instance.
-- Do not call Dio directly from repositories -- always go through a Retrofit service.
-- Do not return raw `Response` objects from services -- use typed DTOs.
-- Do not handle authentication logic in individual services -- let the interceptor chain handle it.
+- Do not add a real-backend dependency before the project selects it.
+- Do not import source SDKs or transport libraries into domain or UI code.
+- Do not expose raw response, record, DTO, or exception types from repositories.
+- Do not assume REST is the next step after a mock; choose the source that fits
+  the product.
+- Do not follow Dio/Retrofit instructions unless `dio_rest` has been installed.

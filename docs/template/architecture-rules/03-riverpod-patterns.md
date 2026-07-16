@@ -13,17 +13,17 @@ Use annotated top-level functions for dependency injection. These live in `data/
 ```dart
 // data/providers/auth_providers.dart
 
-// Service provider -- creates a Retrofit service
+// Selected source provider -- creates a project-chosen SDK client
 @riverpod
-AuthService authService(Ref ref) {
-  return AuthService(ref.read(dioProvider));
+ProjectAuthClient authClient(Ref ref) {
+  return ProjectAuthClient(ref.read(projectSdkProvider));
 }
 
 // Repository provider -- wires service + storage
 @riverpod
 IAuthRepository authRepository(Ref ref) {
   return AuthRepository(
-    ref.read(authServiceProvider),
+    ref.read(authClientProvider),
     ref.read(tokenStorageProvider),
   );
 }
@@ -91,7 +91,7 @@ class ProfileViewModel extends _$ProfileViewModel {
 | Shared state notifier | `@Riverpod(keepAlive: true)` (class) | `data/providers/` | `<className>Provider` | `authStateRepoProvider` |
 | Derived state | `@riverpod` (function) | `data/providers/` | `<functionName>Provider` | `isAuthenticatedProvider` |
 | Page ViewModel | `@riverpod` (class) | `ui/view_models/` | `<className>Provider` | `profileViewModelProvider` |
-| App infrastructure | `@Riverpod(keepAlive: true)` | `core/` | `<name>Provider` | `dioProvider` |
+| App infrastructure | `@Riverpod(keepAlive: true)` | `core/` | `<name>Provider` | `appRouterProvider` |
 
 ## keepAlive Rules
 
@@ -99,7 +99,7 @@ Use `@Riverpod(keepAlive: true)` **only** for providers that must survive the en
 
 | Provider | keepAlive | Reason |
 |----------|-----------|--------|
-| `dioProvider` | `true` | Shared HTTP client, expensive to recreate |
+| Selected long-lived client | `true` when required | Client lifetime is defined by its backend |
 | `appRouterProvider` | `true` | Router must persist across navigation |
 | `authStateRepoProvider` | `true` | Auth state must survive screen changes |
 | `sharedPrefsProvider` | `true` | Initialized once at startup |
@@ -125,8 +125,8 @@ onPressed: () => ref.read(authStateRepoProvider.notifier).login(email, password)
 ```dart
 // READ for one-time dependency resolution in DI providers
 @riverpod
-AuthService authService(Ref ref) {
-  return AuthService(ref.read(dioProvider)); // read, not watch
+ProjectAuthClient authClient(Ref ref) {
+  return ProjectAuthClient(ref.read(projectSdkProvider)); // read, not watch
 }
 
 // WATCH in derived providers that should rebuild

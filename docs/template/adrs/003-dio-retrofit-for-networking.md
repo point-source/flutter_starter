@@ -1,53 +1,63 @@
-# ADR 003: Dio + Retrofit for Networking
+# ADR 003: Dio + Retrofit for Opted-in REST Networking
 
 ## Status
 
-Accepted
+Accepted — applies only after the project installs the `dio_rest` capability.
 
-**Status update:** Dio is now reference infrastructure in `core/http/`. Features default to mock implementations. See ADR-011.
+**Scope update:** The backend-neutral starter does not contain Dio, Retrofit,
+`core/http/`, REST configuration, or REST code generation. This decision becomes
+active for a project only when it deliberately runs `mason make dio_rest`. See
+ADR-011 for the neutral mock-first baseline.
 
 ## Context
 
-The application needs a structured HTTP client layer with:
+A project that has selected a custom REST API may need a structured HTTP client
+with typed endpoints, configuration, logging, and transport-error handling. That
+need is specific to the REST choice; SDK-backed, local, custom-client, and
+mock-only projects do not benefit from inheriting the same dependencies.
 
-- Interceptor chains for authentication, token refresh, logging, and error mapping.
-- Code-generated API service classes that mirror the REST contract.
-- Per-feature service definitions that are testable in isolation.
-- Centralized timeout, base URL, and header configuration.
-
-Alternatives considered:
-
-- **http package**: Lightweight but lacks interceptors, making cross-cutting concerns (auth headers, refresh) difficult to implement cleanly.
-- **Chopper**: Code-generated HTTP client similar to Retrofit but with a smaller community and less active development.
-- **GraphQL (graphql_flutter, ferry)**: Not applicable; the template targets REST APIs.
+Alternatives considered for REST projects included the `http` package, Chopper,
+GraphQL clients, and a copy-and-paste recipe. The supported capability retains
+the established Dio/Retrofit pattern as a coherent opt-in rather than making it
+part of every starter app.
 
 ## Decision
 
-Use **Dio** as the HTTP client and **Retrofit** (with **retrofit_generator**) for code-generated API service classes.
+When a project explicitly installs `dio_rest`:
 
-Architecture:
+- Dio is the REST transport client.
+- Retrofit and `retrofit_generator` provide typed per-feature REST services.
+- The capability owns `lib/core/http/`, `REST_API_URL`, its dependencies,
+  generator configuration, tests, and capability marker.
+- REST services and transport models remain in the data layer.
+- REST repositories catch `DioException`/`DioApiException`, map them to
+  application `Failure` values, and return the same `Result<T>` contract used by
+  every other repository implementation.
+- Concrete setup and maintenance instructions live in the generated
+  `docs/project/REST_DIO.md` file.
 
-- A single `Dio` instance is created in `dio_provider.dart` with the full interceptor chain: `AuthInterceptor` -> `RefreshTokenInterceptor` -> `LoggingInterceptor` -> `ErrorInterceptor`.
-- A separate "plain" Dio instance (no auth/refresh interceptors) is created for the refresh token endpoint to avoid interceptor recursion.
-- Each feature defines a Retrofit `@RestApi()` abstract class (e.g., `AuthService`, `ProfileService`) that takes `Dio` as a constructor parameter.
-- `ErrorInterceptor` maps `DioException` to `DioApiException` subtypes, which repositories then convert to `Failure` values.
+This ADR does not select REST for the base starter and does not make transport
+types part of domain or presentation APIs.
 
 ## Consequences
 
 ### Positive
 
-- **Interceptor chain**: Cross-cutting concerns are cleanly separated into composable interceptors.
-- **Type-safe APIs**: Retrofit generates request/response serialization code from annotated method signatures.
-- **Testability**: Services can be mocked at the interface level; Dio itself can be mocked for interceptor tests.
-- **Token refresh**: `QueuedInterceptor` in `RefreshTokenInterceptor` serializes concurrent 401 handling automatically.
+- REST teams receive a cohesive, tested capability instead of disconnected
+  feature fragments.
+- Retrofit services provide typed endpoint wrappers and generated serialization.
+- Transport details stay behind the repository boundary.
+- Feature-level REST generation fails early until the capability is installed.
 
 ### Negative
 
-- **Two-library dependency**: Both Dio and Retrofit must be maintained and kept compatible.
-- **Code generation**: Each service produces a `.g.dart` file via `build_runner`.
-- **Interceptor ordering matters**: Incorrect ordering (e.g., error interceptor before auth) breaks the pipeline silently.
+- Opted-in projects own two additional libraries and their compatibility.
+- REST services add code generation and capability-specific configuration.
+- Client/interceptor ordering and transport security require project review.
 
 ### Neutral
 
-- The `ErrorInterceptor` -> repository -> `Result<T>` chain ensures exceptions never leak to the UI layer.
-- Dio's `BaseOptions` centralizes timeout and base URL configuration sourced from `AppEnvironment`.
+- Mock, SDK, local, custom-client, and REST implementations remain peers behind
+  repository interfaces.
+- Removing the capability is a coordinated project migration, not deletion of
+  dormant base files.

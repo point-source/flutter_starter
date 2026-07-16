@@ -29,15 +29,17 @@ Adopt **MVVM** (as recommended by the Flutter Architecture Guide) combined with 
 
 1. **UI Layer**: Views (widgets) + ViewModels (Riverpod `AsyncNotifier` classes).
 2. **Domain Layer**: Entities, repository interfaces, feature-specific failures. Optional -- only add use cases when business logic spans multiple repositories.
-3. **Data Layer**: Repository implementations, Retrofit services, DTOs, mappers.
+3. **Data Layer**: Repository implementations plus optional selected sources,
+   source models, and mappers.
 
 ### Key Rules
 
 - Views know only their ViewModel (accessed via a Riverpod provider).
 - Pages act as layout orchestrators: they assemble extracted widget components from `ui/widgets/` rather than implementing UI details inline.
 - ViewModels call repository interfaces (or use cases when needed).
-- Repositories call services and map DTOs to domain entities.
-- Services are stateless HTTP wrappers (Retrofit-generated).
+- Repositories call their selected source and map source models to domain entities.
+- Source SDKs, local stores, custom clients, and opted-in REST services remain
+  data-layer details.
 - Dependency direction: UI depends on Domain, Domain depends on nothing, Data implements Domain interfaces.
 
 ### Domain Layer is Optional

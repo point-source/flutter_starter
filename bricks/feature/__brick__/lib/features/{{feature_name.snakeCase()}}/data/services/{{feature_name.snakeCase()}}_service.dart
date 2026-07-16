@@ -6,9 +6,8 @@
 library;
 
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
-
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/models/{{feature_name.snakeCase()}}_dto.dart';
+import 'package:retrofit/retrofit.dart';
 
 part '{{feature_name.snakeCase()}}_service.g.dart';
 

@@ -12,7 +12,7 @@ part of 'auth_providers.dart';
 ///
 /// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-/// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
+/// [IAuthRepository] backed by the project-selected data source.
 
 @ProviderFor(authRepository)
 final authRepositoryProvider = AuthRepositoryProvider._();
@@ -21,7 +21,7 @@ final authRepositoryProvider = AuthRepositoryProvider._();
 ///
 /// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
 /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-/// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
+/// [IAuthRepository] backed by the project-selected data source.
 
 final class AuthRepositoryProvider
     extends
@@ -31,7 +31,7 @@ final class AuthRepositoryProvider
   ///
   /// Returns [MockAuthRepository] when `BACKEND=mock` (the default).
   /// When `BACKEND=real`, replace the [UnimplementedError] with your own
-  /// [IAuthRepository] backed by Supabase, Firebase, Dio, etc.
+  /// [IAuthRepository] backed by the project-selected data source.
   AuthRepositoryProvider._()
     : super(
         from: null,

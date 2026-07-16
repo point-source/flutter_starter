@@ -180,7 +180,6 @@ like:
 ```json
 {
   "ENVIRONMENT": "production",
-  "API_URL": "https://api.yourcompany.com",
   "SENTRY_DSN": "https://abc123@sentry.io/456789",
   "BACKEND": "real"
 }
@@ -190,7 +189,7 @@ If `CONFIG_FILE` is unset in the target environment, the workflow falls
 back to the committed `config/examples/<env>.json` (placeholder values) and
 prints a log line. Manual deploys from a fresh fork therefore work
 end-to-end without configuring anything — but the resulting build will use
-placeholder URLs and DSNs.
+the placeholder DSN.
 
 ### How config values reach the build
 

@@ -13,6 +13,7 @@
 /// directly instead.
 library;
 
+import 'package:flutter_starter/core/error/failures.dart';
 import 'package:flutter_starter/core/logging/logger_provider.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/data/providers/{{feature_name.snakeCase()}}_providers.dart';
 import 'package:flutter_starter/features/{{feature_name.snakeCase()}}/domain/entities/{{feature_name.snakeCase()}}.dart';
@@ -39,7 +40,7 @@ class {{feature_name.pascalCase()}}ViewModel extends _${{feature_name.pascalCase
           data: {'failure': failure.toString()},
           tag: '{{feature_name.snakeCase()}}',
         );
-        throw failure;
+        throw FailureException(failure);
       },
     );
   }

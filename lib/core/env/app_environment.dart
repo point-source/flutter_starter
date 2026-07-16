@@ -31,8 +31,8 @@ enum BackendMode {
 /// Enumerate the supported application environments.
 ///
 /// Use [current] to read the compile-time environment. Each variant
-/// exposes environment-specific configuration such as [apiBaseUrl],
-/// [sentryDsn], and [sentrySampleRate].
+/// exposes environment-specific configuration such as [sentryDsn] and
+/// [sentrySampleRate].
 enum AppEnvironment {
   /// Development environment — local development with debug tools.
   development,
@@ -106,11 +106,6 @@ enum AppEnvironment {
   /// Whether Sentry error reporting should be enabled.
   bool get sentryEnabled => this == staging || this == production;
 
-  /// Whether SSL pinning should be enabled.
-  ///
-  /// Disabled in development to allow proxy-based network inspection.
-  bool get sslPinningEnabled => this == staging || this == production;
-
   /// Sentry DSN loaded from compile-time config.
   ///
   /// Returns `null` in development or when not configured.
@@ -129,20 +124,6 @@ enum AppEnvironment {
     staging => 1.0,
     production => 0.1,
   };
-
-  /// API base URL for this environment.
-  ///
-  /// Reads from `API_URL` compile-time constant with sensible fallbacks.
-  String get apiBaseUrl {
-    const url = String.fromEnvironment('API_URL');
-    if (url.isNotEmpty) return url;
-
-    return switch (this) {
-      development => 'http://localhost:3000',
-      staging => 'https://api-staging.example.com',
-      production => 'https://api.example.com',
-    };
-  }
 
   /// Display name for this environment (capitalized).
   String get displayName => '${name[0].toUpperCase()}${name.substring(1)}';
