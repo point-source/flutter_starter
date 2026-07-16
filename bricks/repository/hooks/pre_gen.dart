@@ -29,7 +29,8 @@ String? _validateCapability() {
     return 'The dio_rest capability marker is malformed.';
   }
   if (!File('lib/core/http/dio_provider.dart').existsSync() ||
-      !File('lib/core/http/dio_api_exception.dart').existsSync()) {
+      !File('lib/core/http/dio_api_exception.dart').existsSync() ||
+      !File('lib/core/http/rest_config.dart').existsSync()) {
     return 'The dio_rest foundation is incomplete.';
   }
   return null;

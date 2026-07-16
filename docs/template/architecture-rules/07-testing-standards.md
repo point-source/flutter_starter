@@ -11,7 +11,6 @@ test/
   core/
     error/
       result_test.dart
-    error/
       result_documentation_test.dart
   features/
     auth/
